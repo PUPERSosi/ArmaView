@@ -1,0 +1,245 @@
+# ---- hotkey registry: descriptions (Help, palette, tooltips) and groups
+Help (this window), works everywhere	Справка (это окно), работает везде
+open a model / RTM	открыть модель / RTM
+reload the model (keeps view, bone, sources)	перезагрузить модель (вид, кость и источники сохраняются)
+CfgMoves states graph	граф состояний CfgMoves
+command palette	палитра команд
+Vehicle & Crew mode and back (crew preview)	режим «Техника и экипаж» и обратно (просмотр экипажа)
+frame the model	вписать модель
+front	спереди
+back	сзади
+left	слева
+right	справа
+top	сверху
+orbit (scene)	вращать камеру (сцена)
+pan (scene)	сдвигать камеру (сцена)
+zoom (scene)	масштаб (сцена)
+pick a point / hit sphere: name and coordinates	выбрать точку / сферу попадания: имя и координаты
+floor grid	сетка пола
+normal lines	линии нормалей
+skeleton	скелет
+wireframe overlay	каркас поверх
+reflections A/B (env sky x fresnel)	отражения A/B (небо x fresnel)
+RVMAT A/B: original vs edited	RVMAT A/B: исходный против изменённого
+hide the selected selection / proxy / picked faces	скрыть выбранное выделение / прокси / грани
+isolate the selected selection / proxy / picked faces (again: back)	изолировать выбранное выделение / прокси / грани (повторно - назад)
+show everything hidden in this LOD	показать всё скрытое в этом LOD
+pick / unpick a face (then H, Shift+H or save as a temporary set)	выбрать / снять грань (затем H, Shift+H или сохранить как временный набор)
+next LOD	следующий LOD
+previous LOD	предыдущий LOD
+play / pause	пуск / пауза
+previous frame	предыдущий кадр
+next frame	следующий кадр
+scrub (Timeline panel)	перемотка (панель «Таймлайн»)
+about ArmaView (version, libraries)	о программе ArmaView (версия, библиотеки)
+reset layout of this mode	сбросить раскладку этого режима
+reset layout of all modes	сбросить раскладку всех режимов
+RTM folder (check RTM bones against the skeleton)	папка RTM (проверить кости RTM против скелета)
+hot reload on / off	горячая перезагрузка вкл / выкл
+sun shadows on / off	тени от солнца вкл / выкл
+skeleton only (hide mesh, floor)	только скелет (без модели и пола)
+show axes gizmo	показать значок осей
+axis labels Arma (Y-up) / Blender (Z-up)	подписи осей Arma (Y вверх) / Blender (Z вверх)
+show proxy triangles	показать треугольники прокси
+noon	полдень
+sunset	закат
+night	ночь
+overcast	пасмурно
+sun / headlight	солнце / фара
+show crew on proxies	экипаж на прокси
+hide vehicle (only proxies and crew)	скрыть технику (только прокси и экипаж)
+turned out (*Action instead of *InAction)	высунувшись (*Action вместо *InAction)
+play all seats	играть все места
+rest pose	поза покоя
+reset model.cfg sources	сбросить источники model.cfg
+focus: only its links (depth slider 1-3)	фокус: только его связи (ползунок глубины 1-3)
+leave focus	выйти из фокуса
+jump to the nearest node	перейти к ближайшему узлу
+Getting started (scenarios step by step)	С чего начать (сценарии по шагам)
+language: Russian	язык: русский
+language: English	язык: английский
+mode: Model	режим: Модель
+mode: Skeleton & Anim	режим: Скелет и анимация
+mode: Vehicle & Crew	режим: Техника и экипаж
+mode: Materials	режим: Материалы
+mode: Validation	режим: Проверка
+mode: Reload sync (weapon)	режим: Перезарядка (оружие)
+mode: Optics (weapon)	режим: Оптика (оружие)
+UI scale: system DPI	масштаб интерфейса: системный DPI
+UI scale: 100%	масштаб интерфейса: 100%
+UI scale: 125%	масштаб интерфейса: 125%
+UI scale: 150%	масштаб интерфейса: 150%
+UI scale: 175%	масштаб интерфейса: 175%
+UI scale: 200%	масштаб интерфейса: 200%
+LMB drag	ЛКМ + перетаскивание
+RMB / MMB drag	ПКМ / СКМ + перетаскивание
+Wheel	Колесо
+LMB click	Щелчок ЛКМ
+Ctrl+LMB click	Ctrl + щелчок ЛКМ
+LMB on timeline	ЛКМ на таймлайне
+Double click node	Двойной щелчок по узлу
+Esc	Esc
+Minimap click / drag	Миникарта: щелчок / перетаскивание
+Animation	Анимация
+Graph	Граф
+# ---- Timeline / Outliner leftovers
+%s   frame %.1f / %zu   t %.3f / %.3f s%s	%s   кадр %.1f / %zu   t %.3f / %.3f с%s
+Layers ({})	Слои ({})
+%s\n%zu frames, %zu bones, %d match skeleton\nmove %.3f %.3f %.3f	%s\nкадров %zu, костей %zu, совпадает со скелетом %d\nmove %.3f %.3f %.3f
+%d/%zu bones	%d/%zu костей
+ok	ок
+%s (%zu faces)%s -> %s%s%s	%s (граней %zu)%s -> %s%s%s
+CfgVehicles >> %s >> Damage: mat[] triples (intact, damaged, destroyed), tex[] pairs	CfgVehicles >> %s >> Damage: тройки mat[] (целый, повреждённый, разрушенный), пары tex[]
+model.cfg: %s	model.cfg: %s
+Selections ({})	Выделения ({})
+%s  (CfgModels::%s)	%s  (CfgModels::%s)
+skeletonInherit: %s	skeletonInherit: %s
+pivotsModel: %s	pivotsModel: %s
+parent: %s\npivot: %.3f %.3f %.3f (%s)\nselection: %s	родитель: %s\nпивот: %.3f %.3f %.3f (%s)\nвыделение: %s
+LOD %d [%s] vs %s, %zu points	LOD %d [%s] против %s, точек %zu
+model.cfg animations / skins: {} error(s), {} warning(s)	анимации model.cfg / раскраски: ошибок {}, предупреждений {}
+%s:%d (VS Code, path copied to the clipboard)	%s:%d (VS Code, путь скопирован в буфер обмена)
+Loop seam {}: {}	Шов цикла {}: {}
+Crew (config): {} seat(s), {} problem(s)	Экипаж (конфиг): мест {}, проблем {}
+binarized animation - not supported (frame)	бинаризованная анимация - не поддерживается (рамка)
+%zu fr, %s%s	%zu кадр., %s%s
+P:\...\file.rtm	P:\...\file.rtm
+Skipped TAGG %s	Пропущен TAGG %s
+Properties ({})	Свойства ({})
+Textures ({}) / Materials ({})	Текстуры ({}) / Материалы ({})
+%s  [%d faces]	%s  [граней %d]
+Proxies ({})	Прокси ({})
+Face colours over the current shading. With Shading = Diag: tangent / bitangent / shading normal\nyou see the frame the normal map is applied in.	Цвета граней поверх текущего затенения. При «Затенение» = Diag: касательная / бикасательная / нормаль шейдинга -\nвидно базис, в котором применяется normal map.
+%s  (%zu faces)	%s  (граней %zu)
+Vertex normal vs the face plane (orientation of the LOD majority, %s).\nAll corners: the face is lit from behind - dark under the same light.	Нормаль вершины против плоскости грани (ориентация большинства граней LOD, %s).\nВсе углы - грань освещена сзади и темнее при том же свете.
+UV handedness opposite to the LOD majority. The viewer builds the tangent frame per pixel from UV derivatives,\nso mirrored islands are lit correctly here; the game uses binarize tangents (also handedness-aware).	Ориентация UV противоположна большинству в LOD. Вьювер строит касательный базис попиксельно из производных UV,\nпоэтому зеркальные острова здесь освещены верно; игра использует касательные binarize (тоже с учётом ориентации).
+RVMAT:	RVMAT:
+Texture:	Текстура:
+a3: %s\nmods: %s	a3: %s\nмоды: %s
+commit %s, built %s %s	коммит %s, сборка %s %s
+MSVC %d, C++%ld, %s build, %s runtime	MSVC %d, C++%ld, сборка %s, рантайм %s
+# ---- Layers panel
+Animation layers: correct a clip without leaving the viewer.\n1. Base clip: an RTM (or #retarget - the result of the Retarget panel).\n2. + offset / + additive RTM / + replace RTM: layers over the base, each with bones, a mask and keys.\n3. Clip: trim, speed, mirror, loop seam, root and foot locks.\n4. Preview (bake) shows the result; Bake RTM_0101 writes a NEW file and re-reads it.\n5. Save project keeps the layers to continue later; Blender (a3ob) opens the result there.	Слои анимации: правка клипа, не выходя из вьювера.\n1. Базовый клип: RTM (или #retarget - результат панели «Ретаргет»).\n2. «+ смещение» / «+ аддитивный RTM» / «+ замена RTM»: слои поверх базы, у каждого кости, маска и ключи.\n3. Клип: обрезка, скорость, зеркало, шов цикла, корень и фиксация ступней.\n4. «Просмотр (запечь)» показывает результат; «Запечь RTM_0101» пишет НОВЫЙ файл и перечитывает его.\n5. «Сохранить проект» хранит слои для продолжения; Blender (a3ob) открывает результат там.
+Open a character model with a skeleton (model.cfg skeletonName) - layers correct its RTM clips.	Откройте модель персонажа со скелетом (skeletonName в model.cfg) - слои правят её клипы RTM.
+animsrc	базовый клип	Base clip: an .rtm, or #retarget = the result of the Retarget panel.	Базовый клип: .rtm или #retarget - результат панели «Ретаргет».
+base clip .rtm (or #retarget = result of the Retarget panel)	базовый клип .rtm (или #retarget - результат панели «Ретаргет»)
+#retarget	#retarget	Uses the result of the Retarget panel as the base clip.	Берёт результат панели «Ретаргет» как базовый клип.
+Save project	Сохранить проект	Saves the layers, clip settings and output of this correction (.avproj).	Сохраняет слои, настройки клипа и выход этой правки (.avproj).
+Load project	Загрузить проект	Loads a saved correction project.	Загружает сохранённый проект правки.
+Clip: trim, speed, mirror, seam, root, foot locks	Клип: обрезка, скорость, зеркало, шов, корень, фиксация ступней
+trim	обрезка
+mirror L/R	зеркало Л/П	Mirrors the clip left / right (bones by name pairs).	Отражает клип слева направо (кости по парам имён).
+loop seam frames	кадров на шов цикла	Frames blended at the end into the start, so the loop has no jump.	Сколько кадров в конце смешивается с началом, чтобы цикл шёл без скачка.
+align root (pelvis X/Z)	выровнять корень (таз X/Z)	Keeps the pelvis on the spot in X / Z (in-place clip).	Держит таз на месте по X / Z (клип на месте).
+foot	ступня	Foot bone to lock to the ground over the phase range.	Кость ступни, которую зафиксировать на земле в диапазоне фаз.
+foot IK lock	фиксация ступни IK
++ foot lock	+ фиксация ступни	Adds a foot lock (foot bone + phase range).	Добавляет фиксацию ступни (кость + диапазон фаз).
+Correction layers ({})	Слои правки ({})
++ offset	+ смещение	A layer that rotates / moves chosen bones by keys over the phase.	Слой, который поворачивает / сдвигает выбранные кости по ключам на фазе.
++ additive RTM	+ аддитивный RTM	A layer that adds the motion of another RTM (relative to its first frame).	Слой, который добавляет движение другого RTM (относительно его первого кадра).
++ replace RTM	+ замена RTM	A layer that replaces the masked bones with another RTM.	Слой, который заменяет кости маски другим RTM.
+weight	вес	Weight of the layer (0..1).	Вес слоя (0..1).
+Delete layer	Удалить слой	Removes this correction layer.	Удаляет этот слой правки.
+rtm	RTM слоя	The RTM this layer adds or puts in.	RTM, который этот слой добавляет или подставляет.
+RTM of this layer	RTM этого слоя
+ph	фаза	Phase of this key (0..1 of the cycle).	Фаза этого ключа (0..1 цикла).
+rot deg	поворот, °	Rotation of the layer's bones at this key, degrees (x y z).	Поворот костей слоя в этом ключе, градусы (x y z).
+pos m	сдвиг, м	Offset of the layer's bones at this key, metres (x y z).	Сдвиг костей слоя в этом ключе, метры (x y z).
++ key	+ ключ	Adds a key (up to 5): 1 key = constant, more = smooth over the phase.	Добавляет ключ (до 5): 1 ключ - постоянно, больше - плавно по фазе.
+1 key = constant; 2-5 keys = smooth over the phase	1 ключ - постоянно; 2-5 ключей - плавно по фазе
+own bones	свои кости
++ selected bone	+ выбранная кость	Adds the bone selected in the Outliner / scene to this layer.	Добавляет в слой кость, выбранную в Outliner / сцене.
+Select a bone in the Outliner / scene first	Сначала выберите кость в Outliner / сцене
+fall-off to children	спад к дочерним	How much of the layer the child bones get (0 = only the bone itself).	Сколько от слоя получают дочерние кости (0 - только сама кость).
+Show mask on the mesh	Показать маску на модели	Colours the mesh by the layer's bone weights.	Красит модель по весам костей слоя.
+weight curve (phase, weight), empty = constant:	кривая веса (фаза, вес), пусто - постоянный:
+wc	точка кривой	A point of the weight curve: phase, weight.	Точка кривой веса: фаза, вес.
++ point	+ точка	Adds a point to the weight curve (up to 5).	Добавляет точку кривой веса (до 5).
+clear	очистить	Removes the weight curve (constant weight).	Убирает кривую веса (вес постоянный).
+Preview (bake)	Просмотр (запечь)	Bakes the layers in memory and plays the result.	Запекает слои в памяти и проигрывает результат.
+A/B with the base	A/B с базой	Shows the base clip beside the result.	Показывает базовый клип рядом с результатом.
+onion skin	луковая кожа	Ghosts of the previous / next frames.	Призраки предыдущего / следующего кадров.
+animout	выходной RTM	The .rtm the bake writes (a new file).	.rtm, который пишет запекание (новый файл).
+bake to .rtm (new file)	запечь в .rtm (новый файл)
+Bake RTM_0101	Запечь RTM_0101	Writes the result as a NEW RTM_0101 and reads it back to compare.	Пишет результат НОВЫМ RTM_0101 и читает обратно для сравнения.
+%s exists.	%s уже существует.
+Overwrite (keep .bak)	Перезаписать (.bak сохраняется)	Overwrites the existing file; the old one is kept as .bak.	Перезаписывает файл; старый остаётся как .bak.
+Batch: this project over a folder	Пакет: этот проект на папку
+bdir	папка RTM	Folder of .rtm the project is applied to.	Папка .rtm, к которой применяется проект.
+folder with .rtm (source: #retarget = retarget each with the Retarget panel preset first)	папка с .rtm (источник #retarget - сначала каждый ретаргетится пресетом панели «Ретаргет»)
+bout	выходная папка	Where the results go (existing files are skipped).	Куда пишутся результаты (существующие файлы пропускаются).
+output folder (existing files are skipped)	выходная папка (существующие файлы пропускаются)
+Run batch	Запустить пакет	Applies this project to every .rtm of the folder.	Применяет проект к каждому .rtm папки.
+Blender (a3ob)	Blender (a3ob)
+bexe	blender.exe	Path of blender.exe.	Путь к blender.exe.
+bblend	.blend	The .blend with the armature to import into.	.blend с арматурой, в которую импортировать.
+.blend with the armature	.blend с арматурой
+barm	арматура	Armature name (empty: the first one).	Имя арматуры (пусто - первая).
+armature (empty: first)	арматура (пусто - первая)
+Open in Blender	Открыть в Blender	Writes a temp RTM and imports it into the armature with a3ob.	Пишет временный RTM и импортирует его в арматуру через a3ob.
+temp RTM -> a3ob import into the armature; back: Export RTM & Preview in Blender	временный RTM -> импорт a3ob в арматуру; обратно - Export RTM & Preview в Blender
+# ---- Reload sync
+Reload sync: the weapon's reload as in the game.\n1. Open the weapon P3D (MLOD) - its CfgWeapons class is found by model = ....\n2. The character is posed in weapon space: stance + handAnim + the reload gesture (reloadAction -> CfgGesturesMale).\n3. Play / scrub: model.cfg reloadMagazine follows phase = clamp(k * t / T).\n4. Touch (hand bone / weapon part) and Distance over time show where the hand meets the magazine; Suggest window proposes the model.cfg window.\n5. Diff... / Save write the model.cfg (with .bak) - then Validation.	Синхронизация перезарядки: перезарядка оружия как в игре.\n1. Откройте P3D оружия (MLOD) - его класс CfgWeapons находится по model = ....\n2. Персонаж поставлен в пространстве оружия: стойка + handAnim + жест перезарядки (reloadAction -> CfgGesturesMale).\n3. Пуск / перемотка: reloadMagazine в model.cfg следует фазе = clamp(k * t / T).\n4. Касание (кость руки / часть оружия) и «Расстояние по времени» показывают, где рука встречает магазин; «Предложить окно» подбирает окно в model.cfg.\n5. «Diff...» / «Сохранить» пишут model.cfg (с .bak) - затем «Проверка».
+Open a weapon P3D (MLOD) with Ctrl+O: its CfgWeapons class, reload gesture and model.cfg animations are found from it.	Откройте P3D оружия (MLOD) через Ctrl+O: по нему находятся класс CfgWeapons, жест перезарядки и анимации model.cfg.
+No CfgWeapons class with model = {} - check the config.cpp of the addon (next to or above the model).	Нет класса CfgWeapons с model = {} - проверьте config.cpp аддона (рядом с моделью или выше).
+(+%d classes with this model)	(+%d классов с этой моделью)
+reloadAction %s -> CfgGesturesMale >> %s: %s	reloadAction %s -> CfgGesturesMale >> %s: %s
+  speed %s -> %.3f s, mask %s   %s	  speed %s -> %.3f с, маска %s   %s
+  muzzle %s: reloadAction %s	  ствол %s: reloadAction %s
+handAnim %s   stance %s	handAnim %s   стойка %s
+magazineReloadTime %s   magazineReloadSwitchPhase %s	magazineReloadTime %s   magazineReloadSwitchPhase %s
+%s phase = clamp(k * t / %.3f s) - k = 1 until the in-game test confirms it	%s фаза = clamp(k * t / %.3f с) - k = 1, пока проверка в игре не подтвердит
+k	k	Timing factor: reloadMagazine phase = clamp(k * t / T); 1 = the gesture's duration.	Коэффициент времени: фаза reloadMagazine = clamp(k * t / T); 1 - длительность жеста.
+handAnim / gesture blending:	смешивание handAnim / жеста:
+Gesture fade in / out	Появление / затухание жеста	Fades the gesture in and out over 1 / interpolationSpeed (approximation).	Плавно вводит и выводит жест за 1 / interpolationSpeed (приближение).
+1 / interpolationSpeed = %.2f s (approximation)	1 / interpolationSpeed = %.2f с (приближение)
+Play##reload	Пуск	Plays the reload (gesture + weapon animations).	Проигрывает перезарядку (жест + анимации оружия).
+Pause##reload	Пауза	Pauses the reload.	Ставит перезарядку на паузу.
+Play	Пуск
+Pause	Пауза
+Loop##reload	Цикл	Loops the reload.	Зацикливает перезарядку.
+speed##reload	скорость	Playback speed of the reload.	Скорость проигрывания перезарядки.
+Onion skin##reload	Луковая кожа	Ghosts of the weapon and hands a moment before and after.	Призраки оружия и рук чуть раньше и чуть позже.
+odt	интервал	Time between the onion-skin ghosts, seconds.	Время между призраками луковой кожи, секунды.
+t %.3f s   phase %.3f	t %.3f с   фаза %.3f
+%d window(s) changed (viewer only until saved)	изменено окон: %d (только во вьювере до сохранения)
+Diff...	Diff...	Shows the model.cfg lines the window edits change, before saving.	Показывает строки model.cfg, которые меняют правки окон, до сохранения.
+Save (.bak, then Validation)	Сохранить (.bak, затем «Проверка»)	Writes the model.cfg (the old file stays as .bak) and runs Validation.	Пишет model.cfg (старый файл остаётся как .bak) и запускает «Проверку».
+Touch helper	Помощник касания
+hand bone	кость руки	The hand bone measured against the weapon part.	Кость руки, которая измеряется до части оружия.
+weapon part	часть оружия	A selection of the weapon (magazine, bolt ...).	Выделение оружия (магазин, затвор ...).
+Distance over time	Расстояние по времени	Distance hand - part over the reload: where they touch.	Расстояние рука - деталь за перезарядку: где они касаются.
+closest %.1f cm at %.2f s (phase %.3f)	ближе всего %.1f см в %.2f с (фаза %.3f)
+threshold	порог	Distance counted as a touch, cm.	Расстояние, которое считается касанием, см.
+window of	окно анимации	The model.cfg animation whose window is suggested.	Анимация model.cfg, для которой подбирается окно.
+Suggest window	Предложить окно	Proposes minValue / maxValue of the animation from the touch times (viewer only until saved).	Предлагает minValue / maxValue анимации по времени касаний (только во вьювере до сохранения).
+%s: minValue %s, maxValue %s (drag the edges)\n%s	%s: minValue %s, maxValue %s (тяните края)\n%s
+# ---- Optics
+Optics: attachments on the weapon's slots and the sight picture.\n1. Open the weapon P3D - slots come from WeaponSlotsInfo (CowsSlot, PointerSlot, MuzzleSlot, UnderBarrelSlot).\n2. Pick an item per slot: its model sits on the slot's proxy.\n3. View through the sight / Camera at the eye: the camera goes to memoryPointCamera with opticsZoom.\n4. Character aiming poses the character with the weapon.\n5. compatibleItems of the slot can be edited (with .bak) - then Validation.	Оптика: обвес на слотах оружия и картинка в прицеле.\n1. Откройте P3D оружия - слоты берутся из WeaponSlotsInfo (CowsSlot, PointerSlot, MuzzleSlot, UnderBarrelSlot).\n2. Выберите предмет для слота: его модель встаёт на прокси слота.\n3. «Вид через прицел» / «Камера у глаза»: камера в memoryPointCamera с opticsZoom.\n4. «Прицеливание персонажа» ставит персонажа с оружием.\n5. compatibleItems слота можно править (с .bak) - затем «Проверка».
+No CfgWeapons class with this model - check the config.cpp of the addon.	Нет класса CfgWeapons с этой моделью - проверьте config.cpp аддона.
+Open a weapon P3D (MLOD) with Ctrl+O: its slots and optics are read from CfgWeapons.	Откройте P3D оружия (MLOD) через Ctrl+O: слоты и оптика читаются из CfgWeapons.
+slot	слот
+proxy	прокси
+item	предмет	The item on this slot (compatibleItems): its model sits on the slot's proxy.	Предмет на этом слоте (compatibleItems): его модель встаёт на прокси слота.
+(none)	(нет)
+sight	прицел	Use this slot's optic for the sight picture and numbers.	Использовать оптику этого слота для картинки и чисел прицела.
+zoom (opticsZoom)	увеличение (opticsZoom)	opticsZoom of the sight: field of view = 2 atan(opticsZoom).	opticsZoom прицела: угол обзора = 2 atan(opticsZoom).
+View through the sight	Вид через прицел	The camera at memoryPointCamera of the optic with its opticsZoom.	Камера в memoryPointCamera оптики с её opticsZoom.
+Character aiming	Прицеливание персонажа	The character holds the weapon in its aiming pose.	Персонаж держит оружие в позе прицеливания.
+Camera at the eye	Камера у глаза	The camera at the character's eye ('pilot' memory point).	Камера у глаза персонажа (memory-точка 'pilot').
+sight point vs bore line (barrel frame: side / up / along from '%s'):	точка прицела против оси ствола (базис ствола: вбок / вверх / вдоль от '%s'):
+  side %+.1f mm   height over the bore %+.1f mm   along %.1f mm	  вбок %+.1f мм   над осью ствола %+.1f мм   вдоль %.1f мм
+  angle %.3f deg (elevation %.3f, windage %.3f)%s	  угол %.3f° (по вертикали %.3f, по горизонтали %.3f)%s
+  eye (character 'pilot') to the sight point %.0f mm	  от глаза (персонаж, 'pilot') до точки прицела %.0f мм
+  eye distance: character not shown / no 'pilot' memory point	  расстояние до глаза: персонаж не показан / нет memory-точки 'pilot'
+  FOV: vertical = 2 atan(opticsZoom) - model of the game's FOV value, centre alignment does not depend on it	  FOV: вертикальный = 2 atan(opticsZoom) - модель значения FOV игры, совмещение центра от него не зависит
+Fit (viewer only, not written to the P3D)	Подгонка (только во вьювере, в P3D не пишется)
+move mm (x y z)	сдвиг, мм (x y z)	Moves the item on its slot, millimetres (viewer only).	Сдвигает предмет на слоте, миллиметры (только во вьювере).
+rotate deg (x y z)	поворот, ° (x y z)	Rotates the item on its slot, degrees (viewer only).	Поворачивает предмет на слоте, градусы (только во вьювере).
+Reset##fit	Сброс	The item back to its proxy (no fit).	Предмет обратно на свой прокси (без подгонки).
+Correction	Исправление
+Proxy %s in the weapon P3D: move x %+.2f  y %+.2f  z %+.2f mm, rotate x %+.3f  y %+.3f  z %+.3f deg about its corner	Прокси %s в P3D оружия: сдвиг x %+.2f  y %+.2f  z %+.2f мм, поворот x %+.3f  y %+.3f  z %+.3f° вокруг его угла
+  Blender (a3ob: P3D x y z = Blender x z y): location X %+.2f  Y %+.2f  Z %+.2f mm	  Blender (a3ob: P3D x y z = Blender x z y): location X %+.2f  Y %+.2f  Z %+.2f мм
+or the optic P3D (%s): move all LODs x %+.2f  y %+.2f  z %+.2f mm, rotate x %+.3f  y %+.3f  z %+.3f deg about its origin	или P3D оптики (%s): сдвиг всех LOD x %+.2f  y %+.2f  z %+.2f мм, поворот x %+.3f  y %+.3f  z %+.3f° вокруг начала координат
+  Blender: location X %+.2f  Y %+.2f  Z %+.2f mm - after the export hot reload resets the fit	  Blender: location X %+.2f  Y %+.2f  Z %+.2f мм - после экспорта горячая перезагрузка сбросит подгонку
+Sight: ironsights (weapon)	Прицел: механический (оружие)

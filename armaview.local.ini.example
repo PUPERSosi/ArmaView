@@ -1,0 +1,9 @@
+; Copy to armaview.local.ini (next to ArmaView.exe or in the source root) and set the paths of this machine.
+; armaview.local.ini is in .gitignore.
+
+; Arma 3 Samples addons folder: sample man (crew preview, retarget source) and the --selftest models
+samples = C:\Program Files (x86)\Steam\steamapps\common\Arma 3 Samples\Addons
+
+; Blender for the "Open in Blender" button of the Layers panel
+blender = C:\Program Files\Blender Foundation\Blender\blender.exe
+

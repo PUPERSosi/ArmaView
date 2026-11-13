@@ -1,0 +1,74 @@
+# ---- Validation panel, Sources, Timeline, move editor, log
+No skeleton for this model - nothing to validate (see Log).	У модели нет скелета - проверять нечего (см. журнал).
+Weighted selections not in skeleton	Выделения с весами, которых нет в скелете
+Skeleton bones without selection	Кости скелета без выделения
+Points with > 4 bones	Точки с > 4 костей
+Points in unrelated bones	Точки в несвязанных костях
+Points with weight sum != 1 (0.01)	Точки с суммой весов != 1 (0.01)
+Points with weight sum != 1	Точки с суммой весов != 1
+Points without bone	Точки без кости
+Other selections not in skeleton	Прочие выделения не из скелета
+{} ({})###{}	{} ({})###{}
+No skeleton - model.cfg animations need CfgSkeletons bones.	Нет скелета - анимациям model.cfg нужны кости из CfgSkeletons.
+No CfgModels animations for this model.	У этой модели нет анимаций CfgModels.
+Pause (Space)	Пауза (Пробел)	Pauses the animation.	Ставит анимацию на паузу.	play / pause
+Play (Space)	Пуск (Пробел)	Plays the animation (all layers).	Запускает анимацию (все слои).	play / pause
+w	вес	Weight of the layer in the blend (0..1).	Вес слоя в смешивании (0..1).
+v	значение	Value of the model.cfg source (drag; Ctrl+click to type).	Значение источника model.cfg (тяните; Ctrl+щелчок - ввести число).
+Loads the state %s as a layer	Загружает состояние %s слоем
+ConnectTo:	ConnectTo:
+InterpolateTo:	InterpolateTo:
+| game configs loaded	| конфиги игры загружены
+| game configs: loading / not on P:	| конфиги игры: загрузка / нет на P:
+Debug	Отладка	Shows the debug lines of the log.	Показывает отладочные строки журнала.
+Info	Инфо	Shows the info lines of the log.	Показывает информационные строки журнала.
+Warn	Предупр.	Shows the warnings.	Показывает предупреждения.
+Error	Ошибка	Shows the errors.	Показывает ошибки.
+Revert##moves	Отменить	Drops every edit of the move config not saved yet.	Сбрасывает все несохранённые правки конфига движений.
+Revert##windows	Отменить	Drops the window edits (back to the model.cfg on disk).	Сбрасывает правки окон (как в model.cfg на диске).
+Drag %s onto an action below to set it	Перетащите %s на действие ниже, чтобы назначить его
+file (Enter)	file (Enter)	RTM of the state (file=); Enter applies (own configs only).	RTM состояния (file=); Enter - применить (только свои конфиги).
+speed (Enter)	speed (Enter)	speed= of the state: > 0 cycles per second, < 0 seconds per cycle; Enter applies.	speed= состояния: > 0 - циклов в секунду, < 0 - секунд на цикл; Enter - применить.
+looped (0/1)	looped (0/1)	looped= of the state: 1 loops, 0 plays once; Enter applies.	looped= состояния: 1 - цикл, 0 - один раз; Enter - применить.
+interpolationSpeed	interpolationSpeed	interpolationSpeed= of the state: blend in over 1 / value seconds; Enter applies.	interpolationSpeed= состояния: смешивание за 1 / значение секунд; Enter - применить.
+interpolationRestart	interpolationRestart	interpolationRestart= of the state; Enter applies.	interpolationRestart= состояния; Enter - применить.
+equivalentTo	equivalentTo	equivalentTo= of the state; Enter applies.	equivalentTo= состояния; Enter - применить.
+actions	actions	actions= of the state (its actions class); Enter applies.	actions= состояния (его набор действий); Enter - применить.
+aiming	aiming	aiming= mask of the state; Enter applies.	Маска aiming= состояния; Enter - применить.
+aimingBody	aimingBody	aimingBody= mask of the state; Enter applies.	Маска aimingBody= состояния; Enter - применить.
+eye	видимость	Hide / show this selection (right click: more).	Скрыть / показать это выделение (правый щелчок - ещё).
+loveye	видимость LOD	Hide / show this LOD's mesh, or draw it over the current LOD.	Скрыть / показать сетку этого LOD или нарисовать его поверх текущего.
+x	закрыть	Closes this.	Закрывает.
+Hide / show this LOD's mesh (proxies, points, skeleton stay)	Скрыть / показать сетку этого LOD (прокси, точки, скелет остаются)
+Draw this LOD over the current one as wireframe (rest pose)	Нарисовать этот LOD поверх текущего каркасом (поза покоя)
+
+|<	|<	Back to the start of the animation (time 0).	В начало анимации (время 0).
+x1	x1	Speed back to 1.	Скорость обратно на 1.
+your config	ваш конфиг
+BI, read only	BI, только чтение
+, base 	, база 
+; {} = {} skipped (death / unconscious)	; {} = {} пропущено (смерть / без сознания)
+; {} = {} skipped (RTM not on disk: {})	; {} = {} пропущено (RTM нет на диске: {})
+as the engine: Default of the actions class with the unit's upDegree - Actions >> {} (upDegree {}) >> Default = {}	как движок: Default набора действий со стойкой юнита - Actions >> {} (upDegree {}) >> Default = {}
+no actions class with a standing upDegree - {} of Actions >> {} = {}	нет набора действий со стоячим upDegree - {} из Actions >> {} = {}
+no Default / Stop action leads to a usable state - first standing idle state {}	ни Default, ни Stop не ведут в подходящее состояние - первое стоячее idle-состояние {}
+no idle state - first state with an RTM on disk that is not death: {}	нет idle-состояния - первое состояние с RTM на диске, не смерть: {}
+no state with an RTM on disk (other than death)	нет состояния с RTM на диске (кроме смерти)
+picked in the Moves panel (Start state) for this model{}	выбрано в панели Moves («Стартовое состояние») для этой модели{}
+ - a death state!	 - это состояние смерти!
+the picked start state {} is {}; 	выбранное стартовое состояние {} {}; 
+not in this CfgMoves	отсутствует в этом CfgMoves
+without an RTM on disk	без RTM на диске
+Hand IK (gesture curves)	IK кистей (кривые жеста)	leftHandIKCurve / rightHandIKCurve of the reload gesture: by their weight each hand is pulled back to its grip on the weapon (where the handAnim holds it, moved with the weapon), as in the game. The curves are drawn on the timeline (blue left, orange right).	leftHandIKCurve / rightHandIKCurve жеста перезарядки: по их весу каждая кисть возвращается к своему хвату на оружии (где её держит handAnim, вместе с движением оружия), как в игре. Кривые нарисованы на таймлайне (синяя - левая, оранжевая - правая).
+L %.2f  R %.2f	Л %.2f  П %.2f
+(the gesture has no leftHandIKCurve / rightHandIKCurve)	(у жеста нет leftHandIKCurve / rightHandIKCurve)
+cmpweapon	сравнить с	Another weapon on the same timeline, drawn below ours: an MLOD .p3d with its model.cfg, or a CfgWeapons class whose model is such a source file.	Другое оружие на том же таймлайне, рисуется под нашим: MLOD .p3d с его model.cfg или класс CfgWeapons, чья модель - такой исходник.
+compare with: .p3d (MLOD) or CfgWeapons class	сравнить с: .p3d (MLOD) или класс CfgWeapons
+Compare	Сравнить	Loads the comparison weapon: its reloadMagazine windows appear on the timeline in green, the weapon below ours moves with the same time.	Загружает оружие для сравнения: его окна reloadMagazine появляются на таймлайне зелёным, само оружие под нашим двигается по тому же времени.
+Clear##cmp	Убрать	Removes the comparison weapon.	Убирает оружие для сравнения.
+%s below, reload %.2f s	%s снизу, перезарядка %.2f с
+comparison off	сравнение выключено
+{}: no such CfgWeapons class (or give a .p3d path)	{}: нет такого класса CfgWeapons (или укажите путь к .p3d)
+{}: {}	{}: {}
+{}: no model.cfg with its skeleton next to the model	{}: рядом с моделью нет model.cfg с её скелетом
+comparison: {} ({} animations, {} on {}, reload {:.2f} s) below the weapon	сравнение: {} (анимаций {}, из них {} на {}, перезарядка {:.2f} с) под оружием

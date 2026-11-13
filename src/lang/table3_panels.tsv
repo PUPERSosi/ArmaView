@@ -1,0 +1,382 @@
+# ---- Timeline
+No skeleton - load a model with a model.cfg skeleton to play RTMs.	Нет скелета - откройте модель со скелетом в model.cfg, чтобы играть RTM.
+< frame	< кадр	One frame back.	На кадр назад.	previous frame
+frame >	кадр >	One frame forward.	На кадр вперёд.	next frame
+Rest pose	Поза покоя	Shows the bind pose (all animations off) - compare with the animated pose.	Показывает позу привязки (без анимаций) - сравнение с анимированной позой.	rest pose
+Speed	Скорость	Global playback speed (all layers, CfgMoves, crew).	Общая скорость воспроизведения (все слои, CfgMoves, экипаж).
+Onion skin	Луковая кожа	Ghosts of the previous (blue) and next (orange) frames of the primary layer.	Призраки предыдущего (синий) и следующего (оранжевый) кадров основного слоя.
+Previous (blue) and next (orange) frame of the primary layer	Предыдущий (синий) и следующий (оранжевый) кадр основного слоя
+onionstep	шаг кадров	How many frames apart the onion-skin ghosts are.	Через сколько кадров рисуются призраки луковой кожи.
+Bone trail	След кости	Path of the selected bone over one cycle; red = a jump, cyan = keyframes.	Путь выбранной кости за цикл; красный - скачок, голубой - ключевые кадры.
+Path of the selected bone over one cycle; red = jump (segment > 4x median), cyan = keyframes	Путь выбранной кости за цикл; красный - скачок (отрезок > 4x медианы), голубой - ключевые кадры
+cmp	A/B	Compare with layer B: off, B overlaid on the model, or B beside it.	Сравнение со слоем B: выкл, B поверх модели или B рядом.
+A/B off	A/B выкл
+B overlay	B поверх
+B side by side	B рядом
+bpick	слой B	The layer used as B in the comparison.	Слой, который используется как B в сравнении.
+(return B to the layers)	(вернуть B в слои)
+state	состояние	A CfgMovesMaleSdr state: its RTM is loaded as a layer with the state's speed.	Состояние CfgMovesMaleSdr: его RTM загружается слоем со скоростью состояния.
+CfgMovesMaleSdr state, e.g. AmovPercMstpSrasWrflDnon	состояние CfgMovesMaleSdr, например AmovPercMstpSrasWrflDnon
+Load state	Загрузить состояние	Loads the RTM of the typed CfgMovesMaleSdr state as a layer.	Загружает RTM введённого состояния CfgMovesMaleSdr слоем.
+open	открыть	Opens the file at this line in the editor (VS Code).	Открывает файл на этой строке в редакторе (VS Code).
+speed %g (%.2f s), interpolationSpeed %g	speed %g (%.2f с), interpolationSpeed %g
+on	вкл	Turns the layer on / off.	Включает / выключает слой.
+remove	удалить	Removes the layer.	Удаляет слой.
+mode	режим	Blend: mixes with the layers below by weight. Override: replaces the bones it has.	Blend - смешивается со слоями ниже по весу. Override - заменяет свои кости.
+Blend	Смешивание
+Override	Замена
+speed	скорость	Playback speed of this layer.	Скорость воспроизведения этого слоя.
+dur	длительность	Duration of one cycle, seconds.	Длительность одного цикла, секунды.
+off	сдвиг	Phase offset of the layer (0..1).	Сдвиг фазы слоя (0..1).
+loop	цикл	Loops the layer.	Зацикливает слой.
+ping-pong	туда-обратно	Plays forward, then backward.	Играет вперёд, затем назад.
+add	RTM для слоя	An RTM of the open folder to add as a layer.	RTM из открытой папки, который добавить слоем.
+Add layer	Добавить слой	Adds the chosen RTM as a new layer.	Добавляет выбранный RTM новым слоем.
+Open RTM...	Открыть RTM...	Opens an .rtm and adds it as a layer of the model.	Открывает .rtm и добавляет его слоем к модели.	open a model / RTM
+fps for new layers	fps для новых слоёв	Frames per second assumed for RTMs without a CfgMoves speed.	Кадров в секунду для RTM без скорости из CfgMoves.
+Advanced	Дополнительно
+Missing bones	Нет данных о костях	Skeleton bones without data in a layer: follow the parent (default) or identity (bind pose; not confirmed for Arma 3).	Кости скелета без данных в слое: за родителем (по умолчанию) или единичная (поза привязки; для Arma 3 не подтверждено).
+Engine (identity, not confirmed for Arma 3)	Движок (единичная, для Arma 3 не подтверждено)
+Follow parent	За родителем
+Skeleton bones without data in a layer.\nFollow parent (default): move rigidly with the parent bone.\nEngine (identity): Blend layers put them in the bind pose, as OFP / CWR does (RtAnimation.cpp:236) - not confirmed for Arma 3.\nGesture / handAnim layers never override a bone they have no data for.\nSuch bones are drawn red on the skeleton.	Кости скелета без данных в слое.\nЗа родителем (по умолчанию): жёстко следуют за родительской костью.\nДвижок (единичная): Blend-слои ставят их в позу привязки, как OFP / CWR (RtAnimation.cpp:236) - для Arma 3 не подтверждено.\nСлои жестов / handAnim никогда не перекрывают кость, для которой у них нет данных.\nТакие кости на скелете красные.
+Subtract RTM step	Вычесть шаг RTM	OFP IntroduceStep: position -= move * phase. Arma 3 RTMs are already in place - keep off.	OFP IntroduceStep: позиция -= move * фаза. RTM Arma 3 уже на месте - держите выключенным.
+OFP IntroduceStep: position -= move * phase (CWR RtAnimation.cpp:771).\nArma 3 RTMs are already in place - keep off.	OFP IntroduceStep: позиция -= move * фаза (CWR RtAnimation.cpp:771).\nRTM Arma 3 уже на месте - держите выключенным.
+Normalize weights	Нормировать веса	Approximation of binarize: weights scaled to sum 1.	Приближение binarize: веса масштабируются до суммы 1.
+Max 4 bones/point	Максимум 4 кости на точку	Approximation of binarize: only the strongest 4 bones of a point.	Приближение binarize: только 4 самые сильные кости точки.
+Approximation of binarize: strongest 4 bones, weights scaled to sum 1.\nUnticked: raw weights; the missing part of the sum stays at rest pose.	Приближение binarize: 4 самые сильные кости, веса до суммы 1.\nВыключено: веса как есть; недостающая часть суммы остаётся в позе покоя.
+# ---- Sources
+CfgModels::%s: %zu animations, %zu sources	CfgModels::%s: анимаций %zu, источников %zu
+Reset##sources	Сброс	Every model.cfg source back to 0 (or its minimum), oscillation off.	Все источники model.cfg обратно в 0 (или минимум), качание выключено.	reset model.cfg sources
+oscillation period	период качания	Period of the oscillating sources, seconds.	Период качающихся источников, секунды.
+osc	качать	Oscillate this source between its min and max.	Качать этот источник между минимумом и максимумом.
+Oscillate between min and max	Качать между минимумом и максимумом
+memory=0: also look in the Memory LOD	memory=0: искать и в Memory LOD	Some configs set memory=0 while the axis exists only in the Memory LOD. On: animate anyway (orange warning). Off: strictly as written (red error, no motion).	Некоторые конфиги ставят memory=0, а ось есть только в Memory LOD. Вкл - анимировать всё равно (оранжевое предупреждение). Выкл - строго как написано (красная ошибка, без движения).
+Some configs set memory=0 while the axis exists only in the Memory LOD.\nOn: animate anyway (orange warning). Off: strictly as written (red error, no motion).	Некоторые конфиги ставят memory=0, а ось есть только в Memory LOD.\nВкл - анимировать всё равно (оранжевое предупреждение). Выкл - строго как написано (красная ошибка, без движения).
+Animations	Анимации
+Name	Имя
+Type	Тип
+Selection	Выделение
+Source	Источник
+Phase	Фаза
+Status	Статус
+anim	анимация
+value	значение
+# ---- Materials
+No model loaded.	Модель не загружена.
+LOD %d: %zu sections, %zu textures cached	LOD %d: секций %zu, текстур в кэше %zu
+Config skin	Раскраска из конфига	hiddenSelectionsTextures of a config.cpp class with this model: re-textures the hidden selections.	hiddenSelectionsTextures класса config.cpp с этой моделью: перекрашивает скрытые выделения.
+config.cpp: no class with hiddenSelectionsTextures for this model	config.cpp: нет класса с hiddenSelectionsTextures для этой модели
+no class Damage (mat[] / tex[]) for this vehicle	нет class Damage (mat[] / tex[]) у этой техники
+Texture	Текстура
+Material	Материал
+Faces	Грани
+Select a section in Materials to inspect its texture and RVMAT.	Выберите секцию в «Материалах», чтобы посмотреть её текстуру и RVMAT.
+Face texture (stage 0)	Текстура граней (stage 0)
+<none>	<нет>
+Show	Показать
+<none> (default material)	<нет> (материал по умолчанию)
+preview	просмотр	Shows this texture in the preview below.	Показывает эту текстуру в просмотре ниже.
+Edit RVMAT	Редактировать RVMAT
+Binary (rapified) RVMAT: edits are previewed only, Save is not available.	Бинарный (rapified) RVMAT: правки только в просмотре, сохранение недоступно.
+Uses #include: entries from other files are not written.	Использует #include: записи из других файлов не пишутся.
+specularPower	specularPower	Specular power of the material (glossiness).	Степень блика материала (глянцевость).
+tex	текстура	Texture path of this stage; Enter applies.	Путь текстуры этого stage; Enter - применить.
+uvSource	uvSource	UV source of the stage (tex, tex1, none ...).	Источник UV для stage (tex, tex1, none ...).
+aside	aside	UV transform: aside vector (u scale / rotation).	Преобразование UV: вектор aside (масштаб / поворот u).
+up	up	UV transform: up vector (v scale / rotation).	Преобразование UV: вектор up (масштаб / поворот v).
+pos	pos	UV transform: offset.	Преобразование UV: смещение.
+Revert##rvmat	Отменить	Drops the edits of this RVMAT (back to the file).	Сбрасывает правки этого RVMAT (как в файле).
+Revert	Отменить
+Save (.bak kept)	Сохранить (.bak сохраняется)	Writes the RVMAT; the old file stays as .bak.	Пишет RVMAT; старый файл остаётся как .bak.
+A/B: M (now %s)	A/B: M (сейчас %s)
+Stages (read only)	Stages (только чтение)
+Stage	Stage
+Role	Роль
+UV	UV
+Preview	Просмотр
+PixelShaderID %s   VertexShaderID %s	PixelShaderID %s   VertexShaderID %s
+# ---- Outliner / Inspector
+No model. File > Open (Ctrl+O) or drop a .p3d onto the window.	Нет модели. Файл > Открыть (Ctrl+O) или перетащите .p3d в окно.
+model.cfg: not found	model.cfg: не найден
+LODs	LOD
+Points	Точки
+Partial	Частично
+Click a row to show its point weights (blue 0 → red 1).	Щёлкните строку, чтобы увидеть веса точек (синий 0 → красный 1).
+filter (flat list)	фильтр (плоский список)
+bonefilter	фильтр костей	Shows the bones whose name contains this text (flat list).	Показывает кости, в имени которых есть этот текст (плоским списком).
+Isolate	Изолировать	Shows only this selection (Shift+H again: back).	Показывает только это выделение (снова Shift+H - назад).
+Show all	Показать всё	Shows everything hidden in this LOD.	Показывает всё скрытое в этом LOD.	show everything hidden in this LOD
+Name starts with '-' or '.': the engine skips this selection (CWR ShapeSetup.cpp:928)	Имя начинается с '-' или '.': движок пропускает это выделение (CWR ShapeSetup.cpp:928)
+Bones %zu   isDiscrete %d	Кости %zu   isDiscrete %d
+  not found - centroids used	  не найден - взяты центроиды
+Pivots: %d pivotsModel, %d centroid, %d none	Пивоты: из pivotsModel %d, центроид %d, нет %d
+click a bone: select + focus camera; red = no RTM data	щелчок по кости: выбрать + камера на неё; красная - нет данных в RTM
+yellow = pivotsModel, orange = centroid, grey name = no selection	жёлтый - pivotsModel, оранжевый - центроид, серое имя - нет выделения
+isDiscrete=1: each point uses its deepest bone	isDiscrete=1: каждая точка берёт свою самую глубокую кость
+Highlight on model (red)	Подсветить на модели (красным)	Paints the points of this problem red on the model.	Красит точки этой проблемы красным на модели.
+Point	Точка
+Sum	Сумма
+Weights	Веса
+RTM bones vs skeleton	Кости RTM против скелета
+Folder: %s	Папка: %s
+Pick folder...	Выбрать папку...	A folder of RTMs to check against the skeleton.	Папка с RTM для проверки против скелета.
+Re-check	Проверить снова	Reads the folder again.	Перечитывает папку.
+missing	нет в скелете
+extra	лишние
+LOD info	Сведения о LOD	Shows the current LOD in the Inspector instead.	Показывает в Inspector сведения о текущем LOD.
+Show the current LOD instead	Показать текущий LOD
+Points %zu   partial weight %zu   faces %zu	Точек %zu   с частичным весом %zu   граней %zu
+Name starts with '-' or '.': the engine skips it	Имя начинается с '-' или '.': движок его пропускает
+Bone of %s	Кость %s
+not a bone of %s	не кость %s
+inspect bone	смотреть кость	Selects this bone (Inspector, focus).	Выбирает эту кость (Inspector, фокус).
+Clear highlight	Убрать подсветку	Removes the red highlight from the model.	Убирает красную подсветку с модели.
+Parent	Родитель
+- (root)	- (корень)
+Children	Дочерние
+Pivot %.3f %.3f %.3f	Пивот %.3f %.3f %.3f
+Selection: %zu points in LOD %d	Выделение: точек %zu в LOD %d
+No selection in LOD %d	Нет выделения в LOD %d
+Moves %zu mesh points, %zu proxies	Двигает точек сетки %zu, прокси %zu
+model.cfg animations on this bone: %d	Анимаций model.cfg на этой кости: %d
+Focus camera	Камера на кость	Points the camera at this bone.	Направляет камеру на эту кость.
+Points %zu   Normals %zu   Faces %zu   Triangles %zu	Точек %zu   Нормалей %zu   Граней %zu   Треугольников %zu
+Sharp edges %zu   UV sets %zu	Острых рёбер %zu   UV-наборов %zu
+Mass %.3f (%zu points)	Масса %.3f (точек %zu)
+#Animation# frames %zu	#Animation# кадров %zu
+Bounds %.2f x %.2f x %.2f m	Размеры %.2f x %.2f x %.2f м
+Click a selection, bone, point, section or crew seat to inspect it.	Щёлкните выделение, кость, точку, секцию или место экипажа, чтобы посмотреть их.
+# ---- picked faces / sets
+%d of %zu faces hidden%s	скрыто граней %d из %zu%s
+ (isolated)	 (изоляция)
+Picked faces: %zu	Выбрано граней: %zu
+Show all (Alt+H)	Показать всё (Alt+H)	Shows everything hidden in this LOD.	Показывает всё скрытое в этом LOD.	show everything hidden in this LOD
+Hide (H)	Скрыть (H)	Hides the selected selection / proxy / picked faces.	Скрывает выбранное выделение / прокси / выбранные грани.	hide the selected selection / proxy / picked faces
+Isolate (Shift+H)	Изолировать (Shift+H)	Shows only the selected selection / proxy / picked faces (again: back).	Показывает только выбранное выделение / прокси / грани (повторно - назад).	isolate the selected selection / proxy / picked faces (again: back)
+setname	имя набора	Name of a temporary face set (viewer only).	Имя временного набора граней (только во вьювере).
+set name	имя набора
+Save as temporary set	Сохранить как временный набор	A named face set for hiding / checks; kept in settings.txt, never written to the P3D.	Именованный набор граней для скрытия / проверок; хранится в settings.txt, в P3D не пишется.
+Viewer-only named face set for hiding / checks (settings.txt, never written to the P3D)	Именованный набор граней только для вьювера (settings.txt, в P3D не пишется)
+Ctrl+click faces to pick; H hide, Shift+H isolate, Alt+H show all	Ctrl+щелчок - выбрать грани; H - скрыть, Shift+H - изолировать, Alt+H - показать всё
+Shading check of the picked faces	Проверка шейдинга выбранных граней
+Temporary sets (viewer only):	Временные наборы (только вьювер):
+pick	выбрать	Picks the faces of this set.	Выбирает грани этого набора.
+delete	удалить	Deletes the set (the model is not touched).	Удаляет набор (модель не меняется).
+Shading check	Проверка шейдинга
+Normals against the face: %d faces all corners, %d some	Нормали против грани: граней со всеми углами %d, с некоторыми %d
+Mirrored UV: %d faces	Зеркальные UV: граней %d
+Zero UV area: %d faces (no tangent frame: normal map undefined)	Нулевая площадь UV: граней %d (нет касательного базиса: normal map не определён)
+# ---- View options
+Shading	Затенение	What the mesh shows: full material, one map (_co, _nohq, _smdi, _as ...) or diagnostics.	Что показывает модель: полный материал, одна карта (_co, _nohq, _smdi, _as ...) или диагностика.
+Wireframe (W)	Каркас (W)	Off, wireframe over the shaded mesh, or wireframe only.	Выкл, каркас поверх модели или только каркас.	wireframe overlay
+Off	Выкл
+Overlay	Поверх
+Wireframe only	Только каркас
+Reflections (E)	Отражения (E)	Super shader env map x fresnel(n,k): the env map is a sky built from the current lighting.	Env map x fresnel(n,k) супершейдера: env map - небо из текущего освещения.	reflections A/B (env sky x fresnel)
+Super shader env map x fresnel(n,k): the env map is a sky built from the current lighting.	Env map x fresnel(n,k) супершейдера: env map - небо из текущего освещения.
+Face diagnostics	Диагностика граней	Face colours over the shading: tangent frame, mirrored UV, zero UV area, normals against the face.	Цвета граней поверх затенения: касательный базис, зеркальные UV, нулевая площадь UV, нормали против грани.
+Show axes	Оси	Shows the axes gizmo in the corner.	Показывает значок осей в углу.	show axes gizmo
+axislabels	подписи осей	Axis names of the gizmo: P3D / Arma or Blender after an a3ob import (P3D y = Blender z).	Подписи осей: P3D / Arma или Blender после импорта a3ob (P3D y = Blender z).
+Arma (Y-up)	Arma (Y вверх)
+Blender (Z-up)	Blender (Z вверх)
+Axis names of the gizmo: P3D / Arma or Blender after an a3ob import (P3D y = Blender z, P3D z = Blender y)	Подписи осей: P3D / Arma или Blender после импорта a3ob (P3D y = Blender z, P3D z = Blender y)
+Skeleton on top	Скелет поверх	Draws the bones over the mesh (not hidden by it).	Рисует кости поверх модели (не закрываются ею).
+Skeleton only (hide mesh, floor)	Только скелет (без модели и пола)	Hides the mesh and the floor: only the bones.	Прячет модель и пол: только кости.	skeleton only (hide mesh, floor)
+Show normal lines (N)	Линии нормалей (N)	Draws the vertex normals as lines.	Рисует нормали вершин линиями.	normal lines
+Show proxy triangles	Треугольники прокси	Shows the proxy triangles of the P3D.	Показывает треугольники прокси в P3D.	show proxy triangles
+Normals	Нормали	From file (as the engine) or recomputed with #SharpEdges# (as Object Builder).	Из файла (как движок) или пересчитанные по #SharpEdges# (как Object Builder).
+From file	Из файла
+Recomputed (#SharpEdges#)	Пересчитанные (#SharpEdges#)
+Normal line length	Длина линий нормалей	Length of the normal lines, metres.	Длина линий нормалей, метры.
+Culling	Отсечение граней	None, back faces (as the game) or front faces - finds flipped faces.	Нет, задние грани (как в игре) или передние - помогает найти вывернутые грани.
+None	Нет
+Back (CW front)	Задние (CW - лицевые)
+Front faces	Передние
+Two-sided lighting	Двустороннее освещение	Lights back faces as front faces (foliage-like check).	Освещает задние грани как лицевые (проверка как для растительности).
+Flip normal-map green	Инвертировать зелёный normal map	Flips the green channel of the normal maps (DirectX / OpenGL convention check).	Инвертирует зелёный канал normal map (проверка соглашения DirectX / OpenGL).
+Apply PAA channel swizzle (SWIZ) to normal maps	Применять перестановку каналов PAA (SWIZ) к normal map	_nohq from TexConvert keep X as 1-X in alpha (SWIZ 5 4 2 3). Off: X read from red = wrong tilt (A/B check).	_nohq из TexConvert хранят X как 1-X в альфе (SWIZ 5 4 2 3). Выкл - X из красного = неверный наклон (проверка A/B).
+_nohq from TexConvert keep X as 1-X in alpha (SWIZ 5 4 2 3). Off: X read from red = wrong tilt (A/B check).	_nohq из TexConvert хранят X как 1-X в альфе (SWIZ 5 4 2 3). Выкл - X из красного = неверный наклон (проверка A/B).
+Camera	Камера
+Target %.2f %.2f %.2f   distance %.2f   yaw %.0f   pitch %.0f	Цель %.2f %.2f %.2f   расстояние %.2f   поворот %.0f   наклон %.0f
+LMB rotate, RMB/MMB pan, wheel zoom; 1 Front 2 Back 3 Left 4 Right 5 Top, F frame	ЛКМ - вращать, ПКМ/СКМ - сдвиг, колесо - масштаб; 1 спереди 2 сзади 3 слева 4 справа 5 сверху, F - вписать
+# ---- Light options
+Sun	Солнце	Light from the sun (time of day, latitude, season).	Свет от солнца (время суток, широта, сезон).	sun / headlight
+Headlight	Фара	Light from the camera (always lit from the view).	Свет от камеры (всегда освещено со стороны взгляда).	sun / headlight
+Noon	Полдень	Lighting preset: noon.	Пресет освещения: полдень.	noon
+Sunset	Закат	Lighting preset: sunset.	Пресет освещения: закат.	sunset
+Night	Ночь	Lighting preset: night.	Пресет освещения: ночь.	night
+Overcast	Пасмурно	Lighting preset: overcast.	Пресет освещения: пасмурно.	overcast
+World lighting	Освещение мира	CfgWorlds >> world >> Weather >> LightingNew: the game's sun / ambient / sky colours by sun angle and overcast.	CfgWorlds >> мир >> Weather >> LightingNew: цвета солнца / ambient / неба игры по углу солнца и облачности.
+procedural	процедурное
+CfgWorlds >> <world> >> Weather >> LightingNew: sun / ambient / ground / sky by sun angle and overcast,\nlatitude of the world. Exposure: approximate auto exposure (the game adapts its aperture).	CfgWorlds >> <мир> >> Weather >> LightingNew: солнце / ambient / земля / небо по углу солнца и облачности,\nширота мира. Экспозиция - приближение автоэкспозиции (игра подстраивает диафрагму).
+Time of day	Время суток	Hour of the day: the sun's elevation and colour.	Час суток: высота и цвет солнца.
+Sun / light	Солнце / свет	Strength of the sun (or headlight).	Сила солнца (или фары).
+Ambient	Рассеянный	Strength of the ambient light.	Сила рассеянного света.
+Exposure	Экспозиция	Brightness of the picture (approximate auto exposure of the game).	Яркость картинки (приближение автоэкспозиции игры).
+softness	мягкость	Softness of the shadow edges.	Мягкость краёв тени.
+quality	качество	Shadow map 1024 / 2048 / 4096, 4 / 16 / 25 filter taps.	Карта теней 1024 / 2048 / 4096, выборок фильтра 4 / 16 / 25.
+low	низкое
+medium	среднее
+high	высокое
+Shadow map 1024 / 2048 / 4096, 4 / 16 / 25 filter taps	Карта теней 1024 / 2048 / 4096, выборок фильтра 4 / 16 / 25
+Background = sky	Фон = небо	The background takes the sky colour of the lighting.	Фон берёт цвет неба из освещения.
+Background	Фон	Background colour of the viewport.	Цвет фона окна просмотра.
+Sun rotation	Поворот солнца	Azimuth of the sun around the model, degrees.	Азимут солнца вокруг модели, градусы.
+Latitude	Широта	Latitude: how high the sun gets.	Широта: насколько высоко поднимается солнце.
+Season	Сезон	Season (sun declination).	Сезон (склонение солнца).
+%s elevation %.1f, azimuth %.0f	%s высота %.1f, азимут %.0f
+# ---- Crew
+CfgVehicles::%s	CfgVehicles::%s
+Show crew	Показать экипаж	Puts the crew model on every seat proxy with its CfgMoves pose.	Сажает модель экипажа на каждый прокси места в позе из CfgMoves.	show crew on proxies
+Show proxies	Показать прокси	Muzzle flash / light volume proxies and gear-slot placeholders (the game fills them).	Прокси вспышек / световых объёмов и заглушки слотов снаряжения (игра их заполняет).
+Show effects	Показать эффекты	Muzzle flash / light volume proxies and gear-slot placeholders (weapon, launcher, headgear ...: the game fills them).	Прокси вспышек / световых объёмов и заглушки слотов снаряжения (оружие, гранатомёт, головной убор ...: игра их заполняет).
+Muzzle flash / light volume proxies and gear-slot placeholders (weapon, launcher, headgear ...: the game fills them)	Прокси вспышек / световых объёмов и заглушки слотов снаряжения (оружие, гранатомёт, головной убор ...: игра их заполняет)
+Destroyed state	Разрушенное состояние	Wreck proxies (*wreck*.p3d): the game shows them only when the vehicle is destroyed.	Прокси обломков (*wreck*.p3d): игра показывает их только у разрушенной техники.
+Wreck proxies (*wreck*.p3d): the game shows them only when the vehicle is destroyed	Прокси обломков (*wreck*.p3d): игра показывает их только у разрушенной техники
+Hide vehicle	Скрыть технику	Only the proxies and the crew are drawn.	Рисуются только прокси и экипаж.	hide vehicle (only proxies and crew)
+Turned out (*Action instead of *InAction)	Высунувшись (*Action вместо *InAction)	Crew in the turned-out poses (*Action) instead of the inside ones (*InAction).	Экипаж в позах «высунувшись» (*Action) вместо поз внутри (*InAction).	turned out (*Action instead of *InAction)
+IK hands / legs	IK рук / ног	Two-bone IK: hands and feet follow the vehicle bones of driverLeftHandAnimName ... (gunner* for turrets).	Двухкостный IK: руки и ноги следуют за костями техники из driverLeftHandAnimName ... (gunner* у башен).
+Two-bone IK: hands / feet follow the vehicle bones of driverLeftHandAnimName, driverRightHandAnimName,\ndriverLeftLegAnimName, driverRightLegAnimName (gunner* for turrets)	Двухкостный IK: руки / ноги следуют за костями техники из driverLeftHandAnimName, driverRightHandAnimName,\ndriverLeftLegAnimName, driverRightLegAnimName (gunner* у башен)
+Real get-in position	Реальная точка посадки	Get in / out states play at memoryPointsGetIn<Driver|Gunner|Cargo>, facing from ...Dir to it.	Состояния посадки / высадки играются в memoryPointsGetIn<Driver|Gunner|Cargo>, лицом от ...Dir к ней.
+Get in / out states play at memoryPointsGetIn<Driver|Gunner|Cargo>, facing from ...Dir to it	Состояния посадки / высадки играются в memoryPointsGetIn<Driver|Gunner|Cargo>, лицом от ...Dir к ней
+Crew missing bones: follow parent	Кости экипажа без данных: за родителем	On (default): bones without RTM data follow their parent. Off: bind pose (identity; not confirmed for Arma 3).	Вкл (по умолчанию): кости без данных RTM следуют за родителем. Выкл: поза привязки (единичная; для Arma 3 не подтверждено).
+On (default): bones without RTM data follow their parent.\nOff: they stay in the bind pose (identity, as OFP / CWR does - not confirmed for Arma 3; stretching shows).	Вкл (по умолчанию): кости без данных RTM следуют за родителем.\nВыкл: остаются в позе привязки (единичная, как OFP / CWR - для Arma 3 не подтверждено; видно растяжение).
+crewmodel	модель экипажа	MLOD character with a model.cfg skeleton, loaded once for all seats.	MLOD персонажа со скелетом в model.cfg, загружается один раз для всех мест.
+MLOD character with model.cfg skeleton, loaded once for all seats	MLOD персонажа со скелетом в model.cfg, загружается один раз для всех мест
+Set crew model	Задать модель экипажа	Uses the typed character model for every seat (instead of BI's sample man).	Использует введённую модель персонажа для всех мест (вместо образца BI).
+Play all	Играть все	Plays the animations of all seats.	Проигрывает анимации всех мест.	play all seats
+crewspeed	скорость экипажа	Playback speed of all seats.	Скорость воспроизведения всех мест.
+Loop##crew	Цикл	Loops the seat animations.	Зацикливает анимации мест.
+Loop	Цикл
+Rewind	В начало	All seats back to the first frame.	Все места на первый кадр.
+seats	места
+Seat	Место
+Proxy	Прокси
+Action	Действие
+State	Состояние
+RTM	RTM
+play	играть	Plays this seat.	Проигрывает это место.
+ManActions: %s\nState: %s	ManActions: %s\nСостояние: %s
+%s: manual RTM (empty = from config)	%s: RTM вручную (пусто - из конфига)
+rtmov	RTM вручную	An RTM for this seat instead of the config's (empty = from config).	RTM для этого места вместо конфига (пусто - из конфига).
+Apply RTM	Применить RTM	Uses the typed RTM for this seat.	Использует введённый RTM для этого места.
+From config	Из конфига	Back to the RTM of the config.	Вернуться к RTM из конфига.
+seat speed	скорость места	Playback speed of this seat.	Скорость воспроизведения этого места.
+related to %s:	связанные с %s:
+Play as a chain: get in -> seat, or seat -> this state (blend 1 / interpolationSpeed)	Играть цепочкой: посадка -> место или место -> это состояние (смешивание 1 / interpolationSpeed)
+chain:	цепочка:
+Play chain	Играть цепочку	Plays the chain: get in -> seat, or seat -> this state.	Проигрывает цепочку: посадка -> место или место -> это состояние.
+Clear chain	Очистить цепочку	Empties the chain; the seat goes back to its pose.	Очищает цепочку; место возвращается в свою позу.
+# ---- Log
+Auto-scroll	Автопрокрутка	Keeps the newest line in view.	Держит последнюю строку на виду.
+Clear	Очистить	Empties the log.	Очищает журнал.
+Copy	Копировать	Copies the shown log lines to the clipboard.	Копирует показанные строки журнала в буфер обмена.
+# ---- Help
+search	поиск
+keys by their place on the keyboard (US labels) - the same in any layout	клавиши по месту на клавиатуре (подписи US) - одинаково в любой раскладке
+Keys & mouse	Клавиши и мышь
+Everything here runs from the command palette (Ctrl+Shift+P).	Всё это запускается из палитры команд (Ctrl+Shift+P).
+Windows	Окна
+Command line	Командная строка
+ui-script	ui-script
+key	клавиша
+action	действие
+command	команда
+window	окно
+contents	содержимое
+option	параметр
+meaning	значение
+Modes (tabs on top, each with its own layout)	Режимы (вкладки сверху, у каждого своя раскладка)
+Panels	Панели
+type a command (Enter runs, Esc closes)	введите команду (Enter - выполнить, Esc - закрыть)
+no command matches	нет подходящих команд
+# ---- About
+A viewer for Arma 3 source content (MLOD, RTM, PAA, configs) and glTF: models, animations and materials without starting the game.	Просмотрщик исходного контента Arma 3 (MLOD, RTM, PAA, конфиги) и glTF: модели, анимации и материалы без запуска игры.
+Third-party libraries (MIT license):	Сторонние библиотеки (лицензия MIT):
+Arma 3 is a trademark of Bohemia Interactive. This project is not affiliated with Bohemia Interactive.	Arma 3 - товарный знак Bohemia Interactive. Проект не связан с Bohemia Interactive.
+# ---- model.cfg graph
+model.cfg graph: sources -> animations -> bones.\n1. Left: animation sources (sliders move them); middle: CfgModels animations; right: skeleton bones.\n2. Click a bone: it is selected in the viewport; double click a node: only its links (depth 1-3), Esc leaves.\n3. Open in model.cfg jumps to the animation in the editor.\n4. Wheel zooms, right drag pans, the minimap jumps.	Граф model.cfg: источники -> анимации -> кости.\n1. Слева - источники анимаций (ползунки двигают их); в середине - анимации CfgModels; справа - кости скелета.\n2. Щелчок по кости выбирает её в окне просмотра; двойной щелчок по узлу - только его связи (глубина 1-3), Esc - выход.\n3. «open in model.cfg» открывает анимацию в редакторе.\n4. Колесо - масштаб, правая кнопка - сдвиг, миникарта - переход.
+This model has no CfgModels animations (model.cfg class of the model without Animations).	У модели нет анимаций CfgModels (класс модели в model.cfg без Animations).
+Open a model with a model.cfg (Ctrl+O): its animations, sources and bones are drawn here.	Откройте модель с model.cfg (Ctrl+O): здесь будут её анимации, источники и кости.
+# ---- survey
+PixelShaderID survey of P:\ (a3 + mods)	Обзор PixelShaderID на P:\ (a3 + моды)
+Copy table	Копировать таблицу	Copies the survey table to the clipboard.	Копирует таблицу обзора в буфер обмена.
+mods	моды
+Note / example	Примечание / пример
+# ---- Unit window
+Unit	Юнит
+A soldier class dressed like the game does it: the class's model is the uniform, the head comes from its face (CfgFaces / CfgHeads), headgear, vest and NVG from linkedItems[], the backpack from backpack=. Every part is skinned with the open model's skeleton and follows its animation.	Класс солдата, одетый как в игре: модель класса - униформа, голова - из лица (CfgFaces / CfgHeads), шлем, жилет и ПНВ - из linkedItems[], рюкзак - из backpack=. Все части скинятся скелетом открытой модели и следуют её анимации.
+Put away##unit	Убрать	Remove the parts; the model stays open	Убрать части; модель остаётся открытой
+No unit assembled	Юнит не собран
+No config loaded (open a model of a mod, or wait for the game configs)	Конфиг не загружен (откройте модель мода или дождитесь игровых конфигов)
+The CfgVehicles class whose model= is the open model	Класс CfgVehicles, у которого model= - открытая модель
+Click a class: its model is opened (if another one) and dressed	Щелчок по классу: его модель открывается (если другая) и одевается
+Replace	Заменить
+Remove part	Убрать часть
+Close##replace	Закрыть
+Part slot	Слот части	Slot to replace or add: pick a class below	Слот для замены или добавления: выберите класс ниже
+... (filter to see more)	... (уточните фильтр)
+They stay in the bind pose. Selections:\n%s	Остаются в позе привязки. Выделения:\n%s
+%d point(s) on no bone of the skeleton	%d точек без кости скелета
+Class	Класс
+Outfit	Примерка
+Outfit on %s	Примерка на %s
+Body:	Тело:
+ArmaMan (Samples)	ArmaMan (Samples)
+A3_character_example.p3d of Arma 3 Samples (Setup and paths: Samples) as the body	A3_character_example.p3d из Arma 3 Samples (Настройка и пути: Samples) как тело
+P3D file...	Файл P3D...
+Any character P3D with a model.cfg skeleton as the body	Любой P3D персонажа со скелетом в model.cfg как тело
+Open model	Открытая модель
+The open model as the body (its parts are kept)	Открытая модель как тело (части сохраняются)
+A soldier class as the body: the Class tab. The parts stay when the body changes.	Класс солдата как тело - вкладка «Класс». При смене тела части остаются.
+Part from a file:	Часть из файла:
+Slot of the part: it replaces the part of that slot (other: added)	Слот части: заменяет часть этого слота (other - добавляется)
+Add P3D...	Добавить P3D...
+A helmet, vest, backpack ... P3D: skinned with the body's skeleton by bone (selection) names	P3D шлема, жилета, рюкзака...: скиннится скелетом тела по именам костей (выделений)
+Control (WASD)	Управление (WASD)
+CfgMoves control mode with this outfit: WASD walk, Shift run, Q / E turn, C crouch, Z prone	Режим управления CfgMoves в этом комплекте: WASD - ходьба, Shift - бег, Q / E - поворот, C - присесть, Z - лечь
+preset name	имя пресета
+Save outfit preset	Сохранить пресет комплекта
+Saves the body and the parts (classes and files) as a preset in the settings folder (outfits)	Сохраняет тело и части (классы и файлы) пресетом в папке настроек (outfits)
+Load	Загрузить
+Delete	Удалить
+Moves the preset file to the recycle bin	Перемещает файл пресета в корзину
+No saved presets	Нет сохранённых пресетов
+Checks	Проверки
+Against the body's skeleton: bones of the part (its model.cfg) the body lacks, points on more than 4 bones (the engine keeps 4), bone weights not summing to 1.	Сравнение со скелетом тела: кости части (из её model.cfg), которых нет в теле; точки на более чем 4 костях (движок оставляет 4); веса костей с суммой не 1.
+Remove	Убрать
+# ---- tooltips of the graphs, point labels, layer ranges
+Shows only the nodes whose name contains this text.	Показывает только узлы, в имени которых есть этот текст.
+Shows only the animations driven by this source.	Показывает только анимации, которыми управляет этот источник.
+Shows only the nodes with a problem (missing bone, selection, axis or source).	Показывает только узлы с проблемой (нет кости, выделения, оси или источника).
+Runs of parent bones without animations become one node ("a > ... > b > (root)")	Цепочки родительских костей без анимаций сворачиваются в один узел ("a > ... > b > (root)")
+Minimap: click / drag to jump	Миникарта: щелчок / перетаскивание - перейти
+Shows a small overview of the whole graph in the corner.	Показывает в углу уменьшенный обзор всего графа.
+Zooms the graph so that every node is visible.	Масштабирует граф так, чтобы были видны все узлы.
+Arranges the nodes again from scratch.	Заново расставляет узлы.
+How many links away from the focused node are shown.	Сколько связей от узла в фокусе показывать.
+Leaves the focus: the whole graph again.	Выйти из фокуса: снова весь граф.
+Source value: drives the animations linked to this source.\nCtrl+click: type a value.	Значение источника: управляет связанными с ним анимациями.\nCtrl+клик — ввести значение.
+Moves the source value back and forth between its min and max.	Гоняет значение источника туда-обратно между минимумом и максимумом.
+Opens model.cfg in the editor at this animation's class.	Открывает model.cfg в редакторе на классе этой анимации.
+Finds states by name; Enter jumps to the next match.	Ищет состояния по имени; Enter - к следующему совпадению.
+search also in the RTM path	искать также в пути RTM
+search also in the actions class / the action names leading to the state	искать также в классе действий / в именах действий, ведущих к состоянию
+Which states to show: all, only those of your mod's config, or only BI's.	Какие состояния показывать: все, только из конфига вашего мода или только BI.
+Zooms the graph so that every state is visible.	Масштабирует граф так, чтобы были видны все состояния.
+Centers the graph on the state the character is in now.	Центрирует граф на текущем состоянии персонажа.
+Arranges the states again from scratch.	Заново расставляет состояния.
+Goes to this state through the transitions, as playMove does in the game.	Переходит в это состояние через переходы, как playMove в игре.
+Jumps straight to this state, as switchMove does in the game.	Сразу переключает в это состояние, как switchMove в игре.
+Selects this state: its details in the Inspector.	Выбирает состояние: подробности в Inspector.
+Shows the names of the points (named selections) in the view.	Показывает в виде имена точек (именованных выделений).
+Off: labels only on LODs without faces (Memory, Land Contact, Hit-points ...)	Выкл.: подписи только на LOD без граней (Memory, Land Contact, Hit-points ...)
+Shows only the labels whose name contains this text.	Показывает только подписи, в имени которых есть этот текст.
+Points behind the geometry (depth buffer) are dimmed or hidden	Точки за геометрией (по буферу глубины) приглушаются или скрываются
+Hides the points behind the geometry instead of dimming them.	Скрывает точки за геометрией, а не приглушает их.
+Also shows the points that are in no named selection, as dots.	Показывает точками и точки, не входящие ни в одно именованное выделение.
+Spheres of CfgVehicles >> HitPoints (incl. turrets): radius around every point of name= in the Hit-points LOD	Сферы CfgVehicles >> HitPoints (вкл. башни): радиус вокруг каждой точки name= в LOD Hit-points
+Part of the clip to keep, from start to end (0..1 of its length).	Какую часть клипа оставить, от начала до конца (0..1 его длины).
+Phase range (0..1) where this foot stays planted on the ground.	Диапазон фазы (0..1), где эта стопа стоит на земле.
+Shows or hides this part.	Показывает или скрывает эту часть.
+Optics mode of the sight (a class of OpticsModes): its zoom range and reticle.	Режим оптики прицела (класс OpticsModes): его диапазон зума и сетка.

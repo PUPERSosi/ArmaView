@@ -1,0 +1,91 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+    },
+    {
+      "name": "vs2026",
+      "inherits": "base",
+      "displayName": "Visual Studio 18 2026 x64 (vcpkg from VCPKG_ROOT)",
+      "binaryDir": "${sourceDir}/build/vs2026",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      }
+    },
+    {
+      "name": "vs2026-static",
+      "inherits": "base",
+      "displayName": "Visual Studio 18 2026 x64, static runtime (/MT, x64-windows-static)",
+      "binaryDir": "${sourceDir}/build/vs2026-static",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+      }
+    },
+    {
+      "name": "fuzz",
+      "inherits": "base",
+      "displayName": "Parser fuzzing: ArmaViewFuzz (libFuzzer + ASan)",
+      "binaryDir": "${sourceDir}/build/fuzz",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "ARMAVIEW_FUZZ": "ON"
+      }
+    },
+    {
+      "name": "ci",
+      "inherits": "base",
+      "displayName": "CI (GitHub Actions): Visual Studio 17 2022, static runtime",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/ci",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "vs2026",
+      "configuration": "Debug",
+      "inheritConfigureEnvironment": true
+    },
+    {
+      "name": "dev",
+      "configurePreset": "vs2026",
+      "configuration": "RelWithDebInfo",
+      "inheritConfigureEnvironment": true
+    },
+    {
+      "name": "release",
+      "configurePreset": "vs2026-static",
+      "configuration": "Release",
+      "inheritConfigureEnvironment": true
+    },
+    {
+      "name": "fuzz",
+      "configurePreset": "fuzz",
+      "configuration": "RelWithDebInfo",
+      "targets": [
+        "ArmaViewFuzz"
+      ],
+      "inheritConfigureEnvironment": true
+    },
+    {
+      "name": "ci",
+      "configurePreset": "ci",
+      "configuration": "Release",
+      "targets": [
+        "ArmaView",
+        "armaview-cli"
+      ],
+      "inheritConfigureEnvironment": true
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+# ---- Mod check
+Mod check	Проверка мода
+Mod check...	Проверка мода...	Checks every P3D, model.cfg, config.cpp, RVMAT and RTM of a mod folder in the background (read only) and lists the problems per file.	Проверяет все P3D, model.cfg, config.cpp, RVMAT и RTM папки мода в фоне (только чтение) и показывает проблемы по файлам.	Mod check (validate every file of a mod folder)
+Mod check (validate every file of a mod folder)	Проверка мода (все файлы папки мода)
+Mod check: every file of a mod folder, read only.\n1. Pick the mod folder (e.g. P:\MyMod) and press Check: P3D, model.cfg, config.cpp, RVMAT and RTM files are read in the background.\n2. P3D: textures / materials / proxies that do not exist, the rig against its model.cfg skeleton, model.cfg animations and axes.\n3. config.cpp: parse errors, missing base classes, model / texture paths, CfgMoves states without RTM, links to missing states.\n4. Problems are listed per file with open (the line in the editor); the HTML report is kept in %LOCALAPPDATA%\ArmaView\modcheck.\n5. The next run of the same folder marks new problems and lists the fixed ones. Nothing is changed in the mod.	Проверка мода: все файлы папки мода, только чтение.\n1. Выберите папку мода (например P:\MyMod) и нажмите «Проверить»: P3D, model.cfg, config.cpp, RVMAT и RTM читаются в фоне.\n2. P3D: несуществующие текстуры / материалы / прокси, риг против скелета из model.cfg, анимации model.cfg и их оси.\n3. config.cpp: ошибки разбора, ненайденные базовые классы, пути моделей и текстур, состояния CfgMoves без RTM, связи на несуществующие состояния.\n4. Проблемы сгруппированы по файлам с кнопкой «открыть» (строка в редакторе); HTML-отчёт сохраняется в %LOCALAPPDATA%\ArmaView\modcheck.\n5. Следующий прогон той же папки отмечает новые проблемы и показывает исправленные. В моде ничего не меняется.
+modfolder	папка мода	The mod folder to check (its subfolders too).	Папка мода для проверки (вместе с подпапками).
+mod folder (e.g. P:\MyMod)	папка мода (например P:\MyMod)
+...##modfolder	...	Pick the mod folder.	Выбрать папку мода.
+Check##modcheck	Проверить	Starts the check in the background (the viewer stays usable).	Запускает проверку в фоне (вьювером можно пользоваться).
+Cancel##modcheck	Отмена	Stops the check; the problems found so far are shown.	Останавливает проверку; показываются найденные до этого проблемы.
+Pick a mod folder and press Check. Nothing is written into the mod: the report goes to %LOCALAPPDATA%\ArmaView\modcheck.	Выберите папку мода и нажмите «Проверить». В мод ничего не пишется: отчёт сохраняется в %LOCALAPPDATA%\ArmaView\modcheck.
+%s  |  %s  |  %.1f s%s	%s  |  %s  |  %.1f с%s
+  |  cancelled	  |  отменено
+{} error(s)	ошибок: {}
+{} warning(s)	предупреждений: {}
+| against {}: {} new, {} fixed	| против {}: новых {}, исправлено {}
+Open HTML report	Открыть HTML-отчёт	Opens the report (filters by text, severity, kind, only new) in the browser.	Открывает отчёт (фильтры по тексту, важности, типу, только новые) в браузере.
+modfilter	фильтр	Shows only problems whose file or text contains this.	Показывает только проблемы, у которых файл или текст содержит это.
+filter (file or text)	фильтр (файл или текст)
+errors##mod	ошибки	Shows the errors.	Показывает ошибки.
+warnings##mod	предупреждения	Shows the warnings.	Показывает предупреждения.
+only new##mod	только новые	Only the problems that were not there in the previous run of this folder.	Только проблемы, которых не было в прошлом прогоне этой папки.
+modkind	тип файлов	Only the problems of one kind of file.	Только проблемы одного типа файлов.
+all kinds	все типы
+No problems found.	Проблем не найдено.
+open##issue	открыть	Opens the file at this line in the editor (VS Code / Notepad++), the path is copied too.	Открывает файл на этой строке в редакторе (VS Code / Notepad++), путь копируется в буфер.
+ (new)	 (новое)
+Fixed since {} ({})###modfixed	Исправлено с {} ({})###modfixed

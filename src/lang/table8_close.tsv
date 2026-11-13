@@ -1,0 +1,10 @@
+# ---- closing with unsaved edits
+Unsaved changes	Несохранённые изменения
+These changes are only in the viewer and will be lost:	Эти изменения есть только во вьювере и будут потеряны:
+Close without saving	Закрыть без сохранения	Closes the viewer; the listed changes are lost.	Закрывает вьювер; перечисленные изменения теряются.
+Cancel##close	Отмена	Back to the viewer to save the changes.	Назад во вьювер, чтобы сохранить изменения.
+Move config {}: changed, not saved (Move editor: Diff & Save...)	Конфиг движений {}: изменён, не сохранён (Редактор движений: Diff и сохранить...)
+RVMAT edits: {} (Materials: Save)	Правки RVMAT: {} (Материалы: Сохранить)
+model.cfg windows: {} changed (Reload sync: Diff... / Save)	Окна model.cfg: изменено {} (Синхронизация перезарядки: Diff... / Сохранить)
+Weapon config.cpp: changed, not saved	config.cpp оружия: изменён, не сохранён
+Animation layers project: changed, not saved (Layers: Save project)	Проект слоёв анимации: изменён, не сохранён (Слои: Сохранить проект)

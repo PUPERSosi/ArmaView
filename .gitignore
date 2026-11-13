@@ -1,0 +1,98 @@
+# build output (CMake/vcpkg), incl. exe-side runtime files
+build/
+out/
+# local only (kept on disk, never pushed): the leak check with its list, working notes
+tools/release/
+CLAUDE.md
+.vs/
+vcpkg_installed/
+
+# runtime files written next to the exe
+selftest/
+graphs/
+*.log
+layout.ini
+
+# editor / OS
+*.user
+.vscode/
+Thumbs.db
+
+# python
+__pycache__/
+*.pyc
+cache/
+
+# machine paths (see armaview.local.ini.example, CMakeUserPresets.json.example)
+armaview.local.ini
+CMakeUserPresets.json
+
+# ---- GitHub C++ template (from the initial commit)
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+*.so.*
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Build directories
+build/
+Build/
+build-*/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.swp
+
+# vcpkg
+vcpkg_installed/
+
+# debug information files
+*.dwo
+
+# test output & cache
+Testing/
+.cache/

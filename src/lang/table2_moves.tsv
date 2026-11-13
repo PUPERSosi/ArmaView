@@ -1,0 +1,192 @@
+# ---- Moves panel
+CfgMoves	CfgMoves	The move config played on this model. auto = the one whose skeletonName is the model's skeleton.	Конфиг движений для этой модели. «авто» - тот, у которого skeletonName совпадает со скелетом модели.
+auto: {}	авто: {}
+auto (by the model's skeleton)	авто (по скелету модели)
+skeleton %s	скелет %s
+| %zu states	| состояний: %zu
+States graph (Ctrl+M)	Граф состояний (Ctrl+M)	All states of the move config with their ConnectTo / InterpolateTo links; the current path is highlighted.	Все состояния конфига со связями ConnectTo / InterpolateTo; текущий путь подсвечен.	CfgMoves states graph
+The model's skeleton is %s, this CfgMoves is for %s: the RTMs will not fit. Pick the move config of %s in the list (or add one).	Скелет модели - %s, а этот CfgMoves для %s: RTM не подойдут. Выберите в списке конфиг движений для %s (или добавьте его).
+1. Start state	1. Стартовое состояние
+Start state	Стартовое состояние	Where the character begins (control mode, Reset). auto = as the engine: the Default action of the actions class with the unit's upDegree. Death / unconscious states are not offered. The choice is kept per model.	С чего начинает персонаж (режим управления, «Сброс»). «авто» - как движок: действие Default набора действий со стойкой юнита (upDegree). Состояния смерти / без сознания не предлагаются. Выбор запоминается для модели.
+none	нет
+Reset	Сброс
+Reset##moves	Сброс	Back to the start state at the origin: heading 0, footsteps cleared, gesture stopped.	Обратно в стартовое состояние в начало координат: курс 0, следы стёрты, жест остановлен.
+No start state: %s. Check the file= paths of the idle state (the viewer looks on P:\ and in the mod folder under its prefix).	Нет стартового состояния: %s. Проверьте пути file= у idle-состояния (вьювер ищет на P:\ и в папке мода по его префиксу).
+The start state %s has no RTM on disk (%s).	У стартового состояния %s нет RTM на диске (%s).
+why: %s	почему: %s
+2. Current state	2. Текущее состояние
+Game mode: CfgMoves drives the animation	Игровой режим: анимацией управляет CfgMoves	CfgMoves plays the current state and walks the cheapest ConnectTo / InterpolateTo path to the next one. Off: your RTM layers come back.	CfgMoves играет текущее состояние и идёт к следующему по самому дешёвому пути ConnectTo / InterpolateTo. Выключено - возвращаются ваши слои RTM.
+Control mode	Режим управления	Keyboard drives the character through CfgMoves: W A S D walk, Shift run, C crouch / stand, Z prone / stand, X stand up, Q / E turn. Turning it on puts the character in the start state at the origin. Keys never lead into death.	Клавиатура управляет персонажем через CfgMoves: W A S D - шаг, Shift - бег, C - присесть / встать, Z - лечь / встать, X - встать, Q / E - поворот. При включении персонаж встаёт в стартовое состояние в начале координат. Клавиши никогда не ведут в смерть.
+phase %.2f, %.2f s%s, actions %s	фаза %.2f, %.2f с%s, действия %s
+ looped	 цикл
+| blending from %s (%.0f%%)	| смешивание с %s (%.0f%%)
+queued%s	в очереди%s
+Not playing: tick Game mode or Control mode, or press Reset - the character goes to the start state.	Не играет: включите игровой режим или режим управления, либо нажмите «Сброс» - персонаж встанет в стартовое состояние.
+W A S D walk, Shift+W run, C crouch / stand, Z prone / stand, X stand up, Q / E turn | position %.2f %.2f, heading %.0f deg, key action %s	W A S D - шаг, Shift+W - бег, C - присесть / встать, Z - лечь / встать, X - встать, Q / E - поворот | позиция %.2f %.2f, курс %.0f°, действие клавиши %s
+3. Actions	3. Действия
+movecmd	команда	A state name or an action of the current state (WalkF, Down ...). Enter = playMove.	Имя состояния или действие текущего состояния (WalkF, Down ...). Enter - playMove.
+state or action (e.g. WalkF, Down, AmovPpneMstpSrasWrflDnon)	состояние или действие (например WalkF, Down, AmovPpneMstpSrasWrflDnon)
+playMove	playMove	Goes to the state by the cheapest ConnectTo / InterpolateTo path, as the engine's playMove.	Переходит в состояние по самому дешёвому пути ConnectTo / InterpolateTo, как playMove в движке.
+switchMove	switchMove	Jumps to the state at once, without a path or a blend (switchMove).	Сразу переключает в состояние, без пути и смешивания (switchMove).
+actions of %s (%zu):	действия %s (%zu):
+Other actions ({})	Другие действия ({})
+%s -> %s (death / unconscious: only by this click)	%s -> %s (смерть / без сознания: только этим щелчком)
+%s -> %s (playMove: the cheapest path from the current state)	%s -> %s (playMove: самый дешёвый путь из текущего состояния)
+4. Transition log ({})	4. Журнал переходов ({})
+Clear log	Очистить журнал	Empties the transition log.	Очищает журнал переходов.
+empty - every playMove / switchMove / key action lands here with its path	пусто - здесь появится каждый playMove / switchMove / действие клавиши с путём
+Click: switchMove to %s and run %s again	Щелчок: switchMove в %s и снова %s
+No CfgMoves for this model - nothing to reset	Для этой модели нет CfgMoves - нечего сбрасывать
+Reset: start state {} at the origin	Сброс: стартовое состояние {} в начале координат
+No start state: {}	Нет стартового состояния: {}
+No CfgMoves loaded (game configs not loaded yet?)	CfgMoves не загружен (конфиги игры ещё не загрузились?)
+"{}": no such state, nor an action of {}	"{}": нет такого состояния и нет такого действия у {}
+{} -> {}: a death / unconscious state is entered only by an explicit command (not by a key or an empty action)	{} -> {}: в состояние смерти / без сознания можно попасть только явной командой (не клавишей и не пустым действием)
+path to {} goes through {} (death) - not taken	путь к {} идёт через {} (смерть) - не выполнен
+Open a character model (Ctrl+O): the Moves panel plays its CfgMoves (the move config of its skeleton).	Откройте модель персонажа (Ctrl+O): панель Moves проигрывает её CfgMoves (конфиг движений её скелета).
+Game configs are loading...	Конфиги игры загружаются...
+No configs: put a config.cpp with CfgMoves next to the model, or the game data on P:\a3.	Нет конфигов: положите config.cpp с CfgMoves рядом с моделью или данные игры на P:\a3.
+This model has no skeleton (CfgModels skeletonName in its model.cfg): CfgMoves needs one.	У модели нет скелета (skeletonName в CfgModels её model.cfg): CfgMoves без него не работает.
+No CfgMoves for this skeleton. Add a move config (class CfgMovesX { skeletonName = "..."; class States {...}; }) to the config.cpp next to the model, or pick one in the list above.	Для этого скелета нет CfgMoves. Добавьте конфиг движений (class CfgMovesX { skeletonName = "..."; class States {...}; }) в config.cpp рядом с моделью или выберите конфиг в списке выше.
+CfgMoves in the viewer, as in the game:\n1. Start state: where the character begins (auto = the Default action of its actions class, as the engine).\n2. Game mode / Control mode: CfgMoves drives the animation; in control mode W A S D, Shift, C, Z, X and Q / E move the character.\n3. Actions: buttons of the current state's actions class - each walks the cheapest ConnectTo / InterpolateTo path.\n4. Transition log: every step with its path; click a line to replay it. Reset: start state at the origin.\nDeath / unconscious states are entered only by an explicit click, never by a key or at the start.	CfgMoves во вьювере - как в игре:\n1. Стартовое состояние: с чего начинает персонаж («авто» - действие Default его набора действий, как в движке).\n2. Игровой режим / режим управления: анимацией управляет CfgMoves; в режиме управления персонажа двигают W A S D, Shift, C, Z, X и Q / E.\n3. Действия: кнопки набора действий текущего состояния - каждая идёт по самому дешёвому пути ConnectTo / InterpolateTo.\n4. Журнал переходов: каждый шаг с путём; щелчок по строке - повторить. «Сброс» - стартовое состояние в начале координат.\nВ смерть / без сознания - только явным щелчком, никогда клавишей или при старте.
+# ---- gestures and layers
+Gestures and layers ({}: {} gestures, {} masks)	Жесты и слои ({}: жестов {}, масок {})
+Gesture / handAnim blending:	Смешивание жеста / handAnim:
+Model space	В пространстве модели	The gesture overrides the bones in model space (a bone keeps its world orientation from the gesture).	Жест заменяет кости в пространстве модели (кость берёт мировую ориентацию из жеста).
+Parent-relative	Относительно родителя	The gesture overrides the bones relative to their parent (default): the arms follow the body of the base state.	Жест заменяет кости относительно родителя (по умолчанию): руки следуют за телом базового состояния.
+(fade: 1 / interpolationSpeed - approximation)	(затухание: 1 / interpolationSpeed - приближение)
+gesture	жест	A gesture of the gesture config (CfgGestures...). Enter = playGesture.	Жест из конфига жестов (CfgGestures...). Enter - playGesture.
+gesture (e.g. GestureNod, GestureFreeze)	жест (например GestureNod, GestureFreeze)
+playGesture	playGesture	Plays the gesture over the current state with its BlendAnims mask.	Проигрывает жест поверх текущего состояния с его маской BlendAnims.
+Stop gesture	Остановить жест	Removes the gesture layer.	Убирает слой жеста.
+Mask heat map	Карта маски	Colours the mesh by the mask weight of its bones (blue 0 -> red 1).	Красит модель по весу маски её костей (синий 0 -> красный 1).
+Mesh coloured by the mask weight of its bones (blue 0 -> red 1)	Модель окрашена по весу маски костей (синий 0 -> красный 1)
+maskview	маска	The BlendAnims mask shown on the mesh.	Маска BlendAnims, показанная на модели.
+mask	маска	The BlendAnims mask of the layer (empty: own bones).	Маска BlendAnims слоя (пусто - свои кости).
+Layer	Слой
+State / RTM	Состояние / RTM
+Mode	Режим
+Weight	Вес
+Mask (bones > 0)	Маска (кости > 0)
+all bones	все кости
+Mask weights per bone	Веса маски по костям
+Approximation:	Приближение:
+aiming / aimingBody	aiming / aimingBody	Pitch / yaw of the bones of the state's aiming masks around the pelvis by their weight (approximation).	Наклон / поворот костей масок aiming вокруг таза по их весу (приближение).
+Bones of the state's aiming mask pitch, of aimingBody yaw, around the pelvis by their mask weight.\nThe engine aims with its own weapon / head controllers - this only shows which bones follow and how much.	Кости маски aiming наклоняются, aimingBody поворачиваются вокруг таза по весу маски.\nДвижок целится своими контроллерами оружия / головы - здесь видно только, какие кости и насколько следуют.
+yaw	поворот	Yaw of the aimingBody bones, degrees.	Поворот костей aimingBody, градусы.
+pitch	наклон	Pitch of the aiming bones, degrees.	Наклон костей aiming, градусы.
+%s %s: aiming %s, aimingBody %s	%s %s: aiming %s, aimingBody %s
+IK curves are shown, not applied: there is no weapon to reach for in the viewer.	Кривые IK показаны, но не применяются: во вьювере нет оружия, к которому тянуться.
+# ---- control keys, tests, traps
+Control keys, tests, traps	Клавиши управления, тесты, ловушки
+keys -> actions of the current state; Q / E turn; the character walks with the RTM step, camera follows	клавиши -> действия текущего состояния; Q / E - поворот; персонаж идёт шагом из RTM, камера следует
+Key map	Раскладка клавиш
+keys	клавиши	Keys of the binding: letters joined with + (Shift+W, W+A).	Клавиши привязки: буквы через + (Shift+W, W+A).
+act	действие	The action run while the keys are held (WalkF, Stop ...).	Действие, пока клавиши нажаты (WalkF, Stop ...).
++ binding	+ привязка	Adds a key binding.	Добавляет привязку клавиши.
+Defaults	По умолчанию	Restores the default key map.	Возвращает раскладку по умолчанию.
+Test scenarios	Тестовые сценарии
+Run tests	Запустить тесты	Runs the scenarios of armaview_moves_tests.txt (start / do / expect) against this CfgMoves.	Запускает сценарии armaview_moves_tests.txt (start / do / expect) на этом CfgMoves.
+Open file	Открыть файл	Opens the test file in its editor (created if missing).	Открывает файл тестов в редакторе (создаёт, если его нет).
+your states only	только ваши состояния	Traps only among the states of your own config.	Ловушки только среди состояний вашего конфига.
+pose jumps on connectTo (reads RTMs)	скачки позы на connectTo (читает RTM)	Also compares the last frame with the next state's first frame (slow: reads the RTMs).	Также сравнивает последний кадр с первым кадром следующего состояния (медленно: читает RTM).
+Find traps	Найти ловушки	Dead ends, states without a way back, pose jumps.	Тупики, состояния без пути назад, скачки позы.
+show	показать	Shows the state in the States graph.	Показывает состояние в графе состояний.
+Traps ({})	Ловушки ({})
+Traps (%zu)	Ловушки (%zu)
+# ---- validation
+Validation of {}	Проверка {}
+Validation of %s	Проверка %s
+Check states	Проверить состояния	Unreachable states, missing links / RTMs, RTM vs skeleton, loop seams, actions.	Недостижимые состояния, битые связи / RTM, RTM против скелета, швы циклов, действия.
+Checking...	Проверка...
+loop seams (reads every looped RTM)	швы циклов (читает все циклические RTM)	Also compares the first and last frame of every looped RTM (slow).	Также сравнивает первый и последний кадр каждого циклического RTM (медленно).
+unreachable states, missing links / RTMs, RTM vs skeleton, loop seams, actions	недостижимые состояния, битые связи / RTM, RTM против скелета, швы циклов, действия
+valfilter	фильтр	Shows only the lines that contain this text.	Показывает только строки с этим текстом.
+filter	фильтр	Shows only the rows that contain this text.	Показывает только строки с этим текстом.
+# ---- states graph
+CfgMoves states graph.\n1. Each node is a state; edges are ConnectTo (wait for the cycle end) and InterpolateTo (blend now) with their costs.\n2. Click selects a state; double click runs playMove to it (the path is highlighted).\n3. Right click: playMove (path) / switchMove (jump) / Select; Alt+drag from a state to another adds a link (own configs only).\n4. Wheel zooms, right / middle drag pans, left drag moves a node.	Граф состояний CfgMoves.\n1. Узел - состояние; рёбра - ConnectTo (ждёт конца цикла) и InterpolateTo (смешивание сразу) с их стоимостью.\n2. Щелчок выбирает состояние; двойной щелчок - playMove к нему (путь подсвечивается).\n3. Правый щелчок: playMove (путь) / switchMove (прыжок) / выбрать; Alt+перетаскивание от состояния к другому добавляет связь (только свои конфиги).\n4. Колесо - масштаб, правая / средняя кнопка - сдвиг, левая - перенос узла.
+No CfgMoves for this model: open a character model whose skeleton has a move config (see the Moves panel).	Для этой модели нет CfgMoves: откройте модель персонажа, у скелета которой есть конфиг движений (см. панель Moves).
+# ---- retarget
+Retarget: an RTM of another skeleton on this model.\n1. Source rig: a character .p3d of the source skeleton (BI's sample man by default) - Load source rig.\n2. Source animation: an .rtm, or a CfgMovesMaleSdr state name + Use state.\n3. Retarget + preview: the result plays on the model; the source skeleton is drawn beside or over it.\n4. Bone mapping: same names are mapped automatically; fix the rest and Save preset.\n5. Export RTM_0101 + verify writes a NEW file and compares it with the preview.	Ретаргет: RTM другого скелета на этой модели.\n1. Исходный риг: .p3d персонажа исходного скелета (по умолчанию образец BI) - «Загрузить исходный риг».\n2. Исходная анимация: .rtm или имя состояния CfgMovesMaleSdr + «Взять состояние».\n3. «Ретаргет + просмотр»: результат играет на модели; исходный скелет нарисован рядом или поверх.\n4. Соответствие костей: одинаковые имена сопоставляются сами; поправьте остальные и «Сохранить пресет».\n5. «Экспорт RTM_0101 + проверка» пишет НОВЫЙ файл и сравнивает его с просмотром.
+Quick check: an RTM of another skeleton on this model. Export writes a NEW RTM_0101 and verifies it.	Быстрая проверка: RTM другого скелета на этой модели. Экспорт пишет НОВЫЙ RTM_0101 и проверяет его.
+Open the target character model first (a model with a model.cfg skeleton).	Сначала откройте целевую модель персонажа (модель со скелетом в model.cfg).
+Target: %s	Цель: %s
+(no skeleton - open a character model)	(нет скелета - откройте модель персонажа)
+rtsrc	исходная модель	Character .p3d of the source skeleton (its model.cfg skeleton + pivots).	.p3d персонажа исходного скелета (скелет из его model.cfg + пивоты).
+source character model .p3d (its model.cfg skeleton + pivots)	исходная модель персонажа .p3d (скелет из model.cfg + пивоты)
+Load source rig	Загрузить исходный риг	Reads the source character: skeleton, pivots; maps bones of the same name automatically.	Читает исходного персонажа: скелет, пивоты; сопоставляет одноимённые кости автоматически.
+Source: %s	Источник: %s
+rtanim	исходная анимация	An .rtm of the source skeleton, or a CfgMovesMaleSdr state name (then Use state).	.rtm исходного скелета или имя состояния CfgMovesMaleSdr (затем «Взять состояние»).
+source animation .rtm (or a CfgMoves state name + Use state)	исходная анимация .rtm (или имя состояния CfgMoves + «Взять состояние»)
+Use state	Взять состояние	A CfgMovesMaleSdr state name -> its RTM file and cycle duration.	Имя состояния CfgMovesMaleSdr -> его RTM и длительность цикла.
+Type a CfgMovesMaleSdr state (e.g. AmovPercMwlkSrasWrflDf) and press: its RTM and cycle duration	Введите состояние CfgMovesMaleSdr (например AmovPercMwlkSrasWrflDf) и нажмите: его RTM и длительность цикла
+Scale pelvis motion by leg length	Масштабировать движение таза по длине ног	Pelvis travel scaled by the leg length ratio of the two skeletons (no foot sliding on shorter legs).	Ход таза масштабируется отношением длины ног двух скелетов (ноги не скользят при другой длине).
+Foot IK (feet on the scaled source footprints)	IK ног (ступни на масштабированные следы источника)	Two-bone IK puts the feet where the scaled source feet stand.	Двухкостный IK ставит ступни туда, где стоят масштабированные ступни источника.
+cycle s	цикл, с	Duration of one cycle of the result, seconds.	Длительность одного цикла результата, секунды.
+rtpreview	просмотр источника	How the source skeleton is shown: not, beside the model, or over it.	Как показан исходный скелет: никак, рядом с моделью или поверх неё.
+no source	без источника
+source beside	источник рядом
+source overlaid	источник поверх
+Retarget + preview	Ретаргет + просмотр	Retargets the animation onto this model and plays it (your layers come back with Stop preview).	Переносит анимацию на эту модель и проигрывает её (ваши слои вернутся по «Остановить просмотр»).
+Stop preview	Остановить просмотр	Ends the preview: your layers come back.	Завершает просмотр: возвращаются ваши слои.
+rtout	выходной файл	The .rtm the export writes (a new file; existing names get _2, _3 ...).	.rtm, который пишет экспорт (новый файл; к занятым именам добавляется _2, _3 ...).
+output .rtm (new file)	выходной .rtm (новый файл)
+Export RTM_0101 + verify	Экспорт RTM_0101 + проверка	Writes a NEW RTM_0101, reads it back and compares it with the preview.	Пишет НОВЫЙ RTM_0101, читает его обратно и сравнивает с просмотром.
+Bone mapping ({} of {} mapped)	Соответствие костей (сопоставлено {} из {})
+Auto (same names)	Авто (одинаковые имена)	Maps the bones of the same name; unmapped ones follow their parent.	Сопоставляет одноимённые кости; несопоставленные следуют за родителем.
+Save preset	Сохранить пресет	Saves the mapping of this skeleton pair (retarget folder next to the exe).	Сохраняет соответствие для этой пары скелетов (папка retarget рядом с exe).
+Load preset	Загрузить пресет	Loads the saved mapping of this skeleton pair.	Загружает сохранённое соответствие для этой пары скелетов.
+src	кость источника	The source bone this target bone follows ("-": follows its parent).	Кость источника, за которой следует эта кость цели («-» - следует за родителем).
+- (follows parent)	- (следует за родителем)
+# ---- move editor
+No CfgMoves for this model.	Для этой модели нет CfgMoves.
+BI move config: read only (copy states into your own config)	Конфиг движений BI: только чтение (скопируйте состояния в свой конфиг)
+Undo	Отменить	Undoes the last edit of the move config (not saved yet).	Отменяет последнюю правку конфига движений (ещё не сохранённую).
+Redo	Повторить	Redoes the undone edit.	Возвращает отменённую правку.
+Diff & Save...	Diff и сохранить...	Shows the changes line by line; Save writes the file (backup .bak kept).	Показывает изменения построчно; «Сохранить» пишет файл (копия .bak сохраняется).
+Pick RTM	Выбрать RTM	An .rtm below the config's folder for the file= of this state.	.rtm из папки конфига для file= этого состояния.
+no .rtm below %s	нет .rtm в %s
+= %.2f s per cycle	= %.2f с на цикл
+link to	связь с
+type	тип
+cost	стоимость	Cost of the link: playMove takes the cheapest path. Enter applies.	Стоимость связи: playMove выбирает самый дешёвый путь. Enter - применить.
+New link: Alt+drag from this state to another in the States graph (Ctrl+M); with Shift: connectTo	Новая связь: Alt+перетаскивание от этого состояния к другому в графе состояний (Ctrl+M); с Shift - connectTo
+rename	новое имя	New name of the state (links and actions are renamed too).	Новое имя состояния (связи и действия переименуются тоже).
+new name	новое имя
+Rename	Переименовать	Renames the state everywhere in your config.	Переименовывает состояние во всём вашем конфиге.
+Delete state	Удалить состояние	Removes the state and the links to it from your config.	Удаляет состояние и связи на него из вашего конфига.
+copyname	имя копии	Name of the copy in your config.	Имя копии в вашем конфиге.
+name in your config	имя в вашем конфиге
+Copy into my config	Скопировать в мой конфиг	A new class in your config with the BI state's file, speed, looped, interpolationSpeed and actions; the BI class stays untouched.	Новый класс в вашем конфиге с file, speed, looped, interpolationSpeed и actions состояния BI; класс BI не меняется.
+The BI class stays untouched: a new class with its file, speed, looped, interpolationSpeed, actions;\nlinks empty (add them in the graph)	Класс BI не меняется: новый класс с его file, speed, looped, interpolationSpeed, actions;\nсвязи пустые (добавьте их в графе)
+New state	Новое состояние
+newname	имя	Name of the new state.	Имя нового состояния.
+newbase	база	Base class of the new state (one of your states; optional).	Базовый класс нового состояния (одно из ваших; необязательно).
+base (your state, optional)	база (ваше состояние, необязательно)
+name	имя	Name.	Имя.
+Create	Создать	Adds the state to your config.	Добавляет состояние в ваш конфиг.
+Actions (drag a state onto an action)	Действия (перетащите состояние на действие)	Actions classes of your config: drag a state from the graph onto an action to set it.	Наборы действий вашего конфига: перетащите состояние из графа на действие, чтобы назначить его.
+Your states:	Ваши состояния:
+Remove from the class	Убрать из класса	Removes this action entry from the class.	Убирает эту запись действия из класса.
+Save (backup kept)	Сохранить (копия сохраняется)	Writes the move config; the old file is kept as .bak (.bak2 ...).	Пишет конфиг движений; старый файл остаётся как .bak (.bak2 ...).
+Cancel	Отмена	Closes without saving.	Закрывает без сохранения.
+# ---- states graph: actions filter
+States	Состояния
+Actions	Действия
+Actions: the matrix of actions classes x actions (red: leads to a state that does not exist)	Действия: матрица классов действий x действия (красным - ведёт в несуществующее состояние)
+actions class: all states	класс действий: все состояния
+(all states)	(все состояния)
+Shows only the states that use this actions class (actions = ...); the Actions view lists its action -> state table.	Показывает только состояния с этим классом действий (actions = ...); вид «Действия» показывает его таблицу действие -> состояние.
+action: none	действие: нет
+Highlights every state this action leads to (cyan), in the chosen actions class or in all of them.	Подсвечивает (голубым) все состояния, в которые ведёт это действие, в выбранном классе действий или во всех.
+target state(s)	целевых состояний
+action(s)	действий
+(no action)	(нет действия)
+no such state	нет такого состояния
+filter actions	фильтр действий
+classes	классов
+first	первые
+lead to states that do not exist	ведут в несуществующие состояния
+No actions	Нет действий
+Click: filter the graph to the states of this actions class (and list its actions above)	Щелчок: граф только с состояниями этого класса действий (и его действия выше)
+click: show it in the graph	щелчок - показать в графе

@@ -1,0 +1,35 @@
+# ---- Record
+Record	Запись
+Record video / GIF...	Записать видео / GIF...	Records the current view without the UI: the animation once or a 360 degree turn, as MP4 / GIF (ffmpeg) or PNG frames.	Записывает текущий вид без интерфейса: анимацию один раз или поворот на 360°, в MP4 / GIF (ffmpeg) или PNG-кадры.	Record video / GIF of the view
+Record video / GIF of the view	Записать видео / GIF вида
+Records the current view without the UI.\n1. What: the animation once (RTM layers, the CfgMoves state, the reload in Reload sync) or a 360 degree turn around the model.\n2. Format: MP4 (H.264) or GIF through ffmpeg, or a folder of PNG frames (no ffmpeg needed).\n3. Size and FPS of the file - independent of the window; the camera, lighting and overlays are the current ones.\n4. Record: the frames are rendered one by one at exact times (not in real time), then the file is written.	Записывает текущий вид без интерфейса.\n1. Что: анимация один раз (слои RTM, состояние CfgMoves, перезарядка в Reload sync) или поворот на 360° вокруг модели.\n2. Формат: MP4 (H.264) или GIF через ffmpeg, либо папка PNG-кадров (ffmpeg не нужен).\n3. Размер и FPS файла не зависят от окна; камера, свет и наложения - текущие.\n4. «Записать»: кадры рендерятся по одному в точные моменты времени (не в реальном времени), затем пишется файл.
+Animation##rec	Анимация	The animation once: RTM layers, the CfgMoves state or the reload (Reload sync).	Анимация один раз: слои RTM, состояние CfgMoves или перезарядка (Reload sync).
+Turn 360##rec	Поворот 360	The camera turns once around the model.	Камера один раз облетает модель.
+seconds##rec	секунд	Duration of the turn.	Длительность поворота.
+format##rec	формат	MP4 / GIF need ffmpeg; PNG frames go into a folder.	MP4 / GIF требуют ffmpeg; PNG-кадры пишутся в папку.
+MP4 (ffmpeg)	MP4 (ffmpeg)
+GIF (ffmpeg)	GIF (ffmpeg)
+PNG frames	PNG-кадры
+size##rec	размер	Width x height of the file (even numbers for MP4).	Ширина x высота файла (для MP4 - чётные).
+fps##rec	fps	Frames per second of the file.	Кадров в секунду в файле.
+ffmpeg	ffmpeg	Path to ffmpeg.exe, or just ffmpeg when it is on PATH (kept in the settings).	Путь к ffmpeg.exe или просто ffmpeg, если он в PATH (сохраняется в настройках).
+ffmpeg.exe (or ffmpeg on PATH)	ffmpeg.exe (или ffmpeg из PATH)
+recdir	папка	Where the files go (empty: Videos\ArmaView).	Куда пишутся файлы (пусто - Видео\ArmaView).
+output folder (empty: Videos\ArmaView)	папка вывода (пусто - Видео\ArmaView)
+...##recdir	...	Pick the output folder.	Выбрать папку вывода.
+Record##rec	Записать	Renders every frame offscreen at the chosen size and writes the file.	Рендерит каждый кадр вне экрана нужного размера и пишет файл.
+Stop##rec	Стоп	Stops; the frames so far are discarded for MP4 / GIF.	Останавливает; для MP4 / GIF записанные кадры отбрасываются.
+Open##reclast	Открыть	Opens the recorded file.	Открывает записанный файл.
+Show in folder##reclast	Показать в папке	Opens Explorer at the recorded file.	Открывает проводник на записанном файле.
+no model	нет модели
+the reload ({})	перезарядка ({})
+one cycle of the CfgMoves state {}	один цикл состояния CfgMoves {}
+one cycle of the RTM layers	один цикл слоёв RTM
+no animation playing (record a turn instead)	анимация не играет (запишите поворот)
+Open a model first.	Сначала откройте модель.
+Nothing to record: {}	Нечего записывать: {}
+a 360 degree turn	поворот на 360°
+Recording {}: {} frames {}x{} at {} fps	Запись: {} - кадров {}, {}x{}, {} fps
+%s, %.2f s	%s, %.2f с
+Saved {} ({} frames)	Сохранено: {} (кадров {})
+Recording failed after {} of {} frames (ffmpeg exit {}): {}	Запись прервалась после {} из {} кадров (код ffmpeg {}): {}

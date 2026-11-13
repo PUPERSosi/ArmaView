@@ -1,0 +1,62 @@
+# Release build + core selftest, only when a version tag (v*) is pushed; the zip is attached to a GitHub release of the
+# tag. The core selftest (armaview-cli selftest: parsers, configs, CfgMoves, glTF, unit, settings, fuzzing on files it writes
+# itself) needs no window and no Arma 3 data.
+name: release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg-binary-cache
+      ARMAVIEW_LOCAL_INI: none
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}\vcpkg-binary-cache
+          key: vcpkg-x64-windows-static-${{ hashFiles('vcpkg.json') }}
+
+      - name: Configure (preset ci)
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force $env:VCPKG_DEFAULT_BINARY_CACHE | Out-Null
+          $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+          cmake --preset ci
+
+      - name: Build Release (ArmaView + armaview-cli)
+        shell: pwsh
+        run: |
+          $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+          cmake --build --preset ci
+
+      - name: Core selftest (armaview-cli, no window, no game data)
+        shell: pwsh
+        run: |
+          & "build/ci/Release/armaview-cli.exe" selftest --fuzz 150
+          if ($LASTEXITCODE -ne 0) { Write-Error "armaview-cli selftest failed (exit $LASTEXITCODE)"; exit 1 }
+
+      - name: Package
+        shell: pwsh
+        run: |
+          # every file is required: a missing one fails the job instead of shipping an incomplete zip
+          $stage = "package"
+          New-Item -ItemType Directory -Force "$stage/tools/blender" | Out-Null
+          Copy-Item -ErrorAction Stop -Destination $stage -Path @("build/ci/Release/ArmaView.exe", "build/ci/Release/armaview-cli.exe",
+            "README.md", "README.ru.md", "LICENSE", "THIRD_PARTY_LICENSES", "armaview.local.ini.example")
+          Copy-Item -ErrorAction Stop -Destination "$stage/tools/blender" -Path "tools/blender/armaview_preview.py"
+          Compress-Archive -Path "$stage/*" -DestinationPath "ArmaView-${{ github.ref_name }}-win64.zip"
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ArmaView-${{ github.ref_name }}-win64.zip

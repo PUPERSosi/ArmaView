@@ -1,0 +1,185 @@
+# en	ru	tip en	tip ru	hotkey command (its key is appended)
+# ---- modes (tab buttons: key = mode name)
+Model	Модель	Model mode: LODs and selections in the Outliner, the Inspector, the log.	Режим «Модель»: LOD и выделения в Outliner, Inspector, журнал.	mode: Model
+Skeleton & Anim	Скелет и анимация	Skeleton & Anim mode: bone tree, Timeline with RTM layers, Moves (CfgMoves), Retarget, Layers.	Режим «Скелет и анимация»: дерево костей, таймлайн со слоями RTM, Moves (CfgMoves), ретаргет, слои.	mode: Skeleton & Anim
+Vehicle & Crew	Техника и экипаж	Vehicle & Crew mode: seats, proxies, get-in points, crew poses from CfgMoves.	Режим «Техника и экипаж»: места, прокси, точки посадки, позы экипажа из CfgMoves.	mode: Vehicle & Crew
+Materials	Материалы	Materials mode: sections, textures, RVMAT editor and shading checks.	Режим «Материалы»: секции, текстуры, редактор RVMAT, проверка шейдинга.	mode: Materials
+Validation	Проверка	Validation mode: every problem of the model, rig, model.cfg, RTM and crew with its place. The numbers are errors / warnings.	Режим «Проверка»: все ошибки модели, рига, model.cfg, RTM и экипажа с местом в файле. Числа - ошибки / предупреждения.	mode: Validation
+Reload	Перезарядка	Reload sync mode (weapon): the reload gesture against the weapon's model.cfg animations.	Режим «Перезарядка» (оружие): жест перезарядки против анимаций model.cfg оружия.	mode: Reload sync (weapon)
+Optics	Оптика	Optics mode (weapon): attachments on the slots, the sight picture, fitting.	Режим «Оптика» (оружие): обвес на слотах, картинка в прицеле, подгонка.	mode: Optics (weapon)
+Reload sync	Синхронизация перезарядки
+Skeleton	Скелет
+# ---- top bar, toolbar (icon buttons: key = their description)
+Reset layout	Сбросить раскладку	Puts the panels of the current mode back to their default places.	Возвращает панели текущего режима на места по умолчанию.
+Commands	Команды
+Commands  Ctrl+Shift+P	Команды  Ctrl+Shift+P
+palette	палитра	Command palette: every command of the viewer, type to filter, Enter runs.	Палитра команд: все команды вьювера, введите часть названия, Enter - выполнить.	command palette
+Open model / RTM (Ctrl+O)	Открыть модель / RTM (Ctrl+O)	Opens a P3D model or an RTM animation (an RTM is added as a layer to the open model).	Открывает модель P3D или анимацию RTM (RTM добавляется слоем к открытой модели).	open a model / RTM
+Reload (F5)	Перезагрузить (F5)	Reloads the model from disk; the view, the selected bone and the sources stay.	Перечитывает модель с диска; вид, выбранная кость и источники сохраняются.	reload the model (keeps view, bone, sources)
+lod	LOD	The LOD shown in the viewport (resolution LODs, Geometry, Memory, Fire Geometry ...).	LOD в окне просмотра (LOD разрешений, Geometry, Memory, Fire Geometry ...).	next LOD
+LOD (PgUp / PgDn)	LOD (PgUp / PgDn)
+Play / pause (Space)	Пуск / пауза (Пробел)	Plays or pauses the animation (RTM layers, CfgMoves, crew).	Запускает или останавливает анимацию (слои RTM, CfgMoves, экипаж).	play / pause
+Previous frame (Left)	Предыдущий кадр (Влево)	One frame back (pauses).	На кадр назад (ставит паузу).	previous frame
+Next frame (Right)	Следующий кадр (Вправо)	One frame forward (pauses).	На кадр вперёд (ставит паузу).	next frame
+Show grid (G)	Сетка (G)	Shows / hides the floor grid.	Показывает / прячет сетку пола.	floor grid
+Show skeleton (B)	Скелет (B)	Shows / hides the bones of the model.cfg skeleton.	Показывает / прячет кости скелета из model.cfg.	skeleton
+Wireframe overlay (W)	Каркас (W)	Draws the wireframe over the shaded mesh.	Рисует каркас поверх модели.	wireframe overlay
+Show crew on proxies	Экипаж на прокси	Puts the crew model on every seat proxy of a vehicle.	Сажает модель экипажа на все прокси мест техники.	show crew on proxies
+Sun shadows	Тени от солнца	Shadow map from the sun (or the headlight).	Карта теней от солнца (или фары-камеры).	sun shadows on / off
+Reflections A/B (E)	Отражения A/B (E)	Super shader env map x fresnel on / off - compare the material with and without reflections.	Включает / выключает env map x fresnel супершейдера - сравнение материала с отражениями и без.	reflections A/B (env sky x fresnel)
+Frame the model (F)	Показать модель целиком (F)	Moves the camera so the whole model fits.	Камера охватывает модель целиком.	frame the model
+View	Вид	Shading, overlays, normals, axes, points and hitpoints.	Затенение, наложения, нормали, оси, точки и hitpoints.
+Light	Свет	Sun or headlight, presets, time of day, world lighting, exposure, shadows.	Солнце или фара, пресеты, время суток, освещение мира, экспозиция, тени.
+Front	Спереди	Camera from the front.	Камера спереди.	front
+Back	Сзади	Camera from behind.	Камера сзади.	back
+Left	Слева	Camera from the left.	Камера слева.	left
+Right	Справа	Camera from the right.	Камера справа.	right
+Top	Сверху	Camera from above.	Камера сверху.	top
+Camera %s (%s)	Камера: %s (%s)
+Open	Открыть
+Bones	Кости
+Wire	Каркас
+Crew	Экипаж
+Shadows	Тени
+Refl	Отраж.
+Frame	Вписать
+Shading, overlays, points / hitpoints	Затенение, наложения, точки / hitpoints
+Sun / headlight, time of day, exposure, shadows	Солнце / фара, время суток, экспозиция, тени
+# ---- menus
+File	Файл
+Window	Окно
+Help	Справка	Help (F1): every key, command, window, command-line option and ui-script command.	Справка (F1): все клавиши, команды, окна, параметры командной строки и команды ui-script.	Help (this window), works everywhere
+Open...	Открыть...	Opens a P3D model or an RTM animation.	Открывает модель P3D или анимацию RTM.	open a model / RTM
+Reload##menu	Перезагрузить	Reloads the model from disk (view, bone and sources stay).	Перечитывает модель с диска (вид, кость и источники сохраняются).	reload the model (keeps view, bone, sources)
+RTM folder...	Папка RTM...	Checks every RTM of a folder against the skeleton of the open model (Validation lists the result).	Проверяет все RTM папки против скелета открытой модели (результат - в «Проверке»).
+Exit	Выход	Closes the viewer.	Закрывает вьювер.
+Getting started	С чего начать	Scenarios step by step: the viewer opens the right mode and highlights the next control.	Сценарии по шагам: вьювер открывает нужный режим и подсвечивает следующий элемент.
+About ArmaView	О программе ArmaView	Version, build and the third-party libraries.	Версия, сборка и сторонние библиотеки.
+Command palette	Палитра команд	Every command of the viewer: type a part of its name, Enter runs it.	Все команды вьювера: введите часть названия, Enter - выполнить.	command palette
+model.cfg graph	Граф model.cfg	Sources -> CfgModels animations -> bones of the model as a graph.	Источники -> анимации CfgModels -> кости модели в виде графа.	model.cfg graph
+Reset layout of this mode	Сбросить раскладку этого режима	Puts the panels of the current mode back to their default places.	Возвращает панели текущего режима на места по умолчанию.
+Reset layout of all modes	Сбросить раскладку всех режимов	Puts the panels of every mode back to their default places.	Возвращает панели всех режимов на места по умолчанию.
+UI scale	Масштаб интерфейса
+System (%.0f%%)	Системный (%.0f%%)
+Hot reload (watch files)	Горячая перезагрузка (следить за файлами)	Reloads the model, model.cfg, RTM, RVMAT and textures when they are saved on disk.	Перезагружает модель, model.cfg, RTM, RVMAT и текстуры при их сохранении на диске.	hot reload on / off
+Language / Язык	Язык / Language
+# ---- status bar
+no model - Ctrl+O or drop a .p3d	нет модели - Ctrl+O или перетащите .p3d
+CPU time of the last frame (without the vsync wait)	Время CPU последнего кадра (без ожидания vsync)
+Open Validation (Ctrl+5)	Открыть «Проверку» (Ctrl+5)
+hot reload: %zu files	горячая перезагрузка: файлов %zu
+hot reload off	горячая перезагрузка выключена
+game configs: loading	конфиги игры: загрузка
+game configs: loaded	конфиги игры: загружены
+game configs: not on P:	конфиги игры: нет на P:
+LOD %d %s	LOD %d %s
+%.2f ms	%.2f мс
+# ---- Getting started
+Pick a scenario: the viewer opens its mode and highlights the control of the next step (yellow frame).	Выберите сценарий: вьювер откроет его режим и подсветит элемент следующего шага (жёлтая рамка).
+Choose a scenario on the left. Each one switches to its mode, brings the right panel to the front and walks you through it step by step. Help > Getting started opens this window again; F1 lists every key.	Выберите сценарий слева. Каждый включает свой режим, выводит нужную панель вперёд и ведёт по шагам. Справка > С чего начать открывает это окно снова; F1 - все клавиши.
+< Back	< Назад	The previous step (its control is highlighted).	Предыдущий шаг (его элемент подсвечивается).
+Next step >	Следующий шаг >	The next step: its control gets the yellow frame.	Следующий шаг: его элемент получает жёлтую рамку.
+Done	Готово	Ends the scenario and removes the highlight.	Завершает сценарий и убирает подсветку.
+Show me	Покажи	Switches to the scenario's mode again and highlights the current step's control.	Снова включает режим сценария и подсвечивает элемент текущего шага.
+Check a model	Проверить модель	LODs, selections, rig and Validation of a P3D.	LOD, выделения, риг и «Проверка» модели P3D.
+LODs, selections, textures and the rig of a P3D (MLOD) - without the game.	LOD, выделения, текстуры и риг P3D (MLOD) - без запуска игры.
+Open a model: the folder button of the toolbar or Ctrl+O (or drop a .p3d onto the window).	Откройте модель: кнопка с папкой на панели инструментов или Ctrl+O (или перетащите .p3d в окно).
+Pick a LOD in the list (PgUp / PgDn). The Outliner lists its selections: click one to see its points.	Выберите LOD в списке (PgUp / PgDn). В Outliner - его выделения: щёлкните, чтобы увидеть точки.
+Turn on the skeleton (B) and the wireframe (W) to check the rig.	Включите скелет (B) и каркас (W), чтобы проверить риг.
+Open Validation (Ctrl+5): rig, selections, model.cfg animations and textures - every problem with its place.	Откройте «Проверку» (Ctrl+5): риг, выделения, анимации model.cfg и текстуры - каждая ошибка с местом.
+Check an RTM animation	Проверить анимацию RTM	An .rtm on the model's skeleton.	RTM на скелете модели.
+An .rtm on the model's skeleton: bones, loop, speed.	RTM на скелете модели: кости, цикл, скорость.
+Open the character model (Ctrl+O): the skeleton comes from its model.cfg.	Откройте модель персонажа (Ctrl+O): скелет берётся из её model.cfg.
+Timeline: Open RTM... adds an animation layer (several layers blend).	Таймлайн: «Открыть RTM...» добавляет слой анимации (слои смешиваются).
+Play / pause (Space), step frames with Left / Right.	Пуск / пауза (Пробел), по кадрам - Влево / Вправо.
+Validation lists RTM bones the skeleton does not have and the loop seam.	«Проверка» покажет кости RTM, которых нет в скелете, и шов цикла.
+Check CfgMoves (control)	Проверить CfgMoves (управление)	The character's move config: start state, keys, transitions.	Конфиг движений персонажа: стартовое состояние, клавиши, переходы.
+The character's move config as in the game: start state, keys, transitions.	Конфиг движений персонажа как в игре: стартовое состояние, клавиши, переходы.
+Open the character model (Ctrl+O): its CfgMoves is found by the skeleton.	Откройте модель персонажа (Ctrl+O): её CfgMoves находится по скелету.
+Moves panel: check the start state (auto = as the engine: the Default action of the actions class).	Панель Moves: проверьте стартовое состояние (авто = как движок: действие Default набора действий).
+Tick Control mode: W A S D walk, Shift run, C crouch / stand, Z prone / stand, X stand up, Q / E turn.	Включите «Режим управления»: W A S D - шаг, Shift - бег, C - присесть / встать, Z - лечь / встать, X - встать, Q / E - поворот.
+Reset: back to the start state at the origin.	«Сброс»: обратно в стартовое состояние в начало координат.
+The transition log shows every step with its path; click a line to replay it.	Журнал переходов показывает каждый шаг с путём; щелчок по строке - повторить.
+Weapon reload	Перезарядка оружия	The reload gesture against the weapon's model.cfg.	Жест перезарядки против model.cfg оружия.
+The reload gesture against the weapon's model.cfg (magazine, bolt) in weapon space.	Жест перезарядки против model.cfg оружия (магазин, затвор) в пространстве оружия.
+Open the weapon P3D (Ctrl+O): its CfgWeapons class, reloadAction and handAnim are found.	Откройте P3D оружия (Ctrl+O): находятся его класс CfgWeapons, reloadAction и handAnim.
+Play the reload, or scrub frame by frame.	Запустите перезарядку или пройдите по кадрам.
+Pick the hand bone and the weapon part: Distance over time shows where they meet.	Выберите кость руки и часть оружия: «Расстояние по времени» покажет, где они встречаются.
+Suggest window proposes the model.cfg window of the animation; Diff... shows the change before saving.	«Предложить окно» подбирает окно анимации в model.cfg; «Diff...» показывает изменение до сохранения.
+Optic fitting	Посадка оптики	Attachments on the slots and the sight picture.	Обвес на слотах и картинка в прицеле.
+Attachments on the slots and the picture through the sight.	Обвес на слотах и картинка через прицел.
+Open the weapon P3D (Ctrl+O): slots come from WeaponSlotsInfo.	Откройте P3D оружия (Ctrl+O): слоты берутся из WeaponSlotsInfo.
+Pick an item for a slot: it sits on the slot's proxy.	Выберите предмет для слота: он встаёт на прокси слота.
+View through the sight: the camera at memoryPointCamera with opticsZoom.	«Вид через прицел»: камера в memoryPointCamera с opticsZoom.
+Character aiming: the character holds the weapon - check the eye against the sight.	«Прицеливание персонажа»: персонаж держит оружие - проверьте глаз против прицела.
+Vehicle and crew	Техника и экипаж	Seats, proxies, get-in points and crew poses.	Места, прокси, точки посадки и позы экипажа.
+Crew seats, proxies, get-in points and turned-out poses of a vehicle.	Места экипажа, прокси, точки посадки и позы «высунувшись» у техники.
+Open the vehicle P3D (Ctrl+O).	Откройте P3D техники (Ctrl+O).
+Show crew: the crew model sits on every seat proxy with its CfgMoves pose.	«Показать экипаж»: модель экипажа сидит на каждом прокси места в позе из CfgMoves.
+Play all seats, or pick a seat in the list for its details in the Inspector.	«Играть все» - все места, или выберите место в списке - подробности в Inspector.
+Set crew model: your own character instead of BI's sample man.	«Задать модель экипажа»: свой персонаж вместо образца BI.
+Retarget	Ретаргет	An RTM of another skeleton on this model.	RTM другого скелета на этой модели.
+An RTM of another skeleton on this model, exported to a new RTM_0101.	RTM другого скелета на этой модели с экспортом в новый RTM_0101.
+Open the target character model (Ctrl+O).	Откройте целевую модель персонажа (Ctrl+O).
+Load the source rig (a character of the source skeleton; BI's sample man by default).	Загрузите исходный риг (персонаж исходного скелета; по умолчанию образец BI).
+Type an .rtm or a CfgMovesMaleSdr state name, then Retarget + preview.	Укажите .rtm или имя состояния CfgMovesMaleSdr, затем «Ретаргет + просмотр».
+Export RTM_0101 + verify writes a NEW file and compares it with the preview.	«Экспорт RTM_0101 + проверка» пишет НОВЫЙ файл и сравнивает его с просмотром.
+# ---- window titles
+Outliner	Структура
+Inspector	Инспектор
+Timeline	Таймлайн
+Sources	Источники
+Log	Журнал
+Moves	Движения
+Layers	Слои
+Move editor	Редактор движений
+Help (F1)	Справка (F1)
+CfgMoves states	Состояния CfgMoves
+Move config: changes before saving	Конфиг движений: изменения перед сохранением
+model.cfg windows	Окна model.cfg
+# ---- start screen, setup and paths
+What do you want to do?	Что хотите сделать?
+Pick a task: the viewer opens its mode and panel. Then open a model (Ctrl+O or drop a .p3d onto the window).	Выберите задачу: вьювер откроет её режим и панель. Затем откройте модель (Ctrl+O или перетащите .p3d в окно).
+Model##task	Модель	Model mode: LODs, selections, textures, the rig and Validation of a P3D.	Режим «Модель»: LOD, выделения, текстуры, риг и проверка P3D.
+Animation##task	Анимация	Skeleton & Anim mode with the Timeline: RTM layers on the model's skeleton.	Режим «Скелет и анимация» с Timeline: слои RTM на скелете модели.
+CfgMoves##task	CfgMoves	Skeleton & Anim mode with the Moves panel: the move config, control mode, transitions.	Режим «Скелет и анимация» с панелью Moves: конфиг движений, управление, переходы.
+Unit##task	Юнит	Model mode with the Unit window: a soldier class dressed from CfgVehicles.	Режим «Модель» с окном Unit: класс солдата, одетый из CfgVehicles.
+Vehicle##task	Техника	Vehicle & Crew mode: seats, proxies, get-in points, crew poses.	Режим «Техника и экипаж»: места, прокси, точки посадки, позы экипажа.
+Weapon##task	Оружие	Reload mode: the reload gesture against the weapon; Optics mode for the slots.	Режим «Перезарядка»: жест перезарядки против оружия; режим «Оптика» для слотов.
+Check a P3D: LODs, selections, textures, rig, validation.	Проверка P3D: LOD, выделения, текстуры, риг, валидация.
+Play RTM animations on the model's skeleton, blend layers.	Проигрывание RTM на скелете модели, смешивание слоёв.
+Walk the character through its move config, as in the game.	Провести персонажа по его конфигу движений, как в игре.
+Dress a soldier class from CfgVehicles: head, helmet, vest, NVG, backpack.	Одеть класс солдата из CfgVehicles: голова, шлем, жилет, ПНВ, рюкзак.
+Crew seats, proxies and get-in points of a vehicle.	Места экипажа, прокси и точки посадки техники.
+Reload gesture against the weapon, optics on its slots.	Жест перезарядки против оружия, оптика на слотах.
+Open model...##start	Открыть модель...	Opens a P3D (or an RTM) from disk.	Открывает P3D (или RTM) с диска.
+Step-by-step guide	Пошаговое руководство	Getting started: scenarios step by step with the control to use highlighted.	Первые шаги: сценарии по шагам с подсветкой нужного элемента.
+Setup and paths	Настройка и пути	What the viewer uses on this machine: settings folder, P:, game data, Samples, Blender, ffmpeg.	Что вьювер использует на этой машине: папка настроек, P:, данные игры, Samples, Blender, ffmpeg.
+Show at startup	Показывать при запуске	Shows this window at every start without a model.	Показывать это окно при каждом запуске без модели.
+Start screen	Стартовый экран	What do you want to do? - a task opens its mode and panel.	Что хотите сделать? - задача открывает свой режим и панель.
+What the viewer uses on this machine. Nothing here is required to open a model; missing items only turn features off.	Что вьювер использует на этой машине. Для открытия модели ничего из этого не обязательно; без недостающего отключаются только отдельные функции.
+What	Что
+Path	Путь
+found	найдено
+not set (optional)	не задано (необязательно)
+Settings folder	Папка настроек
+P: drive	Диск P:
+Game data on P:\a3	Данные игры в P:\a3
+Arma 3 Samples	Arma 3 Samples
+Blender	Blender
+Mount the project drive: Arma 3 Tools > Project Drive Management (or Mount the project drive). Models use paths like \a3\... from P:.	Смонтируйте диск проекта: Arma 3 Tools > Project Drive Management (или Mount the project drive). Модели используют пути вида \a3\... от P:.
+Unpack the game data to P: (Arma 3 Tools > Project Drive Management > Extract game data). Without it config.cpp inheritance stops at the game's classes and BI textures are missing.	Распакуйте данные игры на P: (Arma 3 Tools > Project Drive Management > Extract game data). Без них наследование config.cpp обрывается на классах игры и нет текстур BI.
+Arma 3 Samples (Steam: Arma 3 Samples): BI's sample man for the crew preview and as the retarget source.	Arma 3 Samples (Steam: Arma 3 Samples): образец человека BI для экипажа и как источник ретаргета.
+blender.exe: the Layers window runs Blender scripts (tools/blender).	blender.exe: окно Layers запускает скрипты Blender (tools/blender).
+ffmpeg.exe: video recording (MP4 / GIF). Set its path in the Record window.	ffmpeg.exe: запись видео (MP4 / GIF). Путь задаётся в окне Record.
+Set Arma 3 Samples folder...	Указать папку Arma 3 Samples...	Saves the folder in armaview.local.ini in the settings folder.	Сохраняет папку в armaview.local.ini в папке настроек.
+Set blender.exe...	Указать blender.exe...	Saves the path in armaview.local.ini in the settings folder.	Сохраняет путь в armaview.local.ini в папке настроек.
+These two are saved in armaview.local.ini in the settings folder and take effect after a restart.	Эти два пути сохраняются в armaview.local.ini в папке настроек и действуют после перезапуска.
+Machine paths read from: %s	Пути машины прочитаны из: %s
+Continue	Продолжить	Closes this window and shows the start screen.	Закрывает окно и показывает стартовый экран.
+reading the game configs...	чтение игровых конфигов...
+Vehicle	Техника
+Weapon	Оружие
+Open model...	Открыть модель...
+Soldier classes	Классы солдат
+Assemble	Собрать

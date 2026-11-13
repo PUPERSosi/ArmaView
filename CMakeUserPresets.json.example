@@ -1,0 +1,73 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "local",
+      "hidden": true,
+      "environment": {
+        "VCPKG_ROOT": "<path to vcpkg>",
+        "VCPKG_DEFAULT_BINARY_CACHE": "<vcpkg binary cache folder>",
+        "VCPKG_DOWNLOADS": "<vcpkg downloads folder>",
+        "X_VCPKG_REGISTRIES_CACHE": "<vcpkg registries cache folder>",
+        "TEMP": "<temp folder for the build>",
+        "TMP": "<temp folder for the build>"
+      },
+      "cacheVariables": {
+        "VCPKG_INSTALL_OPTIONS": "--x-buildtrees-root=<vcpkg buildtrees folder>;--downloads-root=<vcpkg downloads folder>"
+      }
+    },
+    {
+      "name": "vs2026-local",
+      "inherits": [
+        "local",
+        "vs2026"
+      ],
+      "displayName": "vs2026 (this machine)"
+    },
+    {
+      "name": "vs2026-static-local",
+      "inherits": [
+        "local",
+        "vs2026-static"
+      ],
+      "displayName": "vs2026-static (this machine)"
+    },
+    {
+      "name": "fuzz-local",
+      "inherits": [
+        "local",
+        "fuzz"
+      ],
+      "displayName": "fuzz (this machine)"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug-local",
+      "configurePreset": "vs2026-local",
+      "configuration": "Debug",
+      "inheritConfigureEnvironment": true
+    },
+    {
+      "name": "dev-local",
+      "configurePreset": "vs2026-local",
+      "configuration": "RelWithDebInfo",
+      "inheritConfigureEnvironment": true
+    },
+    {
+      "name": "release-local",
+      "configurePreset": "vs2026-static-local",
+      "configuration": "Release",
+      "inheritConfigureEnvironment": true
+    },
+    {
+      "name": "fuzz-local",
+      "configurePreset": "fuzz-local",
+      "configuration": "RelWithDebInfo",
+      "targets": [
+        "ArmaViewFuzz"
+      ],
+      "inheritConfigureEnvironment": true
+    }
+  ]
+}
