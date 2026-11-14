@@ -15,7 +15,7 @@
 #include "RetargetJob.h"
 #include "SceneView.h"
 #include "Session.h"
-#include "StatesPanel.h"
+#include "IStatesGraphHost.h"
 #include "ViewHost.h"
 
 #include <functional>
@@ -26,10 +26,10 @@ class AnimationView : public IMovesView, public ILayersView
 {
 public:
     AnimationView(Session& session, Playback& playback, MovesSim& sim, MovesLoader& loader, GesturePlayer& gestures, MovesControl& control, LayersJob& layers,
-                  RetargetJob& retarget, SceneView& scene, Renderer& renderer, const OrbitCamera& camera, StatesPanel& states, const IPaths& paths,
+                  RetargetJob& retarget, SceneView& scene, Renderer& renderer, const OrbitCamera& camera, IStatesGraphHost& states, const IPaths& paths,
                   IViewHost& host, std::function<bool()> gameConfigsLoading)
         : session_(session), playback_(playback), movesSim_(sim), movesLoader_(loader), gesturePlayer_(gestures), control_(control), layers_(layers),
-          rt_(retarget), scene_(scene), renderer_(renderer), camera_(camera), statesPanel_(states), paths_(paths), host_(host),
+          rt_(retarget), scene_(scene), renderer_(renderer), camera_(camera), states_(states), paths_(paths), host_(host),
           gameConfigsLoading_(std::move(gameConfigsLoading)) {}
 
     bool PollMovesBuild(bool wait);    // a finished graph applied: States graph, gestures stopped, watch list
@@ -52,8 +52,8 @@ public:
     void SetMaskHeat(bool on, const std::string& mask) override;
     bool MaskHeat() const override { return scene_.maskHeat; }
     const std::string& MaskView() const override { return scene_.maskView; }
-    void ShowState(int state) override { statesPanel_.Show(state); }
-    void ToggleStatesGraph() override { statesPanel_.open = !statesPanel_.open; }
+    void ShowState(int state) override { states_.ShowState(state); }
+    void ToggleStatesGraph() override { states_.Toggle(); }
     bool GameConfigsLoading() const override { return gameConfigsLoading_(); }
 
     // ILayersView
@@ -74,7 +74,7 @@ private:
     SceneView& scene_;
     Renderer& renderer_;
     const OrbitCamera& camera_;
-    StatesPanel& statesPanel_;
+    IStatesGraphHost& states_;
     const IPaths& paths_;
     IViewHost& host_;
     std::function<bool()> gameConfigsLoading_;

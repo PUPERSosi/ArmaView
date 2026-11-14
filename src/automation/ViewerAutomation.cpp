@@ -12,6 +12,7 @@
 #include "Retarget.h"
 #include "RunProgram.h"
 #include "SelfTest.h"
+#include "ViewCoreTest.h"
 
 #include <imgui.h>
 #include <imgui_internal.h>
@@ -1065,7 +1066,26 @@ void ViewerAutomation::RegisterCommands()
     });
 }
 
-std::string ViewerAutomation::CoreTest() { return RunCoreTest(app_.paths_.Data() / "selftest_core"); }
+std::string ViewerAutomation::CoreTest()
+{
+    std::string r = RunCoreTest(app_.paths_.Data() / "selftest_core");
+    r += "\nview coretest: " + RunViewCoreTest(app_.paths_.Data() / "selftest_view");
+    // the point overlay's settings change through its setters alone (no ImGui widget, no frame)
+    PointOverlay p;
+    PointOverlaySettings s = p.Settings();
+    s.labels = false;
+    s.occludeByMesh = true;
+    s.hitpointsView = true;
+    s.filter = "wheel";
+    p.SetSettings(s);
+    const bool ok = p.Settings() == s && p.WantsDepth();
+    s.hitpointsView = false;
+    p.SetSettings(s);
+    const bool off = !p.WantsDepth(); // occlusion needs labels or hitpoints shown
+    r += std::format("\n    {} point overlay: SetSettings changes what is shown without an ImGui widget (depth wanted {} -> {})", ok && off ? "ok  " : "FAIL", ok, !off);
+    if (!(ok && off)) Log::Get().Error("coretest: point overlay setters");
+    return r;
+}
 
 // the selftest summary of the open model: checks, loop seam, log since it was loaded, orientation in the Front view
 std::string ViewerAutomation::ValidationSummary(const std::string& label)

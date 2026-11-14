@@ -12,6 +12,7 @@
 #include "Strings.h"
 #include "Session.h"
 #include "Validation.h"
+#include "ViewCoreTest.h"
 #include "WinFileSystem.h"
 #include "WinPlatform.h"
 
@@ -130,6 +131,9 @@ int SelfTest(int fuzz)
     const fs::path dir = fs::temp_directory_path(ec) / "armaview_selftest_core";
     int failures = 0;
     std::printf("coretest: %s\n", RunCoreTest(dir, &failures).c_str());
+    int viewFailures = 0; // the view logic another UI builds on (input -> scene interaction, overlay settings)
+    std::printf("view coretest: %s\n", RunViewCoreTest(fs::temp_directory_path(ec) / "armaview_selftest_view", &viewFailures).c_str());
+    failures += viewFailures;
     if (fuzz > 0)
     {
         std::vector<fs::path> seeds;

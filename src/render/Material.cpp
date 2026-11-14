@@ -340,8 +340,14 @@ bool TextureCache::PollStreamed(int maxUploads)
     }
     if (!Streaming())
     {
-        std::lock_guard lock(stream_->m);
-        if (stream_->todo.empty()) std::erase_if(workers_, [](std::jthread&) { return true; }); // all done: join the idle workers
+        // all done: join the idle workers - outside the lock: a worker between two names takes it to see the empty list
+        // (joining under it waited for that worker forever: the UI hung in a selftest after a retarget batch)
+        bool idle = false;
+        {
+            std::lock_guard lock(stream_->m);
+            idle = stream_->todo.empty();
+        }
+        if (idle) std::erase_if(workers_, [](std::jthread&) { return true; });
     }
     return true;
 }

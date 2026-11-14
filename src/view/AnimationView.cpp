@@ -50,7 +50,7 @@ void AnimationView::ShowMaskHeat(std::vector<float> boneWeights)
 bool AnimationView::PollMovesBuild(bool wait)
 {
     if (!movesLoader_.Poll(wait)) return false;
-    statesPanel_.graph.SetGraph(session_.moves, paths_.Graphs() / (movesLoader_.BuildClass() + ".states.txt"));
+    states_.SetGraph(&session_.moves, paths_.Graphs() / (movesLoader_.BuildClass() + ".states.txt"));
     gesturePlayer_.Stop();
     host_.WatchedFilesChanged();
     return true;

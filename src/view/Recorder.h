@@ -10,7 +10,7 @@
 #include "ReloadSync.h"
 #include "Renderer.h"
 #include "Session.h"
-#include "UiShell.h"
+#include "AppMode.h"
 #include "ViewHost.h"
 
 #include <filesystem>
@@ -23,8 +23,8 @@ class Recorder : public IRecordView
 public:
     using FolderPicker = std::function<std::wstring(const wchar_t* title)>;
     Recorder(Session& session, Playback& playback, ReloadSync& reload, MovesSim& sim, Renderer& renderer, OrbitCamera& camera, RecordSettings& settings,
-             const UiShell& shell, IViewHost& host, FolderPicker pickFolder)
-        : s_(session), playback_(playback), reload_(reload), movesSim_(sim), renderer_(renderer), camera_(camera), rec_(settings), shell_(shell),
+             std::function<AppMode()> mode, IViewHost& host, FolderPicker pickFolder)
+        : s_(session), playback_(playback), reload_(reload), movesSim_(sim), renderer_(renderer), camera_(camera), rec_(settings), mode_(std::move(mode)),
           host_(host), pickFolder_(std::move(pickFolder)) {}
 
     void FrameSetup();                                         // before the pose of a recorded frame: its time / turn
@@ -60,7 +60,7 @@ private:
     Renderer& renderer_;
     OrbitCamera& camera_;
     RecordSettings& rec_;
-    const UiShell& shell_;
+    std::function<AppMode()> mode_; // the viewer's current mode (Reload: the reload timeline is recorded)
     IViewHost& host_;
     FolderPicker pickFolder_;
     std::string msg_;

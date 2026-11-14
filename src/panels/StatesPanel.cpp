@@ -4,7 +4,13 @@
 
 #include <imgui.h>
 
-void StatesPanel::Show(int state)
+void StatesPanel::SetGraph(const MovesGraph* g, const std::filesystem::path& positionsFile)
+{
+    static const MovesGraph kNone;
+    graph.SetGraph(g ? *g : kNone, positionsFile);
+}
+
+void StatesPanel::ShowState(int state)
 {
     graph.FocusOn(state);
     open = true;

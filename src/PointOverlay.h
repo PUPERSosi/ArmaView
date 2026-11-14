@@ -3,6 +3,7 @@
 // Labels are drawn only for points inside the scene rectangle, greedily placed without overlapping each other.
 #include "ArmaConfig.h"
 #include "P3D.h"
+#include "PointOverlaySettings.h"
 
 #include <glm/glm.hpp>
 #include <imgui.h>
@@ -38,7 +39,10 @@ public:
         float dpi = 1.0f;
         std::function<float(float, float)> depthAt; // scene depth at a screen position (null = no occlusion test)
     };
-    bool WantsDepth() const { return occlude_ && (labels_ || hitView_); }
+    bool WantsDepth() const { return s_.occludeByMesh && (s_.labels || s_.hitpointsView); }
+    // what is shown: any UI sets it directly (the View panel's widgets go through the same calls)
+    const PointOverlaySettings& Settings() const { return s_; }
+    void SetSettings(const PointOverlaySettings& s);
 
     void Invalidate() { cacheLod_ = nullptr; picked_ = -1; pickedHit_ = -1; }
     // Hitpoint definitions for the loaded model; logs hitpoints whose selection is missing in the Hit-points LOD.
@@ -65,13 +69,8 @@ private:
     void EnsureNames(const P3DLod& lod);
     std::string Info(const P3DModel& model, int lod) const;
 
-    bool labels_ = true;
-    bool onMeshLods_ = false; // labels also on LODs with faces (resolution LODs: many selections per point)
-    bool unnamedDots_ = true;
-    bool hitView_ = false;
-    bool occlude_ = false;      // points behind the mesh (depth buffer of the previous frame)
-    bool occludedHide_ = false; // hide them instead of dimming
-    char filter_[96] = {};
+    PointOverlaySettings s_;
+    char filterEdit_[96] = {}; // the filter field's text (s_.filter is the setting)
 
     // per-point selection names of the current LOD
     const P3DLod* cacheLod_ = nullptr;

@@ -70,6 +70,24 @@ target_compile_definitions(ArmaViewCore PUBLIC GLM_FORCE_LEFT_HANDED GLM_FORCE_D
 target_compile_options(ArmaViewCore PRIVATE /W4 /permissive- /utf-8 /MP /Zc:__cplusplus
     $<$<CONFIG:Release>:/O2 /GL /Gy>)
 
+# ---- ArmaViewViewCore: the view logic and the interfaces another UI builds on (app mode, states graph host, point
+# overlay settings, input state, scene interaction).
+# No ImGui / Win32 / D3D, like the core: src/view/ViewCoreGuard.h is included last by every .cpp of it.
+add_library(ArmaViewViewCore STATIC
+    src/view/ViewCoreGuard.h
+    src/view/AppMode.h
+    src/view/IStatesGraphHost.h
+    src/view/ViewCoreHeaders.cpp
+    src/view/PointOverlaySettings.h src/view/PointOverlaySettings.cpp
+    src/view/InputState.h
+    src/view/SceneInteraction.h src/view/SceneInteraction.cpp
+    src/view/ViewCoreTest.h src/view/ViewCoreTest.cpp
+)
+# src/render: Camera.h only (header only, no D3D)
+target_include_directories(ArmaViewViewCore PUBLIC ${CMAKE_SOURCE_DIR}/src/view ${CMAKE_SOURCE_DIR}/src/render)
+target_link_libraries(ArmaViewViewCore PUBLIC ArmaViewCore)
+target_compile_options(ArmaViewViewCore PRIVATE /W4 /permissive- /utf-8 /MP /Zc:__cplusplus $<$<CONFIG:Release>:/O2 /GL /Gy>)
+
 # ---- AV.Render: D3D11 renderer, GPU texture cache, camera. Knows the core's data, not ImGui.
 add_library(ArmaViewRender STATIC
     src/render/Renderer.h   src/render/Renderer.cpp
@@ -101,7 +119,7 @@ target_compile_options(ArmaViewPlatform PRIVATE /W4 /permissive- /utf-8 /MP /Zc:
 
 # ---- armaview-cli: the core without a window (validate a mod, model info, core self test)
 add_executable(armaview-cli src/cli/main.cpp)
-target_link_libraries(armaview-cli PRIVATE ArmaViewCore ArmaViewPlatform)
+target_link_libraries(armaview-cli PRIVATE ArmaViewCore ArmaViewViewCore ArmaViewPlatform)
 target_compile_options(armaview-cli PRIVATE /W4 /permissive- /utf-8 /Zc:__cplusplus $<$<CONFIG:Release>:/O2 /GL /Gy>)
 target_link_options(armaview-cli PRIVATE $<$<CONFIG:Release>:/LTCG /OPT:REF /OPT:ICF>)
 
@@ -157,7 +175,7 @@ add_executable(ArmaView WIN32
     src/ArmaView.rc src/Version.h.in
 )
 
-target_link_libraries(ArmaView PRIVATE ArmaViewCore ArmaViewRender ArmaViewPlatform imgui::imgui unofficial::imgui-node-editor::imgui-node-editor glm::glm d3d11 dxgi d3dcompiler comdlg32 shell32 ole32 windowscodecs dbghelp psapi)
+target_link_libraries(ArmaView PRIVATE ArmaViewCore ArmaViewViewCore ArmaViewRender ArmaViewPlatform imgui::imgui unofficial::imgui-node-editor::imgui-node-editor glm::glm d3d11 dxgi d3dcompiler comdlg32 shell32 ole32 windowscodecs dbghelp psapi)
 
 target_compile_definitions(ArmaView PRIVATE
     UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN
@@ -213,3 +231,38 @@ function(av_check_core_dependencies)
     endforeach()
 endfunction()
 av_check_core_dependencies()
+
+# ---- the same for the view logic another UI builds on: no ImGui / Win32 / D3D links; include paths of the core,
+# src/view and src/render (the header-only Camera.h); these files must not include ImGui themselves either.
+# (ViewCoreGuard.h #errors on windows.h / d3d11.h / imgui.h reaching its .cpp files through any header.)
+function(av_check_view_core_dependencies)
+    set(forbidden "imgui|d3d11|d3dcompiler|dxgi|user32|gdi32|comdlg32|shell32|ole32|windowscodecs|node-editor|ArmaViewRender|ArmaViewPlatform")
+    foreach(prop LINK_LIBRARIES INTERFACE_LINK_LIBRARIES)
+        get_target_property(libs ArmaViewViewCore ${prop})
+        if(libs)
+            foreach(lib IN LISTS libs)
+                if(lib MATCHES "${forbidden}")
+                    message(FATAL_ERROR "ArmaViewViewCore must not link '${lib}' (${prop}): the view logic knows no UI / Win32 / D3D")
+                endif()
+            endforeach()
+        endif()
+    endforeach()
+    get_target_property(dirs ArmaViewViewCore INCLUDE_DIRECTORIES)
+    foreach(dir IN LISTS dirs)
+        if(NOT dir MATCHES "src/view$" AND NOT dir MATCHES "src/render$" AND NOT dir MATCHES "src/core$" AND NOT dir MATCHES "glm")
+            message(FATAL_ERROR "ArmaViewViewCore include path '${dir}': only src/view, src/render (Camera.h), src/core and glm are allowed")
+        endif()
+    endforeach()
+    foreach(f AppMode.h IStatesGraphHost.h InputState.h SceneInteraction.h SceneInteraction.cpp PointOverlaySettings.h PointOverlaySettings.cpp ViewCoreTest.cpp)
+        file(READ ${CMAKE_SOURCE_DIR}/src/view/${f} text)
+        if(text MATCHES "#include[ ]*[<\"][^>\"]*(imgui|windows\\.h|d3d11)")
+            message(FATAL_ERROR "src/view/${f} includes ImGui / Win32 / D3D: the view logic must stay UI-free")
+        endif()
+    endforeach()
+    # Camera.h is the only file of src/render the view logic may use: header only, no D3D
+    file(READ ${CMAKE_SOURCE_DIR}/src/render/Camera.h text)
+    if(text MATCHES "#include[ ]*[<\"][^>\"]*(imgui|windows\\.h|d3d11)")
+        message(FATAL_ERROR "src/render/Camera.h must stay free of ImGui / Win32 / D3D (the view logic includes it)")
+    endif()
+endfunction()
+av_check_view_core_dependencies()

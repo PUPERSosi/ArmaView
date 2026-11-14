@@ -5,19 +5,24 @@
 #include "MovesLoader.h"
 #include "MovesPanel.h"
 #include "MovesSim.h"
+#include "IStatesGraphHost.h"
 #include "Session.h"
 #include "StatesGraph.h"
 #include "ViewHost.h"
 
 #include <string>
 
-class StatesPanel
+class StatesPanel : public IStatesGraphHost
 {
 public:
     StatesPanel(Session& session, MovesLoader& loader, MovesSim& sim, MovesEditor& editor, IViewHost& host, IMovesView& view)
         : s_(session), ld_(loader), sim_(sim), ed_(editor), host_(host), view_(view) {}
     void Draw();
-    void Show(int state); // opened, focused on the state
+    // IStatesGraphHost
+    void SetGraph(const MovesGraph* graph, const std::filesystem::path& positionsFile) override;
+    void Show(bool on) override { open = on; }
+    void Toggle() override { open = !open; }
+    void ShowState(int state) override; // opened, focused on the state
     StatesGraph graph;    // the canvas (positions per move config next to the exe)
     bool open = false;
 

@@ -20,7 +20,7 @@ float Recorder::RecordAnimLength(std::string* what) const
 {
     auto say = [&](const std::string& s) { if (what) *what = s; };
     if (!s_.hasModel) { say(T("no model")); return 0; }
-    if (shell_.mode == UiMode::Reload && reload_.wchar_.model) { say(TF("the reload ({})", s_.weapon.reloadAction)); return reload_.ReloadDuration() / std::max(0.01f, reload_.reloadK_); }
+    if (mode_() == AppMode::Reload && reload_.wchar_.model) { say(TF("the reload ({})", s_.weapon.reloadAction)); return reload_.ReloadDuration() / std::max(0.01f, reload_.reloadK_); }
     if (movesSim_.drive && movesSim_.player.Current() >= 0)
     {
         const MoveState& st = s_.moves.states[size_t(movesSim_.player.Current())];
@@ -57,7 +57,7 @@ bool Recorder::StartRecording()
         r.source = T("a 360 degree turn");
     }
     r.frames = std::max(1, int(std::lround(seconds * float(rec_.fps))));
-    r.reload = shell_.mode == UiMode::Reload;
+    r.reload = mode_() == AppMode::Reload;
     r.animStart = r.reload ? 0.0 : playback_.time;
     r.yaw0 = camera_.yaw;
     // output: <folder>\<model>_<what>_<time>.<ext>

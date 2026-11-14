@@ -165,8 +165,8 @@ void WeaponScene::Update(float dt)
         }
     }
     // the character (Reload: always; Optics: in the aiming pose when asked) and the comparison weapon (Reload)
-    const bool wantChar = reload_.wchar_.model && reload_.wchar_.proxyOk && (h_.Mode() == UiMode::Reload || optics_.aimPose);
-    const bool wantCmp = h_.Mode() == UiMode::Reload && reload_.cmp_.model && reload_.cmp_.model->status == AttachedModel::Status::Ok;
+    const bool wantChar = reload_.wchar_.model && reload_.wchar_.proxyOk && (h_.Mode() == AppMode::Reload || optics_.aimPose);
+    const bool wantCmp = h_.Mode() == AppMode::Reload && reload_.cmp_.model && reload_.cmp_.model->status == AttachedModel::Status::Ok;
     if (wantChar != weaponCharShown_ || wantCmp != cmpShown_)
     {
         s_.attach.extras.clear();
@@ -179,7 +179,7 @@ void WeaponScene::Update(float dt)
         weaponCharT_ = -1;
         reload_.cmp_.shownT = -1;
     }
-    if (h_.Mode() == UiMode::Reload)
+    if (h_.Mode() == AppMode::Reload)
     {
         const float T = reload_.ReloadDuration() / std::max(0.01f, reload_.reloadK_);
         if (reload_.playing)
@@ -200,17 +200,17 @@ void WeaponScene::Update(float dt)
     if (wantCmp && reload_.time != reload_.cmp_.shownT) ComparePose(reload_.time);
     if (wantChar && !s_.attach.extras.empty())
     {
-        const double t = h_.Mode() == UiMode::Reload ? reload_.time : 0.0;
+        const double t = h_.Mode() == AppMode::Reload ? reload_.time : 0.0;
         if (t != weaponCharT_)
         {
             glm::mat4 tw(1.0f);
-            if (reload_.WeaponCharPose(t, h_.Mode() == UiMode::Reload, reload_.wchar_.bones, tw, &s_.attach.extras[0].posed)) reload_.wchar_.toWeapon = tw;
+            if (reload_.WeaponCharPose(t, h_.Mode() == AppMode::Reload, reload_.wchar_.bones, tw, &s_.attach.extras[0].posed)) reload_.wchar_.toWeapon = tw;
             weaponCharT_ = t;
             host_.PoseChanged();
         }
     }
     // optics: temporary fit of the slot items (weapon axes: mm, degrees about the proxy origin)
-    if (h_.Mode() == UiMode::Optics)
+    if (h_.Mode() == AppMode::Optics)
     {
         for (auto& s : s_.attach.SlotsMut())
         {
@@ -266,7 +266,7 @@ void WeaponScene::WeaponLines()
 {
     std::vector<LineVertex> v;
     const glm::vec4 red(1.0f, 0.3f, 0.25f, 1), green(0.3f, 1.0f, 0.4f, 1), yellow(1.0f, 0.85f, 0.2f, 1), cyan(0.3f, 0.9f, 1.0f, 1);
-    if (h_.Mode() == UiMode::Reload && reload_.touchBone_ >= 0 && reload_.touchSel_ >= 0 && reload_.wchar_.model && !reload_.wchar_.bones.empty())
+    if (h_.Mode() == AppMode::Reload && reload_.touchBone_ >= 0 && reload_.touchSel_ >= 0 && reload_.wchar_.model && !reload_.wchar_.bones.empty())
     {
         const glm::vec3 j = reload_.CharJoint(reload_.touchBone_, reload_.wchar_.bones, reload_.wchar_.toWeapon);
         const glm::vec3 c = reload_.SelectionCentroidAt(reload_.touchSel_, reload_.ReloadPhase(reload_.time));
@@ -274,7 +274,7 @@ void WeaponScene::WeaponLines()
         AddCross(v, j, 0.01f, yellow);
         AddCross(v, c, 0.01f, cyan);
     }
-    if (h_.Mode() == UiMode::Optics && !optics_.throughSight && !optics_.eyeView)
+    if (h_.Mode() == AppMode::Optics && !optics_.throughSight && !optics_.eyeView)
     {
         if (optics_.sight_.barrelA != optics_.sight_.barrelB)
         {
@@ -299,7 +299,7 @@ void WeaponScene::WeaponLines()
 
 void WeaponScene::Ghosts(std::vector<MeshVertex>& gv, std::vector<Renderer::Ghost>& ghosts)
 {
-    if (h_.Mode() != UiMode::Reload || !animView_.reloadOnion || !s_.hasModel) return;
+    if (h_.Mode() != AppMode::Reload || !animView_.reloadOnion || !s_.hasModel) return;
     const float T = reload_.ReloadDuration() / std::max(0.01f, reload_.reloadK_);
     for (int side : { -1, 1 })
     {
@@ -360,7 +360,7 @@ void WeaponScene::DrawOverlay()
     ImDrawList* dl = ImGui::GetBackgroundDrawList();
     const ImVec2 origin = ImGui::GetMainViewport()->Pos;
     const float ox = origin.x + sceneX_, oy = origin.y + sceneY_;
-    if (h_.Mode() == UiMode::Optics && (optics_.throughSight || optics_.eyeView) && optics_.sight_.ok)
+    if (h_.Mode() == AppMode::Optics && (optics_.throughSight || optics_.eyeView) && optics_.sight_.ok)
     {
         const ImVec2 c(ox + sceneW_ * 0.5f, oy + sceneH_ * 0.5f);
         const ImU32 col = IM_COL32(255, 40, 40, 230);
@@ -398,9 +398,9 @@ std::string WeaponScene::Command(const std::string& line)
     {
         std::string m;
         is >> m;
-        h_.SetMode(m == "optics" ? UiMode::Optics : UiMode::Reload);
+        h_.SetMode(m == "optics" ? AppMode::Optics : AppMode::Reload);
         Update(0.0f);
-        return std::format("{} - {}", UiShell::ModeName(h_.Mode()), s_.weapon.found ? s_.weapon.cls : "no weapon class");
+        return std::format("{} - {}", AppModeName(h_.Mode()), s_.weapon.found ? s_.weapon.cls : "no weapon class");
     }
     WeaponEnsure();
     if (op == "blend") { std::string m; is >> m; s_.blendMode = m == "parent" ? 1 : 0; Update(0.0f); return std::string(s_.blendMode ? "parent-relative" : "model space"); }

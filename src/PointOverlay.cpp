@@ -153,37 +153,47 @@ void PointOverlay::EnsureNames(const P3DLod& lod)
     }
 }
 
+void PointOverlay::SetSettings(const PointOverlaySettings& s)
+{
+    s_ = s;
+    strncpy_s(filterEdit_, s_.filter.c_str(), _TRUNCATE);
+}
+
 void PointOverlay::DrawControls(const P3DLod* lod)
 {
-    ImGui::Checkbox("Point labels", &labels_);
+    // the widgets edit a copy that goes back through SetSettings (the same way as any other UI)
+    PointOverlaySettings e = s_;
+    if (e.filter != filterEdit_) strncpy_s(filterEdit_, e.filter.c_str(), _TRUNCATE);
+    ImGui::Checkbox("Point labels", &e.labels);
     if (ImGui::IsItemHovered()) ui::SetTooltip("Shows the names of the points (named selections) in the view.");
     ImGui::SameLine();
-    ImGui::Checkbox("on mesh LODs", &onMeshLods_);
+    ImGui::Checkbox("on mesh LODs", &e.onMeshLods);
     if (ImGui::IsItemHovered()) ui::SetTooltip("Off: labels only on LODs without faces (Memory, Land Contact, Hit-points ...)");
     ImGui::SetNextItemWidth(-90);
-    ImGui::InputTextWithHint("Label filter", "name contains...", filter_, sizeof(filter_));
+    if (ImGui::InputTextWithHint("Label filter", "name contains...", filterEdit_, sizeof(filterEdit_))) e.filter = filterEdit_;
     if (ImGui::IsItemHovered()) ui::SetTooltip("Shows only the labels whose name contains this text.");
-    ImGui::Checkbox("Occlude by mesh", &occlude_);
+    ImGui::Checkbox("Occlude by mesh", &e.occludeByMesh);
     if (ImGui::IsItemHovered()) ui::SetTooltip("Points behind the geometry (depth buffer) are dimmed or hidden");
-    if (occlude_)
+    if (e.occludeByMesh)
     {
         ImGui::SameLine();
-        ImGui::Checkbox("hide", &occludedHide_);
+        ImGui::Checkbox("hide", &e.occludedHide);
         if (ImGui::IsItemHovered()) ui::SetTooltip("Hides the points behind the geometry instead of dimming them.");
     }
-    ImGui::Checkbox("Unnamed points", &unnamedDots_);
+    ImGui::Checkbox("Unnamed points", &e.unnamedDots);
     if (ImGui::IsItemHovered()) ui::SetTooltip("Also shows the points that are in no named selection, as dots.");
     ImGui::SameLine();
-    ImGui::Checkbox("Hitpoints view", &hitView_);
+    ImGui::Checkbox("Hitpoints view", &e.hitpointsView);
     if (ImGui::IsItemHovered())
         ui::SetTooltip("Spheres of CfgVehicles >> HitPoints (incl. turrets): radius around every point of name= in the Hit-points LOD");
-    if (hitView_)
+    if (!(e == s_)) SetSettings(e);
+    if (s_.hitpointsView)
     {
         if (vehicleClass_.empty()) ImGui::TextColored(ImVec4(1, 0.7f, 0.2f, 1), "No CfgVehicles class with this model in config.cpp");
         else if (hitLod_ < 0) ImGui::TextColored(ImVec4(1, 0.7f, 0.2f, 1), "Model has no Hit-points LOD");
         else ImGui::TextDisabled("CfgVehicles::%s, %zu hitpoints", vehicleClass_.c_str(), hit_.size());
     }
-    if (labels_ && (lod || hitView_)) ImGui::TextDisabled("labels %d shown, %d hidden (overlap: zoom in)", labelsShown_, labelsHidden_);
+    if (s_.labels && (lod || s_.hitpointsView)) ImGui::TextDisabled("labels %d shown, %d hidden (overlap: zoom in)", labelsShown_, labelsHidden_);
     ImGui::TextDisabled("Click a point in the scene: name and coordinates");
 }
 
@@ -208,7 +218,7 @@ void PointOverlay::Draw(ImDrawList* dl, const View& v, const P3DModel& model, in
         return s.x >= v.x && s.y >= v.y && s.x < v.x + v.w && s.y < v.y + v.h;
     };
     // behind the mesh: everything in a 3x3 pixel block of the depth buffer is nearer (small bias)
-    const bool occl = occlude_ && v.depthAt;
+    const bool occl = s_.occludeByMesh && v.depthAt;
     auto occluded = [&](ImVec2 s) {
         if (!occl) return false;
         for (int dy = -1; dy <= 1; ++dy)
@@ -220,18 +230,18 @@ void PointOverlay::Draw(ImDrawList* dl, const View& v, const P3DModel& model, in
 
     struct Label { ImVec2 at; std::string text; ImU32 col; float priority; float dotR; };
     std::vector<Label> labels;
-    const std::string filter = ToLower(filter_);
+    const std::string filter = ToLower(s_.filter);
     const float dot = 2.5f * v.dpi;
 
     // ---- named points of the current LOD
     const bool faceless = lod.faces.empty() || LodResolutionName(lod.resolution) == "Hit-points";
-    if (labels_ && (faceless || onMeshLods_))
+    if (s_.labels && (faceless || s_.onMeshLods))
     {
         EnsureNames(lod);
         for (int p = 0; p < int(lod.points.size()); ++p)
         {
             bool named = !pointSel_[p].empty();
-            if (!named && !unnamedDots_) continue;
+            if (!named && !s_.unnamedDots) continue;
             bool match = true;
             if (!filter.empty())
             {
@@ -244,7 +254,7 @@ void PointOverlay::Draw(ImDrawList* dl, const View& v, const P3DModel& model, in
             if (!project(pos(p), s, depth)) continue;
             bool sel = p == picked_ && pickedLod_ == lodIndex;
             bool hidden = !sel && occluded(s);
-            if (hidden && occludedHide_) continue;
+            if (hidden && s_.occludedHide) continue;
             ImU32 col = sel ? IM_COL32(255, 80, 255, 255) : named ? IM_COL32(255, 230, 90, 255) : IM_COL32(170, 170, 170, 200);
             if (hidden) col = dim(col);
             dl->AddCircleFilled(s, sel ? dot * 1.8f : dot, col);
@@ -254,7 +264,7 @@ void PointOverlay::Draw(ImDrawList* dl, const View& v, const P3DModel& model, in
     }
 
     // ---- hitpoint spheres (from the Hit-points LOD, drawn over any LOD)
-    if (hitView_ && hitLod_ >= 0 && hitLod_ < int(model.lods.size()))
+    if (s_.hitpointsView && hitLod_ >= 0 && hitLod_ < int(model.lods.size()))
     {
         const P3DLod& hl = model.lods[hitLod_];
         const bool hitPosed = hitLod_ == lodIndex && posed;
@@ -276,7 +286,7 @@ void PointOverlay::Draw(ImDrawList* dl, const View& v, const P3DModel& model, in
                 float depth, d2;
                 if (!project(w, s, depth)) continue;
                 const bool hidden = !sel && occluded(s);
-                if (hidden && occludedHide_) continue;
+                if (hidden && s_.occludedHide) continue;
                 float rs = 0;
                 if (r > 0)
                 {

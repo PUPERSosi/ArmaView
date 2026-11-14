@@ -63,56 +63,46 @@ void SceneInput::PublishKeys()
     SetCommandKeys(std::move(keys));
 }
 
+// ImGui's IO of this frame as an InputState (the ui-script and raw Win32 keys feed ImGui's IO, so they arrive here too)
+InputState SceneInput::ReadInput(const IViewport& viewport)
+{
+    const ImGuiIO& io = ImGui::GetIO();
+    InputState in;
+    const ImVec2 origin = ImGui::GetMainViewport()->Pos;
+    in.originX = origin.x;
+    in.originY = origin.y;
+    in.mouseX = io.MousePos.x;
+    in.mouseY = io.MousePos.y;
+    in.mouseDX = io.MouseDelta.x;
+    in.mouseDY = io.MouseDelta.y;
+    in.wheel = io.MouseWheel;
+    for (int b = 0; b < 3; ++b)
+    {
+        in.down[size_t(b)] = ImGui::IsMouseDown(b);
+        in.pressed[size_t(b)] = ImGui::IsMouseClicked(b);
+        in.released[size_t(b)] = ImGui::IsMouseReleased(b);
+    }
+    in.ctrl = io.KeyCtrl;
+    in.shift = io.KeyShift;
+    in.alt = io.KeyAlt;
+    for (int k = 0; k < 26; ++k) in.letters[size_t(k)] = ImGui::IsKeyDown(ImGuiKey(ImGuiKey_A + k));
+    float sx = 0, sy = 0, sw = 1, sh = 1;
+    viewport.SceneRect(sx, sy, sw, sh);
+    const float mx = in.mouseX - in.originX, my = in.mouseY - in.originY;
+    in.overScene = !io.WantCaptureMouse && mx >= sx && my >= sy && mx < sx + sw && my < sy + sh;
+    in.textInput = io.WantTextInput;
+    return in;
+}
+
 void SceneInput::Frame()
 {
+    const InputState in = ReadInput(viewport_);
+    SceneRect rect;
+    viewport_.SceneRect(rect.x, rect.y, rect.w, rect.h);
+    interaction_.Mouse(in, rect, viewport_.ViewProj());
+
+    // hotkeys (ImGui key chords): nothing fires while a text field has the keyboard, except the palette's own toggle and F1
     ImGuiIO& io = ImGui::GetIO();
-    float sx = 0, sy = 0, sw = 1, sh = 1;
-    viewport_.SceneRect(sx, sy, sw, sh);
-    const ImVec2 origin = ImGui::GetMainViewport()->Pos;
-    const float mx = io.MousePos.x - origin.x, my = io.MousePos.y - origin.y;
-    const bool overScene = !io.WantCaptureMouse && mx >= sx && my >= sy && mx < sx + sw && my < sy + sh;
-
-    if (dragButton_ < 0 && overScene)
-        for (int b = 0; b < 3; ++b)
-            if (ImGui::IsMouseClicked(b))
-            {
-                dragButton_ = b;
-                pressX_ = io.MousePos.x;
-                pressY_ = io.MousePos.y;
-                break;
-            }
-    if (dragButton_ >= 0)
-    {
-        if (!ImGui::IsMouseDown(dragButton_))
-        {
-            // left click without dragging: pick a point, or with Ctrl a face
-            if (dragButton_ == 0 && s_.hasModel && std::hypot(io.MousePos.x - pressX_, io.MousePos.y - pressY_) < 4.0f)
-            {
-                uint32_t face = 0;
-                if (io.KeyCtrl)
-                {
-                    const float nx = (mx - sx) / sw * 2.0f - 1.0f, ny = 1.0f - (my - sy) / sh * 2.0f;
-                    if (scene_.PickFace(viewport_.ViewProj(), nx, ny, face))
-                    {
-                        auto it = std::find(scene_.pickFaces.begin(), scene_.pickFaces.end(), face);
-                        if (it == scene_.pickFaces.end()) scene_.pickFaces.push_back(face);
-                        else scene_.pickFaces.erase(it);
-                        scene_.RebuildLodGeometry();
-                    }
-                }
-                else if (points_.Click(io.MousePos.x, io.MousePos.y, s_.model, s_.lod))
-                    inspector_.what = InspectorPanel::Kind::Point;
-            }
-            dragButton_ = -1;
-        }
-        else if (dragButton_ == 0)
-            camera_.Rotate(io.MouseDelta.x, io.MouseDelta.y);
-        else
-            camera_.Pan(io.MouseDelta.x, io.MouseDelta.y);
-    }
-    if (overScene && io.MouseWheel != 0.0f) camera_.Zoom(io.MouseWheel);
-
-    // nothing fires while a text field has the keyboard, except the palette's own toggle and F1
     if (ImGui::IsKeyPressed(ImGuiKey_F1, false) && !io.WantTextInput) helpOpen_ = !helpOpen_;
     if ((!io.WantTextInput || palette_.open) && ImGui::IsKeyChordPressed(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_P, ImGuiInputFlags_None, ImGuiKeyOwner_Any))
     {
@@ -140,34 +130,64 @@ void SceneInput::Frame()
 // control mode: keys -> actions of the current state, the character walks, the camera and the grid follow
 bool SceneInput::Control(float dt, MovesControl& control, MovesSim& sim, Playback& playback, IMovesView& moves)
 {
-    if (!control.on || s_.moves.Empty()) return false;
-    if (!sim.drive) moves.SetMovesDrive(true);
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.WantTextInput) return false;
-    MovesControl::KeyState keys;
-    keys.shift = io.KeyShift;
-    keys.ctrl = io.KeyCtrl;
-    for (int k = 0; k < 26; ++k) keys.letter[size_t(k)] = ImGui::IsKeyDown(ImGuiKey(ImGuiKey_A + k));
-    if (const std::string act = control.KeyAction(keys, s_.moves, sim.player.Current()); !act.empty())
-        moves.MovesPlay(act, false, false); // a key: never into a death / unconscious state
-    control.Move(sim, s_.moves, playback.time, dt, playback.speed * (playback.playing ? 1.0f : 0.0f), ImGui::IsKeyDown(ImGuiKey_Q), ImGui::IsKeyDown(ImGuiKey_E));
-    // camera follows, grid around the character
-    camera_.target = glm::mix(camera_.target, control.rootPos + glm::vec3(0, 1.0f, 0), std::min(1.0f, dt * 4.0f));
-    const glm::vec2 cell(std::round(control.rootPos.x), std::round(control.rootPos.z));
-    if (cell != scene_.gridCell) { scene_.gridCell = cell; scene_.RebuildGrid(); }
-    return true; // the pose follows
+    moves_ = &moves;
+    return interaction_.Control(ReadInput(viewport_), dt, control, sim, playback, s_.moves);
 }
 
-// camera on a bone (the points it moves, posed), bone selection with its highlight, the standard views
-void SceneInput::FocusBone(int bone)
+// ---- ISceneInteractionHost
+
+void SceneInput::ToggleFace(const glm::mat4& viewProj, float nx, float ny)
 {
-    if (bone < 0 || bone >= int(s_.skeleton.bones.size())) return;
-    // Frame the points the bone moves (posed if animating); fall back to the pivot.
-    glm::vec3 mn(1e30f), mx(-1e30f);
-    if (s_.hasModel && bone < int(scene_.boneSelection.size()) && scene_.boneSelection[bone] >= 0)
+    uint32_t face = 0;
+    if (!scene_.PickFace(viewProj, nx, ny, face)) return;
+    auto it = std::find(scene_.pickFaces.begin(), scene_.pickFaces.end(), face);
+    if (it == scene_.pickFaces.end()) scene_.pickFaces.push_back(face);
+    else scene_.pickFaces.erase(it);
+    scene_.RebuildLodGeometry();
+}
+
+InspectTarget SceneInput::Inspected() const
+{
+    switch (inspector_.what)
+    {
+    case InspectorPanel::Kind::None: return InspectTarget::None;
+    case InspectorPanel::Kind::Point: return InspectTarget::Point;
+    case InspectorPanel::Kind::Bone: return InspectTarget::Bone;
+    default: return InspectTarget::Other;
+    }
+}
+
+void SceneInput::Inspect(InspectTarget what)
+{
+    if (what == InspectTarget::Point) inspector_.what = InspectorPanel::Kind::Point;
+    else if (what == InspectTarget::Bone) inspector_.what = InspectorPanel::Kind::Bone;
+    else if (what == InspectTarget::None) inspector_.what = InspectorPanel::Kind::None;
+}
+
+void SceneInput::SetSelectedBone(int bone)
+{
+    if (bone < 0)
+    {
+        scene_.selectedBone = scene_.selection = -1;
+        scene_.highlight = SceneView::Highlight::None;
+    }
+    else
+    {
+        scene_.selectedBone = bone;
+        scene_.selection = bone < int(scene_.boneSelection.size()) ? scene_.boneSelection[size_t(bone)] : -1;
+        scene_.highlight = scene_.selection >= 0 ? SceneView::Highlight::Selection : SceneView::Highlight::None;
+    }
+    scene_.RebuildLodGeometry();
+    scene_.RebuildSkeletonLines();
+}
+
+// the points the bone moves (posed if animating) and its pivot
+void SceneInput::BoneExtent(int bone, glm::vec3& mn, glm::vec3& mx) const
+{
+    if (s_.hasModel && bone < int(scene_.boneSelection.size()) && scene_.boneSelection[size_t(bone)] >= 0)
     {
         const P3DLod& l = s_.model.lods[s_.lod];
-        const P3DSelection& s = l.selections[scene_.boneSelection[bone]];
+        const P3DSelection& s = l.selections[size_t(scene_.boneSelection[size_t(bone)])];
         for (size_t p = 0; p < s.pointBytes.size() && p < l.points.size(); ++p)
             if (s.pointBytes[p])
             {
@@ -177,39 +197,14 @@ void SceneInput::FocusBone(int bone)
                 mx = glm::max(mx, q);
             }
     }
-    glm::vec3 pivot = scene_.BonePosition(bone);
+    const glm::vec3 pivot = scene_.BonePosition(bone);
     mn = glm::min(mn, pivot);
     mx = glm::max(mx, pivot);
-    glm::vec3 pad(0.12f);
-    camera_.Frame(mn - pad, mx + pad);
 }
 
-void SceneInput::SelectBone(int bone, bool focus, bool materialsMode)
+void SceneInput::GridFollow(const glm::vec2& cell)
 {
-    if (focus && bone >= 0)
-    {
-        scene_.selectedBone = -1; // always (re)select when focusing
-        FocusBone(bone);
-    }
-    if (bone == scene_.selectedBone || bone < 0)
-    {
-        scene_.selectedBone = scene_.selection = -1;
-        scene_.highlight = SceneView::Highlight::None;
-        if (inspector_.what == InspectorPanel::Kind::Bone) inspector_.what = InspectorPanel::Kind::None;
-    }
-    else
-    {
-        if (!materialsMode) inspector_.what = InspectorPanel::Kind::Bone;
-        scene_.selectedBone = bone;
-        scene_.selection = bone < int(scene_.boneSelection.size()) ? scene_.boneSelection[bone] : -1;
-        scene_.highlight = scene_.selection >= 0 ? SceneView::Highlight::Selection : SceneView::Highlight::None;
-    }
-    scene_.RebuildLodGeometry();
-    scene_.RebuildSkeletonLines();
-}
-
-void SceneInput::SetView(float yaw, float pitch)
-{
-    camera_.yaw = yaw;
-    camera_.pitch = pitch;
+    if (cell == scene_.gridCell) return;
+    scene_.gridCell = cell;
+    scene_.RebuildGrid();
 }

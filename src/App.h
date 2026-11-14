@@ -345,11 +345,11 @@ private:
     ModCheckPanel modCheck_{ session_, [this](const wchar_t* title) { return PickFolder(title); },
                              [](const std::filesystem::path& f, int line) { OpenInEditorAt(f, line); } };
     RecordPanel record_{ *this, recorder_ };
-    Recorder recorder_{ session_, playback_, reload_, movesSim_, renderer_, camera_, record_.settings, shell_, *this,
+    Recorder recorder_{ session_, playback_, reload_, movesSim_, renderer_, camera_, record_.settings, [this] { return shell_.mode; }, *this,
                         [this](const wchar_t* title) { return PickFolder(title); } };
     DisplayPanel displayPanel_{ session_, display_, light_, lit_, world_, worlds_, camera_, points_, *this };
     UiShell shell_{ session_, playback_, display_, displayPanel_, palette_, assets_.watcher, layouts_, *this, *this };
-    UiSettings uiSettings_{ shell_, record_.settings, movesSim_ };
+    UiSettings uiSettings_{ shell_, record_.settings, movesSim_, points_ };
     LayoutStore layouts_{ settings_, uiSettings_ };
     ClosePrompt closePrompt_{ session_, mats_, reload_, weaponScene_, layers_, movesEditor_, [this] { PostMessageW(hwnd_, WM_CLOSE, 0, 0); } };
     ViewerAutomation automation_{ *this };

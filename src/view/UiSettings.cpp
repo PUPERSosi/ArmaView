@@ -31,6 +31,9 @@ void UiSettings::Load(const Settings& settings)
         else if (k == "MoveStart")
             if (const size_t tab = v.find('\t'); tab != std::string::npos) moves_.startPick[v.substr(0, tab)] = v.substr(tab + 1);
     }
+    PointOverlaySettings ps = points_.Settings();
+    ps.FromPairs(settings.Pairs("points")); // missing keys keep the defaults
+    points_.SetSettings(ps);
 }
 
 void UiSettings::Store(Settings& settings) const
@@ -49,4 +52,5 @@ void UiSettings::Store(Settings& settings) const
     for (const auto& [model, state] : moves_.startPick)
         if (!state.empty()) p.emplace_back("MoveStart", model + "\t" + state);
     settings.SetPairs(p, "ui");
+    settings.SetPairs(points_.Settings().ToPairs(), "points");
 }

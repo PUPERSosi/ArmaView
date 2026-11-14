@@ -9,7 +9,7 @@
 #include "ReloadSync.h"
 #include "Renderer.h"
 #include "Session.h"
-#include "UiShell.h"
+#include "AppMode.h"
 #include "ViewHost.h"
 #include "WeaponView.h"
 
@@ -21,8 +21,8 @@ class IWeaponSceneHost : public IViewport
 {
 public:
     virtual ~IWeaponSceneHost() = default;
-    virtual UiMode Mode() const = 0;
-    virtual void SetMode(UiMode m) = 0;
+    virtual AppMode Mode() const = 0;
+    virtual void SetMode(AppMode m) = 0;
     virtual Renderer& SceneRenderer() = 0;
     virtual OrbitCamera& SceneCamera() = 0;
     virtual const std::vector<MeshVertex>& BaseVerts() const = 0; // rest-pose geometry of the current LOD
@@ -40,7 +40,7 @@ public:
     WeaponScene(Session& session, ReloadSync& reload, OpticsFit& optics, AnimViewOptions& options, IViewHost& host, IWeaponSceneHost& scene)
         : s_(session), reload_(reload), optics_(optics), animView_(options), host_(host), h_(scene) {}
 
-    bool Active() const { return h_.Mode() == UiMode::Reload || h_.Mode() == UiMode::Optics; }
+    bool Active() const { return h_.Mode() == AppMode::Reload || h_.Mode() == AppMode::Optics; }
     void Update(float dt);    // per frame: config, character, comparison weapon, reload source, fit, sight camera, lines
     void Ghosts(std::vector<MeshVertex>& gv, std::vector<Renderer::Ghost>& ghosts); // Reload onion skin
     void DrawOverlay();       // crosshair of the sight view

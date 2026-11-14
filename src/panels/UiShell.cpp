@@ -36,20 +36,7 @@ enum : uint32_t
 
 } // namespace
 
-const char* UiShell::ModeName(UiMode m)
-{
-    switch (m)
-    {
-    case UiMode::Model: return "Model";
-    case UiMode::Animation: return "Skeleton & Anim";
-    case UiMode::Vehicle: return "Vehicle & Crew";
-    case UiMode::Materials: return "Materials";
-    case UiMode::Validation: return "Validation";
-    case UiMode::Reload: return "Reload";
-    case UiMode::Optics: return "Optics";
-    default: return "?";
-    }
-}
+const char* UiShell::ModeName(UiMode m) { return AppModeName(m); }
 
 std::string UiShell::WinName(const char* title) const { return std::format("{}###{}_{}", T(title), title, int(mode)); }
 

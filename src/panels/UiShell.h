@@ -14,7 +14,8 @@ class LayoutStore; // named layouts, export / import (view/LayoutStore)
 
 #include <string>
 
-enum class UiMode { Model, Animation, Vehicle, Materials, Validation, Reload, Optics, Count };
+#include "AppMode.h"
+using UiMode = AppMode; // the modes live in view/AppMode.h (no UI dependencies); the shell draws their tabs
 
 // What the shell asks of the viewer (implemented by App).
 class IShellHost

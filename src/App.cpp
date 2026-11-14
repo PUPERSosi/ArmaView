@@ -1213,7 +1213,7 @@ void App::RegisterHotkeys()
     input_.Bind(ImGuiMod_Ctrl | ImGuiKey_Z, "Edit", "undo the last edit (config editors)", [this] { session_.commands.Undo(); });
     input_.Bind(ImGuiMod_Ctrl | ImGuiKey_Y, "Edit", "redo", [this] { session_.commands.Redo(); });
     input_.Bind(ImGuiMod_Ctrl | ImGuiKey_G, "Windows", "model.cfg graph", [this] { showGraph_ = !showGraph_; });
-    input_.Bind(ImGuiMod_Ctrl | ImGuiKey_M, "Windows", "CfgMoves states graph", [this] { statesPanel_.open = !statesPanel_.open; });
+    input_.Bind(ImGuiMod_Ctrl | ImGuiKey_M, "Windows", "CfgMoves states graph", [this] { statesPanel_.Toggle(); });
     input_.Bind(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_P, "Windows", "command palette", nullptr); // handled before the keyboard capture check
     input_.Bind(ImGuiMod_Ctrl | ImGuiKey_R, "Windows", "Vehicle & Crew mode and back (crew preview)", [this] { SetMode(shell_.mode == UiMode::Vehicle ? crewReturnMode_ : UiMode::Vehicle); });
     static const char* const kModeCmd[] = { "mode: Model", "mode: Skeleton & Anim", "mode: Vehicle & Crew", "mode: Materials", "mode: Validation",
