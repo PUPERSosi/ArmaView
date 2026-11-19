@@ -131,6 +131,12 @@ bool App::Init(HWND hwnd, float dpiScale)
     Log::Get().Info("Settings: {} ({})", PathToUtf8(settings_.File()), paths_.Why());
     io.IniFilename = nullptr; // ImGui's layout goes into the settings file (LayoutStore)
     uiSettings_.Load(settings_);
+    {
+        // mod prefixes set by hand ("modprefix" block: <mod folder> = <prefix>): InferModPrefix uses them before guessing
+        std::vector<std::pair<fs::path, std::string>> prefixes;
+        for (const auto& [folder, prefix] : settings_.Pairs("modprefix")) prefixes.emplace_back(fs::path(Utf8ToWide(folder)), prefix);
+        SetModPrefixOverrides(std::move(prefixes));
+    }
     layouts_.LoadInitial();
     firstLayout_ = !layouts_.HasSavedLayout();
 

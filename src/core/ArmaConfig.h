@@ -10,6 +10,7 @@
 #include <shared_mutex>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 struct CfgValue
@@ -139,8 +140,9 @@ void SetDriveTargetResolver(DriveTargetFn fn);
 // Arma paths ("\MyMod\x.p3d" or "MyMod\x.p3d") -> files: the project root plus virtual mounts.
 //  - mounts: data outside the project drive, e.g. "Samples_f" -> ...\Arma 3 Samples\Addons (BI's samples reference
 //    themselves as \Samples_f\...). Apply to Resolve and PathOf.
-//  - fallback mounts: a mod's own prefix ("\MyMod\..." of a mod kept in P:\MyMods\MyMod), used only when the path
-//    does not exist under the project root, and never for PathOf (config model= paths stay as on P:).
+//  - fallback mounts: a mod's own prefix ("\MyMod\..." of a mod kept in P:\MyMods\MyMod), used by Resolve only when the
+//    path does not exist under the project root; PathOf names a file under the mod's folder by the prefix (the paths
+//    its config uses: model= "\AL_Mods\mod\x.p3d" for P:\Modding\mod\x.p3d).
 // Thread safe (background loads resolve while the UI adds a mount).
 class ArmaPathResolver
 {
@@ -164,3 +166,14 @@ std::filesystem::path ResolveArmaPath(std::string_view armaPath, const std::file
 void AddArmaMount(const std::string& prefix, const std::filesystem::path& folder);
 void AddArmaFallbackMount(const std::string& prefix, const std::filesystem::path& folder);
 std::string ArmaPathOf(const std::filesystem::path& file, const std::filesystem::path& projectRoot);
+
+// The Arma path prefix of a mod folder (what its files are called in the game: "AL_Mods\am_pin_tigr" for
+// P:\Modding\am_pin_tigr): $PBOPREFIX$; else the prefix set by hand for that folder (SetModPrefixOverrides, from the
+// settings); else the one the parsed config's own paths agree on (for "\a\b\rest" the longest tail "rest" that exists
+// under the folder, the head "a\b" by majority); else the folder name. why: how it was found.
+std::string InferModPrefix(const std::filesystem::path& modFolder, const ArmaConfig* parsed, std::string* why = nullptr);
+// Mod folder -> prefix set by the user (settings "modprefix" block); replaces the previous list.
+void SetModPrefixOverrides(std::vector<std::pair<std::filesystem::path, std::string>> folderToPrefix);
+// The mod's prefix inferred and mounted when the folder is not at that prefix on the project drive (fallback mount).
+// Returns the prefix ("" none).
+std::string MountInferredModPrefix(const std::filesystem::path& modFolder, const ArmaConfig* parsed, const std::filesystem::path& projectRoot);

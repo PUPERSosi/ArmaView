@@ -216,7 +216,22 @@ float DurationFromMovesSpeed(float speed)
     return 1.0f;
 }
 
-std::vector<RtmBoneCheck> CheckRtmFolder(const fs::path& dir, const Skeleton& skel)
+RtmBoneCheck CheckRtmFile(const fs::path& f, const Skeleton& skel)
+{
+    RtmBoneCheck c;
+    c.file = f;
+    if (!ReadRtmHeader(f, c.info, c.error)) return c;
+    std::set<std::string> rtm;
+    for (const auto& b : c.info.bones) rtm.insert(ToLower(b));
+    for (const auto& b : skel.bones)
+        if (!rtm.count(ToLower(b.name))) c.missing.push_back(b.name);
+    for (const auto& b : c.info.bones)
+        if (skel.Find(b) < 0) c.extra.push_back(b);
+    return c;
+}
+
+std::vector<RtmBoneCheck> CheckRtmFolder(const fs::path& dir, const Skeleton& skel, std::atomic<int>* done, std::atomic<int>* total,
+                                         const std::atomic<bool>* cancel)
 {
     std::vector<RtmBoneCheck> out;
     std::error_code ec;
@@ -228,22 +243,12 @@ std::vector<RtmBoneCheck> CheckRtmFolder(const fs::path& dir, const Skeleton& sk
         if (e.is_regular_file() && ext == L".rtm") files.push_back(e.path());
     }
     std::sort(files.begin(), files.end());
+    if (total) *total = int(files.size());
     for (const auto& f : files)
     {
-        RtmBoneCheck c;
-        c.file = f;
-        if (!ReadRtmHeader(f, c.info, c.error))
-        {
-            out.push_back(std::move(c));
-            continue;
-        }
-        std::set<std::string> rtm;
-        for (const auto& b : c.info.bones) rtm.insert(ToLower(b));
-        for (const auto& b : skel.bones)
-            if (!rtm.count(ToLower(b.name))) c.missing.push_back(b.name);
-        for (const auto& b : c.info.bones)
-            if (skel.Find(b) < 0) c.extra.push_back(b);
-        out.push_back(std::move(c));
+        if (cancel && *cancel) break;
+        out.push_back(CheckRtmFile(f, skel));
+        if (done) ++*done;
     }
     return out;
 }

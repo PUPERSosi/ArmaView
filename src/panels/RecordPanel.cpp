@@ -76,7 +76,7 @@ void RecordPanel::Draw()
     {
         ImGui::ProgressBar(float(view_.RecordFrame()) / float(std::max(1, view_.RecordFrames())), ImVec2(-90 * host_.Dpi(), 0), std::format("{} / {}", view_.RecordFrame(), view_.RecordFrames()).c_str());
         ImGui::SameLine();
-        if (ui::Button("Stop##rec")) view_.StopRecording(false);
+        if (ui::Button("Stop##rec")) view_.StopRecording(RecordStop::Cancelled);
     }
     else if (ui::Button("Record##rec")) view_.StartRecording();
     if (!view_.RecordMessage().empty()) ImGui::TextWrapped("%s", view_.RecordMessage().c_str());

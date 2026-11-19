@@ -148,6 +148,14 @@ void ValidationPanel::Draw(const std::string& windowName, const std::function<vo
     if (ui::Button("Pick folder...")) view_.PickRtmFolder();
     ImGui::SameLine();
     if (ui::Button("Re-check") && !view_.RtmFolder().empty()) view_.RecheckRtm();
+    if (int done = 0, total = 0; (view_.RtmCheckProgress(done, total), total > 0))
+    {
+        ImGui::SameLine();
+        ImGui::ProgressBar(float(done) / float(total), ImVec2(160 * ImGui::GetFontSize() / 13.0f, 0), TF("checking {} / {}", done, total).c_str());
+        ImGui::SameLine();
+        if (ui::SmallButton("Cancel##rtmcheck")) view_.CancelRtmCheck();
+        if (ui::Hovered()) ui::SetTooltip("Stops the check of the RTM folder; the files checked so far stay listed");
+    }
     for (size_t i = 0; i < view_.RtmChecks().size(); ++i)
     {
         const RtmBoneCheck& c = view_.RtmChecks()[i];

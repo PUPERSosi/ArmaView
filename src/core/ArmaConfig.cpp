@@ -8,6 +8,7 @@
 #include <fstream>
 #include <functional>
 #include <map>
+#include <mutex>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -334,12 +335,18 @@ std::string ArmaPathResolver::PathOf(const fs::path& file, const fs::path& proje
 {
     std::shared_lock lock(mutex_);
     std::error_code ec;
+    auto under = [&](const fs::path& dir, std::string& out) {
+        const fs::path rel = fs::relative(file, dir, ec);
+        const std::string r = PathToUtf8(rel);
+        if (ec || rel.empty() || r.starts_with("..")) return false;
+        out = r;
+        return true;
+    };
+    std::string r;
     for (const auto& [prefix, dir] : mounts_)
-    {
-        fs::path rel = fs::relative(file, dir, ec);
-        std::string r = PathToUtf8(rel);
-        if (!ec && !rel.empty() && !r.starts_with("..")) return prefix + "\\" + r;
-    }
+        if (under(dir, r)) return prefix + "\\" + r;
+    for (const auto& [prefix, dir] : fallback_) // a mod not at its prefix on P:: named as its config names it
+        if (under(dir, r)) return prefix + "\\" + r;
     return PathToUtf8(fs::relative(file, projectRoot, ec));
 }
 
@@ -371,6 +378,122 @@ ArmaPathResolver& DefaultArmaPaths()
 void AddArmaMount(const std::string& prefix, const fs::path& folder) { DefaultArmaPaths().AddMount(prefix, folder); }
 void AddArmaFallbackMount(const std::string& prefix, const fs::path& folder) { DefaultArmaPaths().AddFallbackMount(prefix, folder); }
 std::string ArmaPathOf(const fs::path& file, const fs::path& projectRoot) { return DefaultArmaPaths().PathOf(file, projectRoot); }
+
+namespace {
+std::mutex g_prefixMutex;
+std::vector<std::pair<fs::path, std::string>> g_prefixOverrides;
+
+std::string TrimPrefix(std::string p)
+{
+    while (!p.empty() && (p.back() == '\r' || p.back() == '\n' || p.back() == ' ' || p.back() == '\\' || p.back() == '/')) p.pop_back();
+    while (!p.empty() && (p.front() == '\\' || p.front() == '/' || p.front() == ' ')) p.erase(p.begin());
+    return p;
+}
+
+// every string value of the config's own classes (not the game's it is overlaid on)
+void CollectStrings(const CfgClass& c, std::vector<std::string>& out, size_t limit)
+{
+    std::vector<const CfgValue*> stack;
+    for (const auto& e : c.entries)
+    {
+        stack.push_back(&e.value);
+        while (!stack.empty() && out.size() < limit)
+        {
+            const CfgValue* v = stack.back();
+            stack.pop_back();
+            if (v->type == CfgValue::Type::String) { if (!v->str.empty()) out.push_back(v->str); }
+            else if (v->type == CfgValue::Type::Array)
+                for (const auto& i : v->items) stack.push_back(&i);
+        }
+    }
+    for (const auto& k : c.classes)
+        if (out.size() < limit && !k->external) CollectStrings(*k, out, limit);
+}
+} // namespace
+
+void SetModPrefixOverrides(std::vector<std::pair<fs::path, std::string>> folderToPrefix)
+{
+    std::lock_guard lock(g_prefixMutex);
+    g_prefixOverrides = std::move(folderToPrefix);
+}
+
+std::string InferModPrefix(const fs::path& modFolder, const ArmaConfig* parsed, std::string* why)
+{
+    auto say = [&](const std::string& w) { if (why) *why = w; };
+    std::error_code ec;
+    if (std::ifstream pf(modFolder / "$PBOPREFIX$"); pf)
+    {
+        std::string line;
+        std::getline(pf, line);
+        if (std::string p = TrimPrefix(line); !p.empty()) { say("$PBOPREFIX$"); return p; }
+    }
+    {
+        std::lock_guard lock(g_prefixMutex);
+        for (const auto& [folder, prefix] : g_prefixOverrides)
+            if (fs::equivalent(folder, modFolder, ec) && !TrimPrefix(prefix).empty()) { say("set in the settings"); return TrimPrefix(prefix); }
+    }
+    if (parsed)
+    {
+        // the config's own file paths: "\a\b\rest" whose longest tail "rest" exists under the folder votes for "a\b"
+        std::vector<std::string> strings;
+        CollectStrings(parsed->Root(), strings, 4000);
+        std::map<std::string, std::pair<int, std::string>> votes; // lower prefix -> (votes, as written)
+        int checked = 0;
+        for (const auto& s : strings)
+        {
+            if (s.find('\\') == std::string::npos || s.find('.') == std::string::npos || s.size() > 260) continue;
+            std::vector<std::string> parts;
+            size_t a = 0;
+            const std::string t = TrimPrefix(s);
+            for (size_t i = 0; i <= t.size(); ++i)
+                if (i == t.size() || t[i] == '\\' || t[i] == '/')
+                {
+                    if (i > a) parts.push_back(t.substr(a, i - a));
+                    a = i + 1;
+                }
+            if (parts.size() < 2 || ++checked > 600) continue;
+            for (size_t i = 1; i < parts.size(); ++i)
+            {
+                fs::path tail;
+                for (size_t k = i; k < parts.size(); ++k) tail /= fs::path(Utf8ToWide(parts[k]));
+                if (!fs::exists(modFolder / tail, ec)) continue;
+                std::string head;
+                for (size_t k = 0; k < i; ++k) head += (k ? "\\" : "") + parts[k];
+                auto& v = votes[ToLower(head)];
+                ++v.first;
+                v.second = head;
+                break;
+            }
+        }
+        const std::pair<int, std::string>* best = nullptr;
+        for (const auto& [k, v] : votes)
+            if (!best || v.first > best->first) best = &v;
+        if (best)
+        {
+            say(std::format("{} of the config's paths agree", best->first));
+            return best->second;
+        }
+    }
+    say("the folder name");
+    return PathToUtf8(modFolder.filename());
+}
+
+std::string MountInferredModPrefix(const fs::path& modFolder, const ArmaConfig* parsed, const fs::path& projectRoot)
+{
+    std::string why;
+    const std::string prefix = InferModPrefix(modFolder, parsed, &why);
+    if (prefix.empty()) return {};
+    std::error_code ec;
+    const fs::path root = projectRoot.empty() ? fs::path("P:\\") : projectRoot;
+    const fs::path onP = root / fs::path(Utf8ToWide(prefix));
+    if (!fs::exists(onP, ec) && !fs::equivalent(modFolder, ResolveArmaPath(prefix, projectRoot), ec))
+    {
+        AddArmaFallbackMount(prefix, modFolder);
+        Log::Get().Info("Mod prefix \\{} ({}) -> {} (not at {}): the mod's own paths that are not on P: resolve there", prefix, why,
+                        PathToUtf8(modFolder), PathToUtf8(onP));
+    }
+    return prefix;
+}
 fs::path ResolveArmaPath(std::string_view armaPath, const fs::path& projectRoot) { return DefaultArmaPaths().Resolve(armaPath, projectRoot); }
 
 namespace {

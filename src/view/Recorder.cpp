@@ -138,25 +138,39 @@ void Recorder::FrameCapture(const SceneDraw& main, const float clear[4])
             if (!ok) msg_ = err;
         }
     }
-    if (!ok) { StopRecording(false); return; }
-    if (++r.frame >= r.frames) StopRecording(true);
+    if (!ok) { StopRecording(RecordStop::Failed); return; }
+    if (++r.frame >= r.frames) StopRecording(RecordStop::Completed);
 }
 
-void Recorder::StopRecording(bool completed)
+void Recorder::StopRecording(RecordStop why)
 {
     Run& r = run_;
     if (!r.active) return;
     r.active = false;
     std::string tail;
     int code = 0;
-    bool ok = completed;
-    if (r.pipe) ok = r.pipe->Finish(code, tail) && completed;
+    bool finished = true;
+    if (r.pipe) finished = r.pipe->Finish(code, tail);
+    const bool ok = why == RecordStop::Completed && finished;
     last_ = ok ? r.out : fs::path();
-    if (ok)
+    std::error_code ec;
+    if (why == RecordStop::Cancelled)
+    {
+        // the user stopped it: an MP4 / GIF of the frames so far is not what was asked for - gone with its ffmpeg log;
+        // PNG frames already written stay (each is complete)
+        if (r.pipe)
+        {
+            fs::remove(r.out, ec);
+            fs::remove(fs::path(r.out).replace_extension(".ffmpeg.log"), ec);
+        }
+        msg_ = r.pipe ? TF("Recording cancelled after {} of {} frames", r.frame, r.frames)
+                      : TF("Recording cancelled after {} of {} frames (the PNG frames so far are kept)", r.frame, r.frames);
+        Log::Get().Info("Record: {}", msg_);
+    }
+    else if (ok)
     {
         msg_ = TF("Saved {} ({} frames)", PathToUtf8(r.out), r.frames);
         Log::Get().Info("Record: {}", msg_);
-        std::error_code ec;
         fs::remove(fs::path(r.out).replace_extension(".ffmpeg.log"), ec);
     }
     else

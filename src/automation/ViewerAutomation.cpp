@@ -11,6 +11,7 @@
 #include "PerfMemory.h"
 #include "Retarget.h"
 #include "RunProgram.h"
+#include "RenderSelfTest.h"
 #include "SelfTest.h"
 #include "ViewCoreTest.h"
 
@@ -44,11 +45,6 @@ void ViewerAutomation::Apply(const Automation& a)
 {
     auto_ = a;
     auto& log = Log::Get();
-    if (a.lod >= 0 && app_.session_.hasModel)
-    {
-        if (a.lod < int(app_.session_.model.lods.size())) { app_.session_.lod = a.lod; app_.OnLodChanged(); app_.camera_.Frame(app_.scene_.boundsMin, app_.scene_.boundsMax); }
-        else log.Warn("--lod {}: model has {} LOD(s)", a.lod, app_.session_.model.lods.size());
-    }
     if (!a.view.empty())
     {
         std::string v = ToLower(a.view);
@@ -58,31 +54,6 @@ void ViewerAutomation::Apply(const Automation& a)
         else if (v == "right") app_.SetView(kViewRightYaw, 0);
         else if (v == "top") app_.SetView(kPi, 1.55f);
         else log.Warn("--view {}: expected front|back|left|right|top", a.view);
-    }
-    if (!a.select.empty() && app_.session_.hasModel)
-    {
-        const P3DLod& l = app_.session_.model.lods[app_.session_.lod];
-        int found = -1;
-        for (int i = 0; i < int(l.selections.size()); ++i)
-            if (IEquals(l.selections[i].name, a.select)) found = i;
-        if (found < 0) log.Warn("--select {}: no such selection in LOD {}", a.select, app_.session_.lod);
-        else
-        {
-            app_.scene_.selection = found;
-            app_.scene_.selectedBone = app_.session_.skeleton.Find(a.select);
-            app_.scene_.highlight = SceneView::Highlight::Selection;
-            app_.inspector_.what = InspectorPanel::Kind::Selection;
-            app_.scene_.RebuildLodGeometry();
-            app_.scene_.RebuildSkeletonLines();
-        }
-    }
-    if (!a.highlight.empty())
-    {
-        std::string h = ToLower(a.highlight);
-        app_.scene_.highlight = h == "bones4" ? SceneView::Highlight::TooManyBones : h == "weightsum" ? SceneView::Highlight::BadWeightSum : h == "nobone" ? SceneView::Highlight::NoBone : app_.scene_.highlight;
-        if (app_.scene_.highlight != SceneView::Highlight::Selection) { app_.scene_.selection = app_.scene_.selectedBone = -1; }
-        app_.scene_.RebuildLodGeometry();
-        app_.scene_.RebuildSkeletonLines();
     }
     if (!a.tab.empty())
     {
@@ -107,43 +78,10 @@ void ViewerAutomation::Apply(const Automation& a)
     if (a.noSwizzle) { app_.display_.applySwizzle = false; app_.scene_.BuildDrawSections(); }
     if (!a.world.empty()) { if (app_.session_.game) app_.displayPanel_.SetWorld(a.world); else app_.pendingWorld_ = a.world; }
     if (a.damage >= 0) { app_.materials_.damageState = std::clamp(a.damage, 0, 2); app_.scene_.RebuildLodGeometry(); }
-    if (!a.isolate.empty() && app_.session_.hasModel)
-    {
-        const P3DLod& l = app_.session_.model.lods[app_.session_.lod];
-        LodVisibility& v = app_.vis_.Lod(l.resolution);
-        v.isolate = a.isolate;
-        v.isolateFaces.clear();
-        app_.scene_.RebuildLodGeometry(); // not saved: automation only
-        glm::vec3 mn(1e30f), mx(-1e30f);
-        for (size_t f = 0; f < l.faces.size(); ++f)
-            if (!app_.scene_.faceHidden[f])
-                for (uint32_t c = 0; c < l.faces[f].count; ++c)
-                    if (l.faces[f].v[c].point < l.points.size())
-                    {
-                        mn = glm::min(mn, l.points[l.faces[f].v[c].point].pos);
-                        mx = glm::max(mx, l.points[l.faces[f].v[c].point].pos);
-                    }
-        if (mn.x <= mx.x) app_.camera_.Frame(mn, mx);
-        else Log::Get().Warn("--isolate {}: no faces in LOD {}", a.isolate, app_.session_.lod);
-    }
     if (a.onion) app_.animView_.onionSkin = true;
     if (a.trail) app_.animView_.showTrail = true;
     if (a.crewPlay) app_.session_.attach.playAll = true;
-    if (a.crewIk) { app_.session_.attach.ik = true; if (app_.session_.hasModel) { app_.session_.attach.ResolveCrew(app_.CrewConfig(), app_.session_.projectRoot); app_.scene_.RebuildLodGeometry(); } }
     if (!a.state.empty()) app_.pendingState_ = a.state; // needs the game configs: loaded in PollGameConfig / now if ready
-    if (!a.compareRtm.empty())
-    {
-        size_t before = app_.session_.anim.layers.size();
-        app_.playback_.AddLayer(a.compareRtm);
-        if (app_.session_.anim.layers.size() > before)
-        {
-            app_.playback_.compare.layers = { app_.session_.anim.layers.back() };
-            app_.session_.anim.layers.pop_back();
-            app_.playback_.compare.missing = app_.session_.anim.missing;
-            app_.playback_.compare.Bind(app_.session_.skeleton);
-            app_.playback_.compareMode = a.compareMode;
-        }
-    }
     if (a.play) app_.playback_.playing = true;
     if (a.reflections >= 0) app_.display_.reflections = a.reflections != 0;
     if (a.shadows >= 0) app_.display_.shadows = a.shadows != 0;
@@ -185,6 +123,13 @@ void ViewerAutomation::Apply(const Automation& a)
             script += "lang ru\nwait 3\nlang en\nshow all off\nmode 0\nwait 3\n";
         };
         model("Test_Tank_01\\Test_Tank_01.p3d", "Test_Tank_01", "");
+        // a recording stopped by the user: no Error, no partial MP4 / ffmpeg log left (record cancel errs otherwise)
+        {
+            const fs::path recDir = (a.selftest.is_relative() ? app_.paths_.Exe() / a.selftest : a.selftest) / "record_cancel";
+            std::error_code ec;
+            fs::remove_all(recDir, ec); // this run's own folder
+            script += "record turn mp4 320 240 10 5 dir=" + PathToUtf8(recDir) + "\nwait 8\nrecord cancel\nwait 3\n";
+        }
         windowWalk();
         model("Test_Car_01\\Test_Car_01.p3d", "Test_Car_01", "");
         model("Test_Heli_01\\Test_Heli_01.p3d", "Test_Heli_01", "");
@@ -250,6 +195,79 @@ selftestLoaded:
         }
     }
     if (!app_.pendingState_.empty() && app_.session_.game) { app_.playback_.LoadState(app_.pendingState_); app_.pendingState_.clear(); }
+    // the options that act on the model: once the last model of the command line is applied (it is read in the
+    // background: applied now, they were lost or reset by the model coming in)
+    modelOptionsPending_ = !a.lastModel.empty();
+    if (!modelOptionsPending_) ApplyModelOptions();
+}
+
+void ViewerAutomation::ApplyModelOptions()
+{
+    const Automation& a = auto_;
+    auto& log = Log::Get();
+    if (a.lod >= 0 && app_.session_.hasModel)
+    {
+        if (a.lod < int(app_.session_.model.lods.size())) { app_.session_.lod = a.lod; app_.OnLodChanged(); app_.camera_.Frame(app_.scene_.boundsMin, app_.scene_.boundsMax); }
+        else log.Warn("--lod {}: model has {} LOD(s)", a.lod, app_.session_.model.lods.size());
+    }
+    if (!a.select.empty() && app_.session_.hasModel)
+    {
+        const P3DLod& l = app_.session_.model.lods[app_.session_.lod];
+        int found = -1;
+        for (int i = 0; i < int(l.selections.size()); ++i)
+            if (IEquals(l.selections[i].name, a.select)) found = i;
+        if (found < 0) log.Warn("--select {}: no such selection in LOD {}", a.select, app_.session_.lod);
+        else
+        {
+            app_.scene_.selection = found;
+            app_.scene_.selectedBone = app_.session_.skeleton.Find(a.select);
+            app_.scene_.highlight = SceneView::Highlight::Selection;
+            app_.inspector_.what = InspectorPanel::Kind::Selection;
+            app_.scene_.RebuildLodGeometry();
+            app_.scene_.RebuildSkeletonLines();
+        }
+    }
+    if (!a.highlight.empty())
+    {
+        std::string h = ToLower(a.highlight);
+        app_.scene_.highlight = h == "bones4" ? SceneView::Highlight::TooManyBones : h == "weightsum" ? SceneView::Highlight::BadWeightSum : h == "nobone" ? SceneView::Highlight::NoBone : app_.scene_.highlight;
+        if (app_.scene_.highlight != SceneView::Highlight::Selection) { app_.scene_.selection = app_.scene_.selectedBone = -1; }
+        app_.scene_.RebuildLodGeometry();
+        app_.scene_.RebuildSkeletonLines();
+    }
+    if (!a.isolate.empty() && app_.session_.hasModel)
+    {
+        const P3DLod& l = app_.session_.model.lods[app_.session_.lod];
+        LodVisibility& v = app_.vis_.Lod(l.resolution);
+        v.isolate = a.isolate;
+        v.isolateFaces.clear();
+        app_.scene_.RebuildLodGeometry(); // not saved: automation only
+        glm::vec3 mn(1e30f), mx(-1e30f);
+        for (size_t f = 0; f < l.faces.size(); ++f)
+            if (!app_.scene_.faceHidden[f])
+                for (uint32_t c = 0; c < l.faces[f].count; ++c)
+                    if (l.faces[f].v[c].point < l.points.size())
+                    {
+                        mn = glm::min(mn, l.points[l.faces[f].v[c].point].pos);
+                        mx = glm::max(mx, l.points[l.faces[f].v[c].point].pos);
+                    }
+        if (mn.x <= mx.x) app_.camera_.Frame(mn, mx);
+        else Log::Get().Warn("--isolate {}: no faces in LOD {}", a.isolate, app_.session_.lod);
+    }
+    if (a.crewIk) { app_.session_.attach.ik = true; if (app_.session_.hasModel) { app_.session_.attach.ResolveCrew(app_.CrewConfig(), app_.session_.projectRoot); app_.scene_.RebuildLodGeometry(); } }
+    if (!a.compareRtm.empty())
+    {
+        size_t before = app_.session_.anim.layers.size();
+        app_.playback_.AddLayer(a.compareRtm);
+        if (app_.session_.anim.layers.size() > before)
+        {
+            app_.playback_.compare.layers = { app_.session_.anim.layers.back() };
+            app_.session_.anim.layers.pop_back();
+            app_.playback_.compare.missing = app_.session_.anim.missing;
+            app_.playback_.compare.Bind(app_.session_.skeleton);
+            app_.playback_.compareMode = a.compareMode;
+        }
+    }
     if (a.turnedOut || !a.crewModel.empty() || a.crewFollowParent)
     {
         app_.session_.attach.turnedOut = a.turnedOut;
@@ -294,10 +312,38 @@ selftestLoaded:
         }
         app_.scene_.UpdatePose();
     }
+    if (!a.view.empty())
+    {
+        // the camera again: the model coming in framed it
+        const std::string v = ToLower(a.view);
+        if (v == "front") app_.SetView(kPi, 0);
+        else if (v == "back") app_.SetView(0, 0);
+        else if (v == "left") app_.SetView(kViewLeftYaw, 0);
+        else if (v == "right") app_.SetView(kViewRightYaw, 0);
+        else if (v == "top") app_.SetView(kPi, 1.55f);
+    }
+}
+
+bool ViewerAutomation::Ready()
+{
+    app_.movesLoader_.PollValidation();
+    if (app_.survey_.Busy()) app_.survey_.Poll();
+    app_.modCheck_.Poll();
+    return !app_.gameLoad_.valid() && !app_.movesLoader_.Building() && !app_.movesLoader_.Validating() && !app_.survey_.Busy() && !app_.modCheck_.Busy() &&
+           !app_.recorder_.Recording() && !app_.ModelLoading() && !app_.texCache_.Streaming() && !app_.assets_.RtmCheckRunning();
 }
 
 void ViewerAutomation::BeforeNewFrame()
 {
+    if (modelOptionsPending_ && !app_.ModelLoading() && app_.session_.hasModel)
+    {
+        std::error_code ec;
+        if (fs::equivalent(app_.session_.model.path, auto_.lastModel, ec))
+        {
+            modelOptionsPending_ = false;
+            ApplyModelOptions();
+        }
+    }
     if (!script_.Active()) return;
     {
         UiScript::Host host;
@@ -306,12 +352,7 @@ void ViewerAutomation::BeforeNewFrame()
         host.findControl = [](const std::string& n, float& x, float& y) { return ui::ControlCenter(n, x, y); };
         host.screenshot = [this](const fs::path& p) { pendingShot_ = p; };
         host.exit = [this]() { PostMessageW(app_.hwnd_, WM_CLOSE, 0, 0); };
-        host.ready = [this]() {
-            app_.movesLoader_.PollValidation();
-            if (app_.survey_.Busy()) app_.survey_.Poll();
-            app_.modCheck_.Poll();
-            return !app_.gameLoad_.valid() && !app_.movesLoader_.Building() && !app_.movesLoader_.Validating() && !app_.survey_.Busy() && !app_.modCheck_.Busy() && !app_.recorder_.Recording() && !app_.ModelLoading() && !app_.texCache_.Streaming();
-        };
+        host.ready = [this]() { return Ready(); };
         host.open = [this](const fs::path& p) { app_.OpenFile(p); };
         host.loading = [this] { return app_.ModelLoading() || app_.texCache_.Streaming(); };
         host.state = [this](const std::string& s) { app_.playback_.LoadState(s); };
@@ -386,13 +427,22 @@ void ViewerAutomation::AfterRender()
         else Log::Get().Error("ui-script: screenshot failed: {}", err);
         pendingShot_.clear();
     }
-    // Command-line automation: --screenshot after a few frames (layout settled), then exit.
+    // Command-line automation: --screenshot when the last model is applied with its options and nothing loads any more
+    // (models, textures, game configs: the ui-script's ready), 8 frames later (layout settled), then exit. A minute at
+    // most: then it is taken as it is, with a warning.
     ++frameCount_;
-    if (!auto_.screenshot.empty() && frameCount_ == 8)
+    if (auto_.screenshot.empty() || screenshotDone_) return;
+    const bool ready = !modelOptionsPending_ && Ready();
+    settledFrames_ = ready ? settledFrames_ + 1 : 0;
+    const bool timeout = frameCount_ > 3600;
+    if (settledFrames_ >= 8 || timeout)
     {
+        screenshotDone_ = true;
+        if (timeout) Log::Get().Warn("--screenshot: still loading after {} frames - taken as it is", frameCount_);
         std::string err;
         if (app_.renderer_.SaveBackbufferPng(auto_.screenshot.native(), err))
-            Log::Get().Info("Screenshot saved: '{}'", PathToUtf8(auto_.screenshot));
+            Log::Get().Info("Screenshot saved: '{}' (model {}, LOD {}, {} texture(s), frame {})", PathToUtf8(auto_.screenshot),
+                            app_.session_.hasModel ? PathToUtf8(app_.session_.model.path.filename()) : "-", app_.session_.lod, app_.texCache_.Count(), frameCount_);
         else
             Log::Get().Error("Screenshot failed: {}", err);
         PostMessageW(app_.hwnd_, WM_CLOSE, 0, 0);
@@ -680,6 +730,27 @@ void ViewerAutomation::RegisterCommands()
         std::string op, err;
         is >> op;
         if (op == "result") return app_.recorder_.Recording() ? std::string("recording") : app_.recorder_.RecordMessage();
+        // record cancel: the Stop button while recording (qt-req 1.4): no Error in the log, the partial MP4 / GIF and the
+        // ffmpeg log are gone from the output folder (an error otherwise)
+        if (op == "cancel")
+        {
+            if (!app_.recorder_.Recording()) return std::string("not recording");
+            const int errorsBefore = Log::Get().Errors();
+            app_.recorder_.StopRecording(RecordStop::Cancelled); // what the Stop button does
+            std::error_code ec;
+            std::string left;
+            for (const auto& e : fs::directory_iterator(fs::path(Utf8ToWide(app_.record_.settings.outDir)), ec))
+            {
+                const std::string ext = ToLower(PathToUtf8(e.path().extension()));
+                if (ext == ".mp4" || ext == ".gif" || ext == ".log") left += " " + PathToUtf8(e.path().filename());
+            }
+            if (ec) left += " (cannot list the folder: " + ec.message() + ")";
+            const bool errorLogged = Log::Get().Errors() > errorsBefore;
+            const std::string out = std::format("{} cancel: {}{}{}", left.empty() && !errorLogged ? "OK" : "FAIL", app_.recorder_.RecordMessage(),
+                                                left.empty() ? "" : "; left on disk:" + left, errorLogged ? "; an Error was logged" : "");
+            if (!left.empty() || errorLogged) Log::Get().Error("record cancel: {}", out);
+            return out;
+        }
         std::string fmt;
         is >> fmt >> app_.record_.settings.width >> app_.record_.settings.height >> app_.record_.settings.fps;
         // [turn seconds] [dir=<output folder>]
@@ -1025,6 +1096,24 @@ void ViewerAutomation::RegisterCommands()
                            sg.view ? "actions" : "states", sg.actionsClass.empty() ? "all" : sg.actionsClass, used, bad,
                            sg.action.empty() ? "none" : sg.action, targets, missing);
     });
+    // optstate: what the command-line options left in the viewer (tools/tests/cli_options.py checks it)
+    reg.Add("optstate", "", "the state the command-line options set (LOD, selection, highlight, isolate, bone, compare, skin, section)",
+            [this](std::istringstream&) -> std::string {
+        const Session& s = app_.session_;
+        int bound = 0, compareBones = 0;
+        if (!app_.playback_.compare.layers.empty())
+            for (int m : app_.playback_.compare.layers[0].boneMap) { ++compareBones; bound += m >= 0; }
+        size_t hidden = 0;
+        for (uint8_t h : app_.scene_.faceHidden) hidden += h ? 1 : 0;
+        std::string isolate;
+        if (s.hasModel) isolate = app_.vis_.Lod(s.model.lods[size_t(s.lod)].resolution).isolate;
+        const std::string sel = s.hasModel && app_.scene_.selection >= 0 && app_.scene_.selection < int(s.model.lods[size_t(s.lod)].selections.size())
+                                    ? s.model.lods[size_t(s.lod)].selections[size_t(app_.scene_.selection)].name : "-";
+        return std::format("model={} lod={} selection={} highlight={} bone={} isolate={} hiddenFaces={} compare={}/{} skin={} section={}",
+                           s.hasModel ? PathToUtf8(s.model.path.filename()) : "-", s.lod, sel, int(app_.scene_.highlight),
+                           app_.scene_.selectedBone >= 0 && app_.scene_.selectedBone < int(s.skeleton.bones.size()) ? s.skeleton.bones[size_t(app_.scene_.selectedBone)].name : "-",
+                           isolate.empty() ? "-" : isolate, hidden, bound, compareBones, s.activeSkin, app_.inspector_.section);
+    });
     reg.Add("frame", "", "frame the model in its current pose", [this](std::istringstream&) -> std::string {
         app_.camera_.Frame(app_.scene_.boundsMin, app_.scene_.boundsMax);
         return "framed";
@@ -1084,12 +1173,17 @@ std::string ViewerAutomation::CoreTest()
     const bool off = !p.WantsDepth(); // occlusion needs labels or hitpoints shown
     r += std::format("\n    {} point overlay: SetSettings changes what is shown without an ImGui widget (depth wanted {} -> {})", ok && off ? "ok  " : "FAIL", ok, !off);
     if (!(ok && off)) Log::Get().Error("coretest: point overlay setters");
+    // render: texture streaming under stress (qt-req 1.1)
+    int renderFailures = 0;
+    r += "\nrender coretest:" + RunTextureStreamTest(app_.renderer_.Device(), &renderFailures);
+    if (renderFailures) Log::Get().Error("coretest: render: {} check(s) failed", renderFailures);
     return r;
 }
 
 // the selftest summary of the open model: checks, loop seam, log since it was loaded, orientation in the Front view
 std::string ViewerAutomation::ValidationSummary(const std::string& label)
 {
+    app_.assets_.WaitRtmCheck(); // the RTM folder check runs in the background: its results belong to the summary
     app_.logWindow_.Flush();
     std::string s = std::format("=== {} ===\n", label);
     if (!app_.session_.hasModel) return s + "no model\n";

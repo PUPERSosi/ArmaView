@@ -190,3 +190,6 @@ lead to states that do not exist	ведут в несуществующие со
 No actions	Нет действий
 Click: filter the graph to the states of this actions class (and list its actions above)	Щелчок: граф только с состояниями этого класса действий (и его действия выше)
 click: show it in the graph	щелчок - показать в графе
+# ---- layer stack: the mode of a layer
+override	перекрытие
+blend	смешивание

@@ -294,21 +294,32 @@ void TextureCache::PrefetchAsync(const std::vector<std::string>& textures)
     if (todo.empty()) return;
     if (!Streaming()) streamTotal_ = streamDone_ = 0;
     streamTotal_ += int(todo.size());
+    // a worker per core while there is work; each takes the next name until the list is empty, then ends. The live
+    // workers are counted under the stream lock, where a worker sees the empty list and leaves: a finished worker is
+    // still joinable, so the thread objects cannot tell (new names after the last one left were never decoded).
+    const unsigned want = std::max(1u, std::thread::hardware_concurrency() > 1 ? std::thread::hardware_concurrency() - 1 : 1u);
+    unsigned spawn = 0;
+    bool allGone = false;
     {
         std::lock_guard lock(stream_->m);
         stream_->todo.insert(stream_->todo.end(), todo.begin(), todo.end());
+        allGone = stream_->running == 0;
+        spawn = want > stream_->running ? want - stream_->running : 0;
+        stream_->running += spawn;
     }
-    // a worker per core while there is work; each takes the next name until the list is empty, then ends
-    const unsigned want = std::max(1u, std::thread::hardware_concurrency() > 1 ? std::thread::hardware_concurrency() - 1 : 1u);
-    std::erase_if(workers_, [](std::jthread& t) { return !t.joinable(); });
-    while (workers_.size() < want)
+    if (allGone) workers_.clear(); // they have all left (or are leaving): the joins return at once
+    for (unsigned i = 0; i < spawn; ++i)
         workers_.emplace_back([this, s = stream_] {
             for (;;)
             {
                 std::string name;
                 {
                     std::lock_guard lock(s->m);
-                    if (s->stop || s->todo.empty()) return;
+                    if (s->stop || s->todo.empty())
+                    {
+                        --s->running;
+                        return;
+                    }
                     name = std::move(s->todo.back());
                     s->todo.pop_back();
                 }

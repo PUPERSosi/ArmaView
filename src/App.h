@@ -192,6 +192,8 @@ private:
     const std::vector<RtmBoneCheck>& RtmChecks() const override { return assets_.rtmChecks; }
     void PickRtmFolder() override { ShowFolderDialog(); }
     void RecheckRtm() override { assets_.RunRtmCheck(); }
+    void RtmCheckProgress(int& done, int& total) const override { assets_.RtmCheckProgress(done, total); }
+    void CancelRtmCheck() override { assets_.CancelRtmCheck(); }
     BoneUsage UsageOfBone(int bone) const override { return scene_.UsageOfBone(bone); }
     int PrimaryLayer() const override;
     AnimStatus AnimStatusOf(const CfgAnimation& a) const { return scene_.AnimStatusOf(a); }

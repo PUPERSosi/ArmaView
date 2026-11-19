@@ -13,7 +13,16 @@
 class Playback
 {
 public:
-    explicit Playback(Session& session) : s_(session) {}
+    // a new / reloaded model: the compare layer (B) is bound to its skeleton too (the Session rebinds the layers it owns)
+    explicit Playback(Session& session) : s_(session)
+    {
+        sub_ = s_.Events().Subscribe([this](SessionEvent e) {
+            if (e == SessionEvent::ModelLoaded && !compare.layers.empty()) compare.Bind(s_.skeleton);
+        });
+    }
+    ~Playback() { s_.Events().Unsubscribe(sub_); }
+    Playback(const Playback&) = delete;
+    Playback& operator=(const Playback&) = delete;
 
     double time = 0.0;      // seconds
     bool playing = false;
@@ -42,4 +51,5 @@ public:
 
 private:
     Session& s_;
+    int sub_ = 0;
 };

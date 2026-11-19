@@ -4,6 +4,7 @@
 #include "Text.h"
 #include "Validation.h"
 
+#include <algorithm>
 #include <chrono>
 #include <format>
 
@@ -66,49 +67,105 @@ bool AssetSession::ReloadRtm(const fs::path& file)
             view_.LogLayerCoverage(l);
         }
     s_.anim.Bind(s_.skeleton);
-    if (!rtmFolder.empty()) RunRtmCheck();
+    // only this file again (not the whole folder)
+    std::error_code ec2;
+    if (!rtmFolder.empty() && !s_.skeleton.Empty() && fs::equivalent(file.parent_path(), rtmFolder, ec2))
+    {
+        RtmBoneCheck c = CheckRtmFile(file, s_.skeleton);
+        ++rtmFilesChecked;
+        auto it = std::find_if(rtmChecks.begin(), rtmChecks.end(), [&](const RtmBoneCheck& x) { return fs::equivalent(x.file, file, ec2); });
+        Log::Get().Info("RTM re-check '{}' vs skeleton {}", PathToUtf8(file.filename()), s_.skeleton.name);
+        LogRtmCheck(c);
+        if (it != rtmChecks.end()) *it = std::move(c);
+        else rtmChecks.push_back(std::move(c));
+    }
     return true;
 }
 
 void AssetSession::RunRtmCheck()
 {
-    auto& log = Log::Get();
-    const Skeleton& sk = s_.skeleton;
+    CancelRtmCheck();
     rtmChecks.clear();
     if (rtmFolder.empty()) return;
-    if (sk.Empty())
+    if (s_.skeleton.Empty())
     {
-        log.Warn("RTM check: no skeleton loaded - open a model with a model.cfg skeleton first");
+        Log::Get().Warn("RTM check: no skeleton loaded - open a model with a model.cfg skeleton first");
         return;
     }
-    rtmChecks = CheckRtmFolder(rtmFolder, sk);
+    // on a worker with its own copy of the skeleton; the results are applied in PollRtmCheck (UI thread)
+    rtmJob_.done = std::make_shared<std::atomic<int>>(0);
+    rtmJob_.total = std::make_shared<std::atomic<int>>(0);
+    rtmJob_.cancel = std::make_shared<std::atomic<bool>>(false);
+    rtmJob_.folder = rtmFolder;
+    rtmJob_.skeleton = s_.skeleton.name;
+    rtmJob_.bones = s_.skeleton.bones.size();
+    rtmJob_.result = std::async(std::launch::async, [folder = rtmFolder, sk = s_.skeleton, done = rtmJob_.done, total = rtmJob_.total, cancel = rtmJob_.cancel] {
+        return CheckRtmFolder(folder, sk, done.get(), total.get(), cancel.get());
+    });
+}
+
+void AssetSession::RtmCheckProgress(int& done, int& total) const
+{
+    done = total = 0;
+    if (!rtmJob_.result.valid()) return;
+    done = *rtmJob_.done;
+    total = *rtmJob_.total;
+}
+
+void AssetSession::CancelRtmCheck()
+{
+    if (!rtmJob_.result.valid()) return;
+    *rtmJob_.cancel = true;
+    rtmJob_.result.wait();
+    PollRtmCheck();
+}
+
+void AssetSession::WaitRtmCheck()
+{
+    if (!rtmJob_.result.valid()) return;
+    rtmJob_.result.wait();
+    PollRtmCheck();
+}
+
+bool AssetSession::PollRtmCheck()
+{
+    if (!rtmJob_.result.valid() || rtmJob_.result.wait_for(std::chrono::seconds(0)) != std::future_status::ready) return false;
+    rtmChecks = rtmJob_.result.get();
+    rtmFilesChecked += int(rtmChecks.size());
+    const bool cancelled = *rtmJob_.cancel;
     int clean = 0;
     for (const auto& c : rtmChecks) clean += c.error.empty() && c.missing.empty() && c.extra.empty();
-    log.Info("RTM check '{}' vs skeleton {} ({} bones): {} file(s), {} match exactly", PathToUtf8(rtmFolder), sk.name, sk.bones.size(), rtmChecks.size(), clean);
-    for (const auto& c : rtmChecks)
+    Log::Get().Info("RTM check '{}' vs skeleton {} ({} bones): {} file(s), {} match exactly{}", PathToUtf8(rtmJob_.folder), rtmJob_.skeleton, rtmJob_.bones,
+                    rtmChecks.size(), clean, cancelled ? std::format(" - cancelled after {} of {}", int(*rtmJob_.done), int(*rtmJob_.total)) : "");
+    for (const auto& c : rtmChecks) LogRtmCheck(c);
+    return true;
+}
+
+void AssetSession::LogRtmCheck(const RtmBoneCheck& c) const
+{
+    auto& log = Log::Get();
+    const Skeleton& sk = s_.skeleton;
+    const std::string name = PathToUtf8(c.file.filename());
+    if (!c.error.empty())
     {
-        const std::string name = PathToUtf8(c.file.filename());
-        if (!c.error.empty())
-        {
-            if (c.info.binarized) log.Warn("  {}: {}", name, c.error);
-            else log.Error("  {}: {}", name, c.error);
-            continue;
-        }
-        if (c.missing.empty() && c.extra.empty())
-        {
-            log.Debug("  {}: {} frames, {} bones - matches the skeleton", name, c.info.frames, c.info.bones.size());
-            continue;
-        }
-        log.Info("  {}: {} frames, {} bones; skeleton bones missing in RTM: {}; RTM bones not in skeleton: {}", name, c.info.frames, c.info.bones.size(),
-                 c.missing.size(), c.extra.size());
-        if (!c.extra.empty()) log.Warn("  {}: RTM bones not in skeleton (ignored): {}", name, JoinList(c.extra, 20));
-        if (!c.missing.empty())
-        {
-            std::vector<int> bones;
-            for (const auto& m : c.missing)
-                if (int b = sk.Find(m); b >= 0) bones.push_back(b);
-            view_.LogMissingBones(name, bones, true);
-        }
+        if (c.info.binarized) log.Warn("  {}: {}", name, c.error);
+        else log.Error("  {}: {}", name, c.error);
+        return;
+    }
+    if (c.missing.empty() && c.extra.empty())
+    {
+        log.Debug("  {}: {} frames, {} bones - matches the skeleton", name, c.info.frames, c.info.bones.size());
+        return;
+    }
+    log.Info("  {}: {} frames, {} bones; skeleton bones missing in RTM: {}; RTM bones not in skeleton: {}", name, c.info.frames, c.info.bones.size(),
+             c.missing.size(), c.extra.size());
+    if (!c.extra.empty()) log.Warn("  {}: RTM bones not in skeleton (ignored): {}", name, JoinList(c.extra, 20));
+    if (!c.missing.empty())
+    {
+        std::vector<int> bones;
+        for (const auto& m : c.missing)
+            if (int b = sk.Find(m); b >= 0) bones.push_back(b);
+        view_.LogMissingBones(name, bones, true);
     }
 }
 
@@ -135,6 +192,7 @@ void AssetSession::UpdateWatchList()
 
 void AssetSession::Poll(double clock)
 {
+    PollRtmCheck();
     if (watchDirty) UpdateWatchList();
     auto events = watcher.Poll(clock);
     if (events.empty()) return;

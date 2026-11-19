@@ -72,3 +72,6 @@ comparison off	сравнение выключено
 {}: {}	{}: {}
 {}: no model.cfg with its skeleton next to the model	{}: рядом с моделью нет model.cfg с её скелетом
 comparison: {} ({} animations, {} on {}, reload {:.2f} s) below the weapon	сравнение: {} (анимаций {}, из них {} на {}, перезарядка {:.2f} с) под оружием
+checking {} / {}	проверка {} / {}
+Cancel##rtmcheck	Отмена
+Stops the check of the RTM folder; the files checked so far stay listed	Останавливает проверку папки RTM; уже проверенные файлы остаются в списке

@@ -3,6 +3,8 @@
 #include "Gltf.h"
 #include "Perf.h"
 
+#include <optional>
+
 #include <algorithm>
 #include <chrono>
 #include <fstream>
@@ -37,6 +39,11 @@ bool Session::ReadModel(const IFileSystem& files, const fs::path& path, bool req
         return true;
     }
     bool parsed;
+    // a hot reload that will retry (requireComplete): a file still being written fails to read / parse on every attempt
+    // but the last - its messages are Debug then (the caller warns once per retry); the last attempt reports Errors
+    std::vector<LogEntry> held;
+    std::optional<Log::CaptureScope> hold;
+    if (requireComplete) hold.emplace(held);
     {
         std::vector<uint8_t> bytes;
         bool read;
@@ -55,11 +62,13 @@ bool Session::ReadModel(const IFileSystem& files, const fs::path& path, bool req
         else
             parsed = LoadP3D(path, bytes, out);
     }
-    if (!parsed)
+    if (!parsed) log.Error("Model not loaded: '{}'", PathToUtf8(path));
+    if (hold)
     {
-        log.Error("Model not loaded: '{}'", PathToUtf8(path));
-        return false;
+        hold.reset();
+        for (auto& e : held) log.Add(!parsed && e.level == LogLevel::Error ? LogLevel::Debug : e.level, std::move(e.text));
     }
+    if (!parsed) return false;
     if (requireComplete && !out.complete)
     {
         log.Warn("'{}' is incomplete (still being written?) - keeping the previous model", PathToUtf8(path));
@@ -218,27 +227,15 @@ bool Session::LoadAddonConfig()
         log.Info("No config.cpp above the model - no hiddenSelectionsTextures");
         return false;
     }
-    // The mod's folder under its prefix: a mod in P:\MyMods\MyMod names its files "\MyMod\anm\x.rtm" (the PBO
-    // prefix, $PBOPREFIX$ or the folder name). When that path is not on P:\ itself, the folder is mounted under the prefix.
-    {
-        const fs::path dir = configCpp.parent_path();
-        std::string prefix;
-        if (std::ifstream pf(dir / "$PBOPREFIX$"); pf) std::getline(pf, prefix);
-        while (!prefix.empty() && (prefix.back() == '\r' || prefix.back() == ' ' || prefix.back() == '\\')) prefix.pop_back();
-        while (!prefix.empty() && (prefix.front() == '\\' || prefix.front() == ' ')) prefix.erase(prefix.begin());
-        if (prefix.empty()) prefix = PathToUtf8(dir.filename());
-        const fs::path onP = (projectRoot.empty() ? fs::path("P:\\") : projectRoot) / fs::path(Utf8ToWide(prefix));
-        if (!prefix.empty() && !fs::exists(onP, ec) && !fs::equivalent(dir, ResolveArmaPath(prefix, projectRoot), ec))
-        {
-            AddArmaFallbackMount(prefix, dir);
-            log.Info("Mod prefix \\{} -> {} (not at {}): the mod's own paths that are not on P: resolve there", prefix, PathToUtf8(dir), PathToUtf8(onP));
-        }
-    }
     modCfg = std::make_shared<ArmaConfig>();
     ArmaConfig& addon = *modCfg;
     addon.SetFallback(game); // the game's configs (P:\a3) when loaded: inheritance continues into them
     addon.Load(configCpp, projectRoot, false);
     configCppFiles = addon.Files();
+    // The mod's folder under its prefix: a mod in P:\MyMods\MyMod names its files "\MyMod\anm\x.rtm" ($PBOPREFIX$, the
+    // prefix set in the settings, the one its config's own paths agree on, else the folder name). When that path is not on
+    // P:\ itself, the folder is mounted under the prefix (its paths resolve there, the model is named by it).
+    MountInferredModPrefix(configCpp.parent_path(), &addon, projectRoot);
     std::string rel = ArmaPathOf(model.path, projectRoot);
     configSkins = FindConfigSkins(addon, rel);
     log.Info("config.cpp: '{}' ({} file(s), {} error(s), {}); {} class(es) re-texture this model", PathToUtf8(configCpp),

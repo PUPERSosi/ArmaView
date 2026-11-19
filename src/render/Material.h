@@ -80,6 +80,7 @@ private:
         std::vector<std::string> todo;
         std::vector<Decoded> done;
         bool stop = false;
+        unsigned running = 0; // workers that have not seen the empty list yet (counted under m, where they see it)
     };
     std::shared_ptr<Stream> stream_ = std::make_shared<Stream>();
     std::vector<std::jthread> workers_;

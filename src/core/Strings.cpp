@@ -74,7 +74,9 @@ const char* Tr(const char* en, bool record)
     const std::string_view vis = s.substr(0, hash);
     if (vis.empty()) return en;
     if (g_lang == UiLang::En) return en;
-    const Row* r = Find(vis);
+    // "label##id": the full label first (rows kept only with their id: "Stop##rec"), then the visible part
+    const Row* full = hash != std::string_view::npos ? Find(s) : nullptr;
+    const Row* r = full && full->ru ? full : Find(vis);
     if (!r || !r->ru)
     {
         if (record && Letters(vis) >= 3 && vis.size() < 300 && Ascii(vis) && g_missingText.size() < 5000) g_missingText.emplace(vis);
@@ -518,6 +520,8 @@ const Row kRows[] = {
     { "No actions", "Нет действий", nullptr, nullptr, nullptr },
     { "Click: filter the graph to the states of this actions class (and list its actions above)", "Щелчок: граф только с состояниями этого класса действий (и его действия выше)", nullptr, nullptr, nullptr },
     { "click: show it in the graph", "щелчок - показать в графе", nullptr, nullptr, nullptr },
+    { "override", "перекрытие", nullptr, nullptr, nullptr },
+    { "blend", "смешивание", nullptr, nullptr, nullptr },
     { "No skeleton - load a model with a model.cfg skeleton to play RTMs.", "Нет скелета - откройте модель со скелетом в model.cfg, чтобы играть RTM.", nullptr, nullptr, nullptr },
     { "< frame", "< кадр", "One frame back.", "На кадр назад.", "previous frame" },
     { "frame >", "кадр >", "One frame forward.", "На кадр вперёд.", "next frame" },
@@ -1197,6 +1201,9 @@ const Row kRows[] = {
     { "{}: {}", "{}: {}", nullptr, nullptr, nullptr },
     { "{}: no model.cfg with its skeleton next to the model", "{}: рядом с моделью нет model.cfg с её скелетом", nullptr, nullptr, nullptr },
     { "comparison: {} ({} animations, {} on {}, reload {:.2f} s) below the weapon", "сравнение: {} (анимаций {}, из них {} на {}, перезарядка {:.2f} с) под оружием", nullptr, nullptr, nullptr },
+    { "checking {} / {}", "проверка {} / {}", nullptr, nullptr, nullptr },
+    { "Cancel##rtmcheck", "Отмена", nullptr, nullptr, nullptr },
+    { "Stops the check of the RTM folder; the files checked so far stay listed", "Останавливает проверку папки RTM; уже проверенные файлы остаются в списке", nullptr, nullptr, nullptr },
     { "Mod check", "Проверка мода", nullptr, nullptr, nullptr },
     { "Mod check...", "Проверка мода...", "Checks every P3D, model.cfg, config.cpp, RVMAT and RTM of a mod folder in the background (read only) and lists the problems per file.", "Проверяет все P3D, model.cfg, config.cpp, RVMAT и RTM папки мода в фоне (только чтение) и показывает проблемы по файлам.", "Mod check (validate every file of a mod folder)" },
     { "Mod check (validate every file of a mod folder)", "Проверка мода (все файлы папки мода)", nullptr, nullptr, nullptr },
@@ -1258,6 +1265,8 @@ const Row kRows[] = {
     { "%s, %.2f s", "%s, %.2f с", nullptr, nullptr, nullptr },
     { "Saved {} ({} frames)", "Сохранено: {} (кадров {})", nullptr, nullptr, nullptr },
     { "Recording failed after {} of {} frames (ffmpeg exit {}): {}", "Запись прервалась после {} из {} кадров (код ffmpeg {}): {}", nullptr, nullptr, nullptr },
+    { "Recording cancelled after {} of {} frames", "Запись отменена после {} из {} кадров", nullptr, nullptr, nullptr },
+    { "Recording cancelled after {} of {} frames (the PNG frames so far are kept)", "Запись отменена после {} из {} кадров (записанные кадры PNG сохранены)", nullptr, nullptr, nullptr },
     { "Unsaved changes", "Несохранённые изменения", nullptr, nullptr, nullptr },
     { "These changes are only in the viewer and will be lost:", "Эти изменения есть только во вьювере и будут потеряны:", nullptr, nullptr, nullptr },
     { "Close without saving", "Закрыть без сохранения", "Closes the viewer; the listed changes are lost.", "Закрывает вьювер; перечисленные изменения теряются.", nullptr },

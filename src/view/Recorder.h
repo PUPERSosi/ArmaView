@@ -33,7 +33,8 @@ public:
     // IRecordView
     float RecordAnimLength(std::string* what) const override;
     bool StartRecording() override;
-    void StopRecording(bool completed) override;
+    void StopRecording(RecordStop why) override;
+    using IRecordView::StopRecording; // compat: удалить после перехода Qt (StopRecording(bool))
     bool Recording() const override { return run_.active; }
     int RecordFrame() const override { return run_.frame; }
     int RecordFrames() const override { return run_.frames; }

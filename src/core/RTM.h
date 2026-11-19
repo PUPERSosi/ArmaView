@@ -8,6 +8,8 @@
 // p' = c0*x + c1*y + c2*z + t. Verified: every child pivot maps to the same point with the child's and
 // the parent's matrix (error 0.0000 m over 292+ joints), i.e. skinning is p' = sum(w * M * p).
 #include "Skeleton.h"
+
+#include <atomic>
 #include "P3D.h" // kBinarizedNotSupported
 
 #include <glm/glm.hpp>
@@ -81,7 +83,11 @@ std::vector<SeamJump> CheckLoopSeam(const RtmAnimation& anim, float maxDistance 
 // Duration of a CfgMoves state from its speed: speed > 0 = cycles per second, speed < 0 = -seconds per cycle.
 float DurationFromMovesSpeed(float speed);
 
-std::vector<RtmBoneCheck> CheckRtmFolder(const std::filesystem::path& dir, const Skeleton& skel);
+// Every .rtm of a folder against the skeleton (headers only). done / total: progress for another thread; cancel: stop early
+// (the files checked so far come back).
+std::vector<RtmBoneCheck> CheckRtmFolder(const std::filesystem::path& dir, const Skeleton& skel, std::atomic<int>* done = nullptr,
+                                         std::atomic<int>* total = nullptr, const std::atomic<bool>* cancel = nullptr);
+RtmBoneCheck CheckRtmFile(const std::filesystem::path& file, const Skeleton& skel); // one file of it
 
 enum class LayerMode { Blend, Override };
 

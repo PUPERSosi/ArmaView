@@ -16,6 +16,7 @@
 #include "Playback.h"
 #include "MovesEdit.h"
 #include "RTM.h"
+#include "RvMaterial.h"
 #include "Retarget.h" // WriteRtm0101
 #include "Session.h"
 #include "Skeleton.h"
@@ -480,9 +481,153 @@ std::string RunCoreTest(const fs::path& dir, int* failuresOut)
                   job.batch.skipped == 1 && job.batch.failed == 0 && fs::exists(outDir / "a.rtm") && fs::exists(outDir / "c.rtm"),
               "layers batch: 3 files stepped one by one, 2 written, 1 skipped (" + job.msg + ")");
     }
+    // the RTM folder check (qt-req 1.6): opening an RTM does not read the whole folder on the UI thread - the results come
+    // in AssetSession::Poll; re-reading one RTM re-checks that file only
+    {
+        struct NoView : IAssetView
+        {
+            bool LoadModel(const fs::path&, bool, bool) override { return false; }
+            void OpenModel(const fs::path&, bool) override {}
+            bool TextureChanged(const fs::path&) override { return true; }
+            void GeometryChanged() override {}
+            void AttachmentsChanged() override {}
+            std::vector<fs::path> TextureFiles() const override { return {}; }
+            void LogLayerCoverage(const AnimLayer&) const override {}
+            void LogMissingBones(const std::string&, const std::vector<int>&, bool) const override {}
+        } noView;
+        const fs::path rtmDir = dir / "rtm_folder";
+        fs::create_directories(rtmDir, ec);
+        RtmAnimation a;
+        a.info.bones = { "root", "arm" };
+        a.times = { 0.0f, 1.0f };
+        a.poses.resize(4);
+        std::string err;
+        const int n = 120;
+        for (int i = 0; i < n; ++i)
+            if (!fs::exists(rtmDir / std::format("a{:03}.rtm", i), ec)) WriteRtm0101(a, rtmDir / std::format("a{:03}.rtm", i), err);
+        DiskFileSystem disk;
+        EventBus bus;
+        Session doc(disk, bus);
+        doc.skeleton.name = "two";
+        for (const char* b : { "root", "arm" }) { Bone bone; bone.name = b; doc.skeleton.bones.push_back(bone); }
+        doc.skeleton.bones[1].parent = 0;
+        Playback pb(doc);
+        MaterialSet mats(dir);
+        MovesSim sim(doc);
+        AssetSession assets(doc, pb, mats, sim, disk, noView);
+        LogCapture cap;
+        assets.OpenFile(rtmDir / "a000.rtm");
+        const size_t atOnce = assets.rtmChecks.size();
+        for (int k = 0; k < 2000 && assets.rtmChecks.size() < size_t(n); ++k)
+        {
+            assets.Poll(double(k));
+            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+        }
+        const size_t later = assets.rtmChecks.size();
+        LogCapture reloadCap;
+        const int filesBefore = assets.rtmFilesChecked;
+        assets.ReloadRtm(rtmDir / "a005.rtm");
+        const bool wholeFolder = reloadCap.Has(LogLevel::Info, "RTM check '") || assets.rtmFilesChecked != filesBefore + 1;
+        check(atOnce == 0 && later == size_t(n) && !wholeFolder && assets.rtmChecks.size() == size_t(n),
+              std::format("RTM folder check: {} result(s) right after opening (in the background: 0), {} after Poll, re-reading one RTM {}", atOnce, later,
+                          wholeFolder ? "re-checked the whole folder" : "re-checked it alone"));
+        // cancel: the check stops, what was checked so far stays; progress while it runs
+        assets.RunRtmCheck();
+        int done = 0, total = 0;
+        assets.RtmCheckProgress(done, total);
+        const bool running = assets.RtmCheckRunning();
+        assets.CancelRtmCheck();
+        check(!assets.RtmCheckRunning() && assets.rtmChecks.size() <= size_t(n) && done <= total && total <= n,
+              std::format("RTM folder check: progress {} / {} while {}, cancelled: {} result(s) kept", done, total, running ? "running" : "already done",
+                          assets.rtmChecks.size()));
+    }
     // string table: every RU translation has the format specifiers of its English text (checked when it was generated)
     const auto [rows, tips] = TableStats();
     check(rows > 500 && tips > 200, std::format("string table: {} rows, {} tooltips", rows, tips));
+    // a mod whose prefix is not its folder name and that has no $PBOPREFIX$ (qt-req 1.5): its config's own paths name the
+    // prefix (\AL_Mods\<mod>\...): the vehicle class of the model, its skin and its files are found
+    {
+        const fs::path mod = dir / "mods" / "av_prefix_mod";
+        fs::create_directories(mod / "Data", ec);
+        fs::create_directories(mod / "Model", ec);
+        fs::remove(mod / "$PBOPREFIX$", ec);
+        std::ofstream(mod / "Data" / "body_co.paa") << "not a real texture: only its place counts";
+        std::ofstream(mod / "Data" / "body.rvmat") << "class StageTI {};\n";
+        std::ofstream(mod / "config.cpp")
+            << "class CfgPatches { class av_prefix_mod { units[] = { \"AV_Test_Car\" }; }; };\n"
+               "class CfgVehicles { class Car; class AV_Test_Car: Car { model = \"\\AL_Mods\\av_prefix_mod\\Model\\car.p3d\"; crew = \"B_Soldier_F\";\n"
+               "  hiddenSelections[] = { \"camo\" }; hiddenSelectionsTextures[] = { \"\\AL_Mods\\av_prefix_mod\\Data\\body_co.paa\" };\n"
+               "  hiddenSelectionsMaterials[] = { \"\\AL_Mods\\av_prefix_mod\\Data\\body.rvmat\" }; }; };\n";
+        DiskFileSystem disk;
+        EventBus bus;
+        Session doc(disk, bus);
+        doc.projectRoot = dir;
+        doc.model.path = mod / "Model" / "car.p3d"; // the path only: no model file is written
+        LogCapture cap;
+        const bool loaded = doc.LoadAddonConfig();
+        const std::string rel = ArmaPathOf(doc.model.path, dir);
+        const CfgClass* veh = loaded && doc.modCfg ? FindVehicleClass(*doc.modCfg, rel) : nullptr;
+        const bool tex = fs::equivalent(ResolveArmaPath("\\AL_Mods\\av_prefix_mod\\Data\\body_co.paa", dir), mod / "Data" / "body_co.paa", ec);
+        // a prefix set by hand wins over the guess; $PBOPREFIX$ over both
+        std::string why1, why2;
+        SetModPrefixOverrides({ { mod, "Hand\\Set" } });
+        const std::string byHand = InferModPrefix(mod, doc.modCfg.get(), &why1);
+        SetModPrefixOverrides({});
+        std::ofstream(mod / "$PBOPREFIX$") << "\\Pbo\\Prefix\\\n";
+        const std::string byFile = InferModPrefix(mod, doc.modCfg.get(), &why2);
+        fs::remove(mod / "$PBOPREFIX$", ec);
+        check(byHand == "Hand\\Set" && byFile == "Pbo\\Prefix", std::format("mod prefix: set by hand {} ({}), $PBOPREFIX$ {} ({})", byHand, why1, byFile, why2));
+        check(veh && veh->name == "AV_Test_Car" && !veh->GetString("crew").empty() && doc.configSkins.size() == 1 && tex,
+              std::format("mod prefix from the config's paths (no $PBOPREFIX$): model {} -> class {}, {} skin(s), texture {}", rel, veh ? veh->name : "-",
+                          doc.configSkins.size(), tex ? "found" : "NOT FOUND"));
+    }
+    // a model still being written (qt-req 1.7): while a hot reload retries (requireComplete) its read / parse problems are
+    // no Errors (Debug); the last attempt (requireComplete off) reports them as Errors
+    {
+        struct HalfWritten : IFileSystem
+        {
+            bool Read(const fs::path&, std::vector<uint8_t>& out) const override
+            {
+                out = { 'M', 'L', 'O', 'D', 1, 1, 0, 0, 3, 0, 0, 0, 'P', '3', 'D', 'M' }; // header of an MLOD, cut short
+                return true;
+            }
+            FileStamp Stamp(const fs::path&) const override { return {}; }
+            bool IsWriteLocked(const fs::path&) const override { return false; }
+        } half;
+        P3DModel m;
+        int retryErrors = 0, lastErrors = 0;
+        bool retryRead = true, lastRead = true;
+        {
+            LogCapture cap;
+            retryRead = Session::ReadModel(half, dir / "being_written.p3d", true, m);
+            retryErrors = cap.Count(LogLevel::Error);
+        }
+        {
+            LogCapture cap;
+            lastRead = Session::ReadModel(half, dir / "being_written.p3d", false, m);
+            lastErrors = cap.Count(LogLevel::Error);
+        }
+        check(!retryRead && retryErrors == 0 && !lastRead && lastErrors >= 1,
+              std::format("half-written model: no Error while a retry follows ({} logged), Errors on the last attempt ({})", retryErrors, lastErrors));
+    }
+    // labels whose table row exists only with the "##id" (qt-req 1.3): the full label first, then the visible part
+    {
+        const UiLang was = GetUiLang();
+        SetUiLang(UiLang::Ru);
+        const std::pair<const char*, const char*> withId[] = {
+            { "Turn 360##rec", "Поворот 360##rec" }, { "seconds##rec", "секунд##rec" }, { "format##rec", "формат##rec" }, { "size##rec", "размер##rec" },
+            { "fps##rec", "fps##rec" }, { "Stop##rec", "Стоп##rec" }, { "Show in folder##reclast", "Показать в папке##reclast" }, { "...##recdir", "...##recdir" },
+            { "Check##modcheck", "Проверить##modcheck" }, { "errors##mod", "ошибки##mod" }, { "warnings##mod", "предупреждения##mod" },
+            { "only new##mod", "только новые##mod" }, { "...##modfolder", "...##modfolder" }, { "Put away##unit", "Убрать##unit" }, { "Close##replace", "Закрыть##replace" },
+        };
+        std::string bad;
+        for (const auto& [en, ru] : withId)
+            if (std::string(T(en)) != ru) bad += std::format(" {} -> {};", en, T(en));
+        for (const char* plain : { "override", "blend" })
+            if (std::string(T(plain)) == plain) bad += std::format(" {} untranslated;", plain);
+        SetUiLang(was);
+        check(bad.empty(), "string table: the 15 labels kept only with their ##id and override / blend translate to RU" + bad);
+    }
     if (failuresOut) *failuresOut = failures;
     return std::format("{} check(s) failed{}", failures, out);
 }

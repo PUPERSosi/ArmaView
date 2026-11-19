@@ -74,7 +74,9 @@ const char* Tr(const char* en, bool record)
     const std::string_view vis = s.substr(0, hash);
     if (vis.empty()) return en;
     if (g_lang == UiLang::En) return en;
-    const Row* r = Find(vis);
+    // "label##id": the full label first (rows kept only with their id: "Stop##rec"), then the visible part
+    const Row* full = hash != std::string_view::npos ? Find(s) : nullptr;
+    const Row* r = full && full->ru ? full : Find(vis);
     if (!r || !r->ru)
     {
         if (record && Letters(vis) >= 3 && vis.size() < 300 && Ascii(vis) && g_missingText.size() < 5000) g_missingText.emplace(vis);

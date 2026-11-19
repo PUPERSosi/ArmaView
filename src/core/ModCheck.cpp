@@ -493,11 +493,14 @@ void FinishModReport(ModReport& r)
 
 void MountModPrefix(const fs::path& dir, const fs::path& root)
 {
-    std::string prefix;
-    if (std::ifstream pf(dir / "$PBOPREFIX$"); pf) std::getline(pf, prefix);
-    while (!prefix.empty() && (prefix.back() == '\r' || prefix.back() == ' ' || prefix.back() == '\\')) prefix.pop_back();
-    while (!prefix.empty() && (prefix.front() == '\\' || prefix.front() == ' ')) prefix.erase(prefix.begin());
-    if (prefix.empty()) prefix = PathToUtf8(dir.filename());
+    // the same inference as the viewer's model (InferModPrefix): the mod's config.cpp read quietly for its own paths
     std::error_code ec;
-    if (!prefix.empty() && !fs::exists(root / fs::path(Utf8ToWide(prefix)), ec)) AddArmaFallbackMount(prefix, dir);
+    ArmaConfig cfg;
+    const bool hasCfg = fs::exists(dir / "config.cpp", ec);
+    if (hasCfg)
+    {
+        LogCapture quiet; // its problems are the Mod check's report, not the log's
+        cfg.Load(dir / "config.cpp", root, false);
+    }
+    MountInferredModPrefix(dir, hasCfg ? &cfg : nullptr, root);
 }

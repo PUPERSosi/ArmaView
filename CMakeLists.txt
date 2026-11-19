@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(ArmaView VERSION 1.0.1 LANGUAGES CXX RC)
+project(ArmaView VERSION 1.0.3 LANGUAGES CXX RC)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -67,7 +67,7 @@ target_include_directories(ArmaViewCore PUBLIC ${CMAKE_SOURCE_DIR}/src/core)
 target_include_directories(ArmaViewCore PRIVATE ${CGLTF_INCLUDE_DIRS})
 target_link_libraries(ArmaViewCore PUBLIC glm::glm)
 target_compile_definitions(ArmaViewCore PUBLIC GLM_FORCE_LEFT_HANDED GLM_FORCE_DEPTH_ZERO_TO_ONE GLM_ENABLE_EXPERIMENTAL)
-target_compile_options(ArmaViewCore PRIVATE /W4 /permissive- /utf-8 /MP /Zc:__cplusplus
+target_compile_options(ArmaViewCore PRIVATE /W4 /we4456 /we4457 /we4458 /permissive- /utf-8 /MP /Zc:__cplusplus
     $<$<CONFIG:Release>:/O2 /GL /Gy>)
 
 # ---- ArmaViewViewCore: the view logic and the interfaces another UI builds on (app mode, states graph host, point
@@ -92,6 +92,7 @@ target_compile_options(ArmaViewViewCore PRIVATE /W4 /permissive- /utf-8 /MP /Zc:
 add_library(ArmaViewRender STATIC
     src/render/Renderer.h   src/render/Renderer.cpp
     src/render/Material.h   src/render/Material.cpp
+    src/render/RenderSelfTest.h src/render/RenderSelfTest.cpp
     src/render/Camera.h
 )
 target_include_directories(ArmaViewRender PUBLIC ${CMAKE_SOURCE_DIR}/src/render)

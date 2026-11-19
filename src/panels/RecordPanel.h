@@ -16,6 +16,10 @@ struct RecordSettings
     char outDir[400] = {};
 };
 
+// Why a recording ends: every frame written / the user stopped it (the partial MP4 / GIF is deleted) / a frame or the
+// encoder failed (the file is kept for a look, an Error is logged).
+enum class RecordStop { Completed, Cancelled, Failed };
+
 // What the Record window asks of the viewer (implemented by App).
 class IRecordView
 {
@@ -23,7 +27,8 @@ public:
     virtual ~IRecordView() = default;
     virtual float RecordAnimLength(std::string* what) const = 0; // seconds of "the animation once" (0: nothing plays)
     virtual bool StartRecording() = 0;
-    virtual void StopRecording(bool completed) = 0;
+    virtual void StopRecording(RecordStop why) = 0;
+    void StopRecording(bool completed) { StopRecording(completed ? RecordStop::Completed : RecordStop::Cancelled); } // compat: удалить после перехода Qt
     virtual bool Recording() const = 0;
     virtual int RecordFrame() const = 0;
     virtual int RecordFrames() const = 0;

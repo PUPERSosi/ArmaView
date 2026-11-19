@@ -179,7 +179,11 @@ void HandleArgs(App& app, const std::vector<std::wstring>& args)
         if (!opt)
         {
             if (arg.starts_with(L"--")) Log::Get().Warn("Unknown option {} (F1: list of options)", WideToUtf8(arg));
-            else app.OpenFile(arg);
+            else
+            {
+                app.OpenFile(arg);
+                if (const auto ext = std::filesystem::path(arg).extension(); ext == L".p3d" || ext == L".P3D") a.lastModel = arg;
+            }
             continue;
         }
         std::wstring value;

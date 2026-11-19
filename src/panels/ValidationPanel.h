@@ -32,6 +32,9 @@ public:
     virtual const std::vector<RtmBoneCheck>& RtmChecks() const = 0;
     virtual void PickRtmFolder() = 0;
     virtual void RecheckRtm() = 0;
+    // the folder check runs in the background: files done of all (both 0 when idle); stop it (results so far stay)
+    virtual void RtmCheckProgress(int& done, int& total) const { done = total = 0; }
+    virtual void CancelRtmCheck() {}
 };
 
 class ValidationPanel

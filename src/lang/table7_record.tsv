@@ -33,3 +33,5 @@ Recording {}: {} frames {}x{} at {} fps	Запись: {} - кадров {}, {}x{
 %s, %.2f s	%s, %.2f с
 Saved {} ({} frames)	Сохранено: {} (кадров {})
 Recording failed after {} of {} frames (ffmpeg exit {}): {}	Запись прервалась после {} из {} кадров (код ffmpeg {}): {}
+Recording cancelled after {} of {} frames	Запись отменена после {} из {} кадров
+Recording cancelled after {} of {} frames (the PNG frames so far are kept)	Запись отменена после {} из {} кадров (записанные кадры PNG сохранены)

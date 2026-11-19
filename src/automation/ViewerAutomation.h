@@ -54,13 +54,16 @@ struct Automation
     bool noSwizzle = false;         // --no-swizzle
     std::string world;              // --world Altis|Tanoa|... (CfgWorlds lighting)
     int damage = -1;                // --damage 0|1|2 (class Damage materials)
+    std::filesystem::path lastModel; // the last model file of the command line: the model options wait until it is applied
 };
 
 class ViewerAutomation
 {
 public:
     explicit ViewerAutomation(App& app) : app_(app) {}
-    void Apply(const Automation& a);      // command-line options (after Init)
+    // command-line options (after Init): what does not need the model at once, the rest when the last model of the
+    // command line is applied (it is read in the background); --screenshot when everything is loaded
+    void Apply(const Automation& a);
     void BeforeNewFrame();                // the ui-script's input / steps of this frame
     void AfterNewFrame() { script_.AfterNewFrame(); }
     void AfterRender();                   // screenshots (ui-script, --screenshot)
@@ -78,4 +81,9 @@ private:
     UiScript script_;
     std::filesystem::path pendingShot_;   // ui-script screenshot after this frame
     int frameCount_ = 0;
+    bool modelOptionsPending_ = false; // waiting for auto_.lastModel
+    int settledFrames_ = 0;
+    bool screenshotDone_ = false;            // frames since the model options were applied and nothing loads (--screenshot)
+    void ApplyModelOptions();          // --lod / --select / --isolate / --highlight / --focus-bone / --compare-rtm ...
+    bool Ready();                      // nothing loads or builds in the background (models, textures, configs, graphs)
 };
