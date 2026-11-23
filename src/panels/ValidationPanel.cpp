@@ -239,6 +239,33 @@ void ValidationPanel::Draw(const std::string& windowName, const std::function<vo
                 ImGui::PopID();
             }
     }
+    // UI pictures the mod's config names (picture / editorPreview / icon) against BI's standards
+    if (const ArmaConfig* cfg = session_.modCfg ? session_.modCfg.get() : nullptr)
+    {
+        if (picturesOf_ != cfg)
+        {
+            picturesOf_ = cfg;
+            pictures_ = CheckConfigPictures(*cfg, session_.projectRoot);
+        }
+        const size_t errors = size_t(std::count_if(pictures_.begin(), pictures_.end(), [](const IconPictureIssue& i) { return i.error; }));
+        ImGui::PushStyleColor(ImGuiCol_Text, errors ? kErrorColor : !pictures_.empty() ? kWarnColor : kOkColor);
+        const bool open = ui::CollapsingHeader(TF("UI pictures (config): {} error(s), {} warning(s)###icpics", errors, pictures_.size() - errors).c_str());
+        ImGui::PopStyleColor();
+        if (open)
+        {
+            if (ui::SmallButton("Check again")) picturesOf_ = nullptr;
+            for (size_t i = 0; i < pictures_.size(); ++i)
+            {
+                const IconPictureIssue& is = pictures_[i];
+                if (ui::SmallButton(TF("open##icp{}", i).c_str())) host_.OpenInEditor(is.config, is.line);
+                if (ui::Hovered()) ui::SetTooltip("%s:%d (VS Code, path copied to the clipboard)", PathToUtf8(is.config).c_str(), is.line);
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Text, is.error ? kErrorColor : kWarnColor);
+                ui::TextWrapped("%s", std::format("{}::{} {} = \"{}\": {}", is.root, is.cls, is.key, is.value, T(is.problem.c_str())).c_str());
+                ImGui::PopStyleColor();
+            }
+        }
+    }
     if (movesSection) movesSection(); // CfgMoves of the model's skeleton (the Moves panel draws it)
     ImGui::End();
 }

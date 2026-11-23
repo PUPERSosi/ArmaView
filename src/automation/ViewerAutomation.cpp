@@ -111,7 +111,7 @@ void ViewerAutomation::Apply(const Automation& a)
         auto windowWalk = [&]() {
             static constexpr const char* kModes[][8] = {
                 { "Outliner", "Inspector", "Log" }, { "Timeline", "Moves", "Move editor", "Retarget", "Layers", "Sources" },
-                { "Crew", "Sources" }, { "Materials" }, { "Validation" }, { "Reload sync" }, { "Optics" },
+                { "Crew", "Sources" }, { "Materials" }, { "Validation" }, { "Reload sync" }, { "Optics" }, { "Icons" },
             };
             script += "show all\nwait 3\n";
             for (int m = 0; m < int(std::size(kModes)); ++m)
@@ -132,15 +132,20 @@ void ViewerAutomation::Apply(const Automation& a)
         }
         windowWalk();
         model("Test_Car_01\\Test_Car_01.p3d", "Test_Car_01", "skintest body\nwait 3\n");
-        model("Test_Heli_01\\Test_Heli_01.p3d", "Test_Heli_01", "");
-        model("Test_Character_01\\A3_character_example.p3d", "A3_character_example", "");
+        model("Test_Heli_01\\Test_Heli_01.p3d", "Test_Heli_01", "icon vehicle icons_heli.png\nicon mapicon icons_heli_map.png\nicon editorpreview icons_heli.jpg\n");
+        // Icons mode: a class of the mod shows its own model and re-texture (the sample vest), then the character again
+        model("Test_Character_01\\A3_character_example.p3d", "A3_character_example",
+              "icon gear icons_character.png\nicon headgear icons_character_3q.png\niconclass V_Test_Vest\nwait 20\nicon gear icons_vest.png\n"
+              "iconcam 30 10 15 2 0 0.1 0\niconsave icons_vest_zoom.png\niconcam 0 0 0 1 0 0 0\n"
+              "iconclass U_Test_uniform\nwait 20\niconhide camo\nwait 5\niconsave icons_uniform_hidden.png\niconhide reset\nopen " + s +
+              "Test_Character_01\\A3_character_example.p3d\nwait 20\n");
         // the Samples' RTMs as layers on the sample character
         script += "open " + s + "Test_Anims\\AmovPercMstpSrasWrflDnon.rtm\nopen " + s + "Test_Anims\\AmovPpneMstpSrasWrflDnon.rtm\n";
         script += "play\nwait 10\nperf_begin\nwait 120\nperf_end character playing (layers)\n";
         script += "screenshot A3_character_playing.png\nvalidation A3_character_example + RTM\npause\n";
         windowWalk();
         // weapon modes on the sample rifle: reload chain + windows + touch, the optics mode
-        script += "open " + s + "Test_Weapon_01\\test_weapon_01_F.p3d\nwait 20\nweapon mode reload\nweapon time 0.9\nweapon report\n"
+        script += "open " + s + "Test_Weapon_01\\test_weapon_01_F.p3d\nwait 20\nicon weapon icons_weapon.png\nweapon mode reload\nweapon time 0.9\nweapon report\n"
                   "weapon touch LeftHand magazine\nwait 5\nscreenshot Test_weapon_reload.png\nweapon mode optics\nwait 10\nweapon report\n"
                   "screenshot Test_weapon_optics.png\nkey ctrl+1\nwait 5\nvalidation Test_weapon_01\n";
         windowWalk();
@@ -769,6 +774,89 @@ void ViewerAutomation::RegisterCommands()
         app_.record_.settings.format = fmt == "gif" ? 1 : fmt == "png" ? 2 : 0;
         app_.recorder_.StartRecording();
         return app_.recorder_.RecordMessage();
+    });
+    // the Icons mode's picture of the open model by a preset's BI numbers; the measurements of it in the report
+    reg.Add("icon", "<preset> <file.png|.jpg|.paa>", "picture of the open model (presets: editorpreview weapon gear headgear attachment vehicle mapicon custom)",
+            [this](std::istringstream& is) -> std::string {
+        std::string id, file;
+        is >> id >> file;
+        const IconPreset p = IconPresetById(id);
+        if (p == IconPreset::Count) return "unknown preset " + id;
+        if (file.empty()) return "icon <preset> <file> [yaw pitch]";
+        IconSettings set = DefaultIconSettings(p);
+        if (float yaw = 0, pitch = 0; is >> yaw >> pitch) { set.yawDeg = yaw; set.pitchDeg = pitch; } // another view (tests)
+        std::string msg;
+        RgbaImage img;
+        if (!app_.iconsPanel_.RenderToFile(set, script_.OutPath(file), msg, &img))
+        {
+            Log::Get().Error("icon {}: {}", id, msg);
+            return "failed: " + msg;
+        }
+        const ImageStats m = MeasureImage(img);
+        const std::string res = std::format("{} {}: fill {:.0f}x{:.0f}% border L{:.0f} R{:.0f} T{:.0f} B{:.0f}% alpha {} white {}", id, msg, m.fillW * 100,
+                                            m.fillH * 100, m.marginL * 100, m.marginR * 100, m.marginT * 100, m.marginB * 100, m.alpha ? "yes" : "no",
+                                            m.whiteSilhouette ? "yes" : "no");
+        if (set.background == IconBackground::Transparent)
+        {
+            // the item fitted into the border: one axis fills it (2 % tolerance), the background transparent
+            const bool fitted = m.fillW >= 1 - set.marginL - set.marginR - 0.02f || m.fillH >= 1 - set.marginT - set.marginB - 0.02f;
+            if (!m.alpha || !fitted || (set.whiteSilhouette && !m.whiteSilhouette)) Log::Get().Error("icon {}: not as the preset: {}", id, res);
+        }
+        return res;
+    });
+    reg.Add("iconclass", "<class>", "the Icons mode on a class of the mod: its model (worn / uniformClass) and its skin", [this](std::istringstream& is) -> std::string {
+        std::string cls;
+        is >> cls;
+        if (!app_.iconsPanel_.SelectClass(cls)) return "no class " + cls + " with a model in the mod's config";
+        if (!app_.iconsPanel_.Message().empty()) return cls + ": " + app_.iconsPanel_.Message();
+        const Session& s = app_.session_;
+        const std::string skin = s.activeSkin >= 0 && s.activeSkin < int(s.configSkins.size())
+                                     ? s.configSkins[size_t(s.activeSkin)].cfgRoot + "::" + s.configSkins[size_t(s.activeSkin)].className : std::string("-");
+        return std::format("{}: model {}, skin {}", cls, s.hasModel ? PathToUtf8(s.model.path.filename()) : "-", skin);
+    });
+    reg.Add("iconcam", "<yaw> <pitch> <roll> <zoom> <x> <y> <z>", "the Icons window's camera (zoom / target: framed by the camera, no fit)",
+            [this](std::istringstream& is) -> std::string {
+        IconSettings& s = app_.iconsPanel_.Current();
+        float v[7] = {};
+        for (float& x : v) is >> x;
+        s.yawDeg = v[0]; s.pitchDeg = v[1]; s.rollDeg = v[2]; s.zoom = v[3] > 0 ? v[3] : 1.0f;
+        s.offsetX = v[4]; s.offsetY = v[5]; s.offsetZ = v[6];
+        s.fitToBorder = s.zoom == 1.0f && v[4] == 0 && v[5] == 0 && v[6] == 0;
+        app_.iconsPanel_.Changed();
+        return std::format("camera yaw {} pitch {} roll {} zoom {} target {} {} {}", v[0], v[1], v[2], s.zoom, v[4], v[5], v[6]);
+    });
+    reg.Add("iconsave", "<file.png|.jpg|.paa>", "the Icons window's picture with its current settings", [this](std::istringstream& is) -> std::string {
+        std::string file;
+        is >> file;
+        std::string msg;
+        RgbaImage img;
+        if (!app_.iconsPanel_.RenderToFile(app_.iconsPanel_.Current(), script_.OutPath(file), msg, &img)) return "failed: " + msg;
+        const ImageStats m = MeasureImage(img);
+        return std::format("{}: fill {:.0f}x{:.0f}% border L{:.0f} R{:.0f} T{:.0f} B{:.0f}%", msg, m.fillW * 100, m.fillH * 100, m.marginL * 100, m.marginR * 100,
+                           m.marginT * 100, m.marginB * 100);
+    });
+    reg.Add("iconhide", "<selection>|reset", "hide a selection for the Icons window's picture only", [this](std::istringstream& is) -> std::string {
+        std::string n;
+        is >> n;
+        return app_.iconsPanel_.HideForIcon(n) ? std::format("icon hiding: {} ({} face(s) hidden)", n,
+                                                              std::count(app_.scene_.faceHidden.begin(), app_.scene_.faceHidden.end(), uint8_t(1)))
+                                               : std::string("no class in the Icons window");
+    });
+    reg.Add("iconpics", "[class]", "UI pictures the mod's config names, checked against BI's standards (warnings)", [this](std::istringstream& is) -> std::string {
+        std::string cls;
+        is >> cls;
+        if (!app_.session_.modCfg) return "no mod config";
+        const auto issues = CheckConfigPictures(*app_.session_.modCfg, app_.session_.projectRoot, cls);
+        std::string out = std::format("{} issue(s)", issues.size());
+        for (const auto& i : issues) out += std::format("; {}::{} {}: {} ({}:{})", i.root, i.cls, i.key, i.problem, PathToUtf8(i.config.filename()), i.line);
+        return out;
+    });
+    reg.Add("iconstate", "", "the Icons window: category, camera and what is kept for the class", [this](std::istringstream&) -> std::string {
+        const IconSettings& s = app_.iconsPanel_.Current();
+        std::string kept;
+        for (const auto& [c, v] : app_.iconsPanel_.saved) kept += c + "{" + v + "} ";
+        return std::format("preset {} yaw {:g} pitch {:g} roll {:g} zoom {:g} fit {} kept: {}", Standard(s.preset).id, s.yawDeg, s.pitchDeg, s.rollDeg, s.zoom,
+                           s.fitToBorder ? 1 : 0, kept.empty() ? "-" : kept);
     });
     // gltf_sample | gltf_sample check: writes the selftest glTF (Gltf.h WriteGltfSample) and opens it; check: the model,
     // its skeleton and the clip layer arrived (an error otherwise)

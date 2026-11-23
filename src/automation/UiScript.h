@@ -39,6 +39,7 @@ public:
     // Script given as text (e.g. the built-in --selftest); relative paths resolve against baseDir.
     bool LoadText(const std::string& text, const std::filesystem::path& baseDir);
     bool Active() const { return active_; }
+    std::filesystem::path OutPath(const std::string& file) const; // a relative output file: in the script's folder
     // Call between the platform backend NewFrame and ImGui::NewFrame: runs due steps, queues input events.
     void BeforeNewFrame(const Host& host);
     // Call right after ImGui::NewFrame (window focus requests).

@@ -71,6 +71,7 @@ const std::vector<CliOption>& CliOptions()
         { L"--crew-ik", nullptr, "Crew", "IK hands / legs", [](Automation& a, const std::wstring&) { a.crewIk = true; } },
         // automation
         { L"--new-instance", nullptr, "Automation", "do not hand the files to a running viewer", [](Automation&, const std::wstring&) {} },
+        { L"--no-game", nullptr, "Automation", "do not read the game configs on P: (Arma 3 Samples and own files only)", [](Automation&, const std::wstring&) {} },
         { L"--screenshot", "out.png", "Automation", "save a screenshot after a few frames and exit", [](Automation& a, const std::wstring& v) { a.screenshot = v; } },
         { L"--ui-script", "file.txt", "Automation", "drive the UI with a script (see ui-script)", [](Automation& a, const std::wstring& v) { a.uiScript = v; } },
         { L"--selftest", "[dir]", "Automation", "regression run on the BI samples, report + screenshots in dir", [](Automation& a, const std::wstring& v) { a.selftest = v.empty() ? fs::path(L"selftest") : fs::path(v); } },

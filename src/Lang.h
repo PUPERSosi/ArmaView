@@ -60,6 +60,7 @@ template <class... A> bool SliderInt(const char* l, A... a) { const bool r = ImG
 template <class... A> bool SliderAngle(const char* l, A... a) { const bool r = ImGui::SliderAngle(T(l), a...); Tip(l, Kind::Slider); return r; }
 template <class... A> bool DragFloat(const char* l, A... a) { const bool r = ImGui::DragFloat(T(l), a...); Tip(l, Kind::Slider); return r; }
 template <class... A> bool DragFloat2(const char* l, A... a) { const bool r = ImGui::DragFloat2(T(l), a...); Tip(l, Kind::Slider); return r; }
+template <class... A> bool DragFloat4(const char* l, A... a) { const bool r = ImGui::DragFloat4(T(l), a...); Tip(l, Kind::Slider); return r; }
 template <class... A> bool DragFloat3(const char* l, A... a) { const bool r = ImGui::DragFloat3(T(l), a...); Tip(l, Kind::Slider); return r; }
 template <class... A> bool DragInt(const char* l, A... a) { const bool r = ImGui::DragInt(T(l), a...); Tip(l, Kind::Slider); return r; }
 template <class... A> bool DragInt2(const char* l, A... a) { const bool r = ImGui::DragInt2(T(l), a...); Tip(l, Kind::Slider); return r; }

@@ -31,9 +31,41 @@ dressed from their config, without starting the game. It reads the unbinarized s
   the view through the sight).
 - **Materials and light:** RVMAT (Super, Multi, Skin and others), PAA, world lighting from `LightingNew`, shadows,
   reflections, damage states.
+- **Icons:** UI pictures of a mod's classes by BI's standards (see [Icons](#icons)).
 - **Blender:** preview from Blender through Arma 3 Object Builder (a3ob), opening a baked clip in Blender.
 - **Start screen and setup:** "What do you want to do?" opens the right mode; the first start shows which paths the
   viewer found (P:, game data, Arma 3 Samples, Blender, ffmpeg); tooltips on the controls; English and Russian UI.
+
+## Icons
+
+The Icons mode (Ctrl+8) makes the UI pictures of a mod's classes the way Bohemia makes its own: it lists the
+`scope = 2` classes of the mod's config that have a model on disk, shows each with its own model and re-texture
+(a uniform as its `uniformClass` soldier, a vest or helmet as worn), and renders it offscreen into the picture.
+
+![Icons mode on an Arma 3 Samples model](docs/images/readme_icons.png)
+
+- **Presets by BI's standards:** editor preview (JPG 455 x 256 on the VR ground, BI's camera), weapon (1024 x 512,
+  side view, muzzle left), gear (256 x 256), headgear (256 x 256, 3/4 view), attachment / magazine (256 x 256),
+  vehicle picture (128 x 64 white silhouette) and map icon (512 x 512 from above), custom. The category comes from the
+  class's inheritance (the base class is shown) or is picked by hand; the numbers (size, free border, view, background,
+  file name, folder) are the medians of BI's own pictures, see [docs/icons.md](docs/icons.md) and the "BI standards"
+  window.
+- **Fitting:** exposure, saturation, contrast, outline, white silhouette, border; the camera (yaw / pitch / roll, zoom,
+  target) with sliders or the mouse in the preview; model parts hidden for the picture only; all kept per class.
+- **BI's examples beside the preview:** read from your own game data on P: while the viewer runs (scope=2 classes of
+  the same category with their picture on disk); nothing of BI's is shipped with ArmaView.
+- **Output:** PNG with alpha, JPG for editor previews, PAA through `ImageToPAA.exe` of the Arma 3 Tools (Steam; found
+  automatically or set in the window). The file name and folder follow BI's rule (`gear_<class>_X_ca.paa`,
+  `icon_<class>_ca.paa`, `map_<class>_ca.paa`, `<Class>.jpg` in `data\ui` / `data\editorpreviews`), and the window
+  gives the config line to paste, for example `picture = "\mymod\data\ui\gear_my_rifle_F_X_ca.paa";`.
+- **Batch:** every listed class in one go (pictures, map icons of vehicles, editor previews).
+- **Editor previews in the game:** "SQF for the game" copies the call for the mod's CfgVehicles classes only, e.g.
+  `[1, "all", [], [], [], ["My_Car_F", "My_Soldier_F"]] spawn BIS_fnc_exportEditorPreviews;` (run it in the editor;
+  the shots go to `Screenshots\EditorPreviews`).
+- **Checks:** the pictures the mod's config already names are checked against the standard of their category (missing
+  file, size, `_co` instead of `_ca`, no alpha, folder, PAA power of two), in the window and in Validation.
+- Characters for editor previews are dressed by the Unit system from source parts only (MLOD, text RTM: Arma 3 Samples
+  or your own); a binarized model or gear part is not drawn, and the window says which part and why.
 
 ## Supported formats
 
@@ -133,7 +165,7 @@ Tests:
 | Ctrl+Shift+P | command palette |
 | Ctrl+O | open a model (P3D, glTF) / RTM |
 | F5 | reload the model |
-| Ctrl+1...7 | modes: Model, Skeleton & Anim, Vehicle & Crew, Materials, Validation, Reload, Optics |
+| Ctrl+1...8 | modes: Model, Skeleton & Anim, Vehicle & Crew, Materials, Validation, Reload, Optics, Icons |
 | LMB / RMB / wheel | rotate / pan / zoom the camera |
 | F | frame the model |
 | 1-5 | front, back, left, right, top view |

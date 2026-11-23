@@ -7,6 +7,9 @@
 #include "Settings.h"
 #include "UiShell.h"
 
+#include <map>
+#include <string>
+
 class UiSettings
 {
 public:
@@ -15,6 +18,8 @@ public:
     void Store(Settings& settings) const;
     bool startedSeen = false;             // the first-run window was shown once
     bool startScreen = true;              // "What do you want to do?" at every start without a model
+    std::string* imageToPaa = nullptr;    // the Icons mode's ImageToPAA.exe (block "icons")
+    std::map<std::string, std::string>* iconClasses = nullptr; // the Icons mode per class: "Class:<cls>" = its choices
 
 private:
     UiShell& shell_;

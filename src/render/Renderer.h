@@ -93,7 +93,7 @@ public:
     bool SaveBackbufferPng(const std::wstring& path, std::string& error); // call after drawing, before Present
     // Offscreen target of any size (recording without the UI): DrawScene draws there between Begin and End.
     bool BeginOffscreen(UINT width, UINT height, const float clearColor[4]);
-    bool ReadOffscreen(std::vector<uint8_t>& rgba); // RGBA8, tight rows
+    bool ReadOffscreen(std::vector<uint8_t>& rgba, bool keepAlpha = false); // RGBA8, tight rows; keepAlpha: the drawn alpha (pictures), else opaque
     void EndOffscreen();
     // Copies the scene depth buffer to the CPU (after DrawScene); DepthAt reads it (0 near .. 1 far, 1 outside).
     void CaptureDepth();

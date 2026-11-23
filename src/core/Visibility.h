@@ -40,6 +40,20 @@ public:
     bool AnyHidden(float resolution) const;
     void ShowAll(float resolution);
 
+    // another visibility in place of this model's for a while (the Icons mode's own hiding): the state as a whole,
+    // put back later; persist = false keeps it out of the settings file meanwhile
+    struct Snapshot
+    {
+        std::map<std::string, LodVisibility> lods;
+        std::set<std::string> overlays;
+    };
+    Snapshot Take() const { return { lods_, overlays }; }
+    void Restore(const Snapshot& s) { lods_ = s.lods; overlays = s.overlays; }
+    bool persist = true;
+    // hidden names / isolation / LOD eye / hidden faces of every LOD as one line ("" when nothing) and back
+    static std::string SnapshotText(const Snapshot& s);
+    static Snapshot SnapshotFromText(const std::string& text);
+
 private:
     Settings* settings_ = nullptr;
     std::filesystem::path model_;

@@ -53,8 +53,50 @@ std::vector<uint32_t> ParseFaces(const std::string& s)
 
 std::string ModelVisibility::Key(float resolution) { return std::format("{:g}", resolution); }
 
+std::string ModelVisibility::SnapshotText(const Snapshot& s)
+{
+    // <lod>!<hidden|...>!<isolate>!<eye 0/1>!<face,...> joined by ~
+    std::string out;
+    for (const auto& [key, v] : s.lods)
+    {
+        if (v.Empty()) continue;
+        std::string h, f;
+        for (const auto& n : v.hidden) h += (h.empty() ? "" : "|") + n;
+        for (uint32_t x : v.hiddenFaces) f += (f.empty() ? "" : ",") + std::to_string(x);
+        out += (out.empty() ? "" : "~") + key + "!" + h + "!" + v.isolate + "!" + (v.meshHidden ? "1" : "0") + "!" + f;
+    }
+    return out;
+}
+
+ModelVisibility::Snapshot ModelVisibility::SnapshotFromText(const std::string& text)
+{
+    Snapshot s;
+    auto split = [](const std::string& t, char c) {
+        std::vector<std::string> r;
+        size_t a = 0;
+        for (size_t b; (b = t.find(c, a)) != std::string::npos; a = b + 1) r.push_back(t.substr(a, b - a));
+        r.push_back(t.substr(a));
+        return r;
+    };
+    if (text.empty()) return s;
+    for (const auto& lod : split(text, '~'))
+    {
+        const auto p = split(lod, '!');
+        if (p.size() < 5) continue;
+        LodVisibility& v = s.lods[p[0]];
+        if (!p[1].empty())
+            for (const auto& n : split(p[1], '|')) v.hidden.insert(n);
+        v.isolate = p[2];
+        v.meshHidden = p[3] == "1";
+        if (!p[4].empty())
+            for (const auto& n : split(p[4], ',')) v.hiddenFaces.insert(uint32_t(std::strtoul(n.c_str(), nullptr, 10)));
+    }
+    return s;
+}
+
 void ModelVisibility::Load(Settings& settings, const fs::path& model)
 {
+    persist = true;
     settings_ = &settings;
     model_ = model;
     lods_.clear();
@@ -83,7 +125,7 @@ void ModelVisibility::Load(Settings& settings, const fs::path& model)
 
 void ModelVisibility::Save() const
 {
-    if (!settings_) return;
+    if (!settings_ || !persist) return;
     // keep the other models' blocks
     std::vector<std::string> keep;
     const std::string header = ModelHeader(model_);

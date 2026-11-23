@@ -1,5 +1,6 @@
 #include "App.h"
 #include "Dialogs.h"
+#include "ImageFiles.h"
 #include "Lang.h"
 #include "RunProgram.h"
 #include "LocalPaths.h"
@@ -130,7 +131,10 @@ bool App::Init(HWND hwnd, float dpiScale)
     settings_.Load(); // false: first start, defaults
     Log::Get().Info("Settings: {} ({})", PathToUtf8(settings_.File()), paths_.Why());
     io.IniFilename = nullptr; // ImGui's layout goes into the settings file (LayoutStore)
+    uiSettings_.imageToPaa = &iconsPanel_.imageToPaa;
+    uiSettings_.iconClasses = &iconsPanel_.saved;
     uiSettings_.Load(settings_);
+    if (iconsPanel_.imageToPaa.empty()) iconsPanel_.imageToPaa = PathToUtf8(FindImageToPaa()); // Arma 3 Tools in a Steam library
     {
         // mod prefixes set by hand ("modprefix" block: <mod folder> = <prefix>): InferModPrefix uses them before guessing
         std::vector<std::pair<fs::path, std::string>> prefixes;
@@ -187,8 +191,9 @@ bool App::Init(HWND hwnd, float dpiScale)
     // Game configs (unpacked game data on P:) in the background: base classes for config.cpp (Tank_F, HitPoints,
     // CfgMovesMaleSdr, ...). Only the root classes the viewer reads are kept.
     // --selftest runs on Arma 3 Samples and synthetic files only: the game data on P: is not read then.
-    if (std::wcsstr(GetCommandLineW(), L"--selftest"))
-        Log::Get().Info("selftest: game configs on P: not loaded (Samples and synthetic files only)");
+    // --no-game: the same by hand (own files and the Samples only, e.g. screenshots without BI's content)
+    if (std::wcsstr(GetCommandLineW(), L"--selftest") || std::wcsstr(GetCommandLineW(), L"--no-game"))
+        Log::Get().Info("game configs on P: not loaded (--selftest / --no-game: Samples and own files only)");
     else
         gameLoad_ = std::async(std::launch::async, [cache = paths_.Cache() / "gameconfigs.bin"]() -> std::shared_ptr<ArmaConfig> {
             return LoadGameConfigs("P:\\", cache);
@@ -335,24 +340,38 @@ void App::Frame()
     renderer_.BeginFrame(clear);
 
     SceneDraw s;
-    s.viewProj = ViewProj();
+    FillSceneDraw(s, lit_, sceneX_, sceneY_, sceneW_, sceneH_, nullptr);
+    renderer_.DrawScene(s);
+    if (points_.WantsDepth()) renderer_.CaptureDepth(); // read by the point overlay next frame
+    if (recorder_.Recording()) recorder_.FrameCapture(s, clear);
+    if (shell_.mode == UiMode::Icons || iconsPanel_.BatchRunning()) iconsPanel_.AfterSceneDraw(); // the icon preview, a batch step (offscreen)
+    else iconsPanel_.LeaveHiding(); // the model's own hiding back outside the Icons mode
+    FrameEnd(frameStart);
+}
+
+// the SceneDraw of a view rectangle: camera, light, shading, sun shadow fit, line layers; display: other display
+// settings than the view's (the Icons mode: its own shadows, no grid)
+void App::FillSceneDraw(SceneDraw& s, const LightingResult& lit, float x, float y, float w, float h, const DisplaySettings* displayOverride)
+{
+    const DisplaySettings& display = displayOverride ? *displayOverride : display_;
+    s.viewProj = camera_.Projection(w / std::max(1.0f, h)) * camera_.View();
     s.cameraPos = camera_.Position();
-    s.lightDir = lit_.lightDir;
-    s.lightColor = lit_.lightColor;
-    s.ambientColor = lit_.skyColor;
-    s.groundColor = lit_.groundColor;
-    s.exposure = lit_.exposure;
-    s.viewportX = sceneX_;
-    s.viewportY = sceneY_;
-    s.viewportW = sceneW_;
-    s.viewportH = sceneH_;
-    s.shading = display_.shading;
-    s.wire = display_.wire;
-    s.cull = display_.cull;
-    s.twoSided = display_.twoSided;
-    s.flipNormalGreen = display_.flipNormalGreen;
-    s.reflections = display_.reflections;
-    s.shadows = display_.shadows && session_.hasModel && !display_.skeletonOnly;
+    s.lightDir = lit.lightDir;
+    s.lightColor = lit.lightColor;
+    s.ambientColor = lit.skyColor;
+    s.groundColor = lit.groundColor;
+    s.exposure = lit.exposure;
+    s.viewportX = x;
+    s.viewportY = y;
+    s.viewportW = w;
+    s.viewportH = h;
+    s.shading = display.shading;
+    s.wire = display.wire;
+    s.cull = display.cull;
+    s.twoSided = display.twoSided;
+    s.flipNormalGreen = display.flipNormalGreen;
+    s.reflections = display.reflections;
+    s.shadows = display.shadows && session_.hasModel && !display.skeletonOnly;
     const float floorY = scene_.FloorY();
     if (floorY != scene_.gridFloor) scene_.RebuildGrid(); // animations started / stopped: the grid moves to the floor
     if (s.shadows)
@@ -365,12 +384,12 @@ void App::Frame()
         const float need = std::max(0.5f, glm::length(hi - lo) * 0.5f) * 1.1f;
         if (need > scene_.shadowR || need < scene_.shadowR * 0.7f) scene_.shadowR = std::ceil(need * 1.1f / 0.25f) * 0.25f;
         const float r = scene_.shadowR;
-        glm::vec3 d = glm::normalize(lit_.lightDir);
+        glm::vec3 d = glm::normalize(lit.lightDir);
         if (d.y > -0.05f) d = glm::normalize(glm::vec3(d.x, -0.05f, d.z)); // sun at the horizon: keep it above
         const glm::vec3 up = std::abs(d.y) > 0.99f ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
         // the centre snapped to whole shadow-map texels across the sun direction: a moving model does not shimmer
         static const int kSizes[3] = { 1024, 2048, 4096 };
-        const float texel = 2.0f * r / float(kSizes[std::clamp(display_.shadowQuality, 0, 2)]);
+        const float texel = 2.0f * r / float(kSizes[std::clamp(display.shadowQuality, 0, 2)]);
         const glm::mat4 rot = glm::lookAtLH(glm::vec3(0), d, up);
         glm::vec3 lc = glm::vec3(rot * glm::vec4(c, 1.0f));
         lc.x = std::floor(lc.x / texel) * texel;
@@ -378,16 +397,16 @@ void App::Frame()
         const glm::vec3 cs = glm::vec3(glm::inverse(rot) * glm::vec4(lc, 1.0f));
         const glm::mat4 view = glm::lookAtLH(cs - d * r * 2.0f, cs, up);
         s.lightViewProj = glm::orthoLH_ZO(-r, r, -r, r, 0.0f, r * 4.0f) * view;
-        s.shadowSoftness = display_.shadowSoftness;
-        s.shadowQuality = display_.shadowQuality;
+        s.shadowSoftness = display.shadowSoftness;
+        s.shadowQuality = display.shadowQuality;
         s.groundY = floorY;
         s.groundSize = r;
         s.groundCenter = { c.x, c.z };
     }
-    s.drawMesh = session_.hasModel && !display_.skeletonOnly;
-    s.drawLayer[size_t(LineLayer::Grid)] = display_.showGrid && !display_.skeletonOnly;
-    s.drawLayer[size_t(LineLayer::Normals)] = display_.showNormals && session_.hasModel;
-    s.drawLayer[size_t(LineLayer::Skeleton)] = display_.showSkeleton && session_.hasModel;
+    s.drawMesh = session_.hasModel && !display.skeletonOnly;
+    s.drawLayer[size_t(LineLayer::Grid)] = display.showGrid && !display.skeletonOnly;
+    s.drawLayer[size_t(LineLayer::Normals)] = display.showNormals && session_.hasModel;
+    s.drawLayer[size_t(LineLayer::Skeleton)] = display.showSkeleton && session_.hasModel;
     s.drawLayer[size_t(LineLayer::Trails)] = animView_.showTrail && session_.hasModel;
     s.drawLayer[size_t(LineLayer::LodOverlay)] = session_.hasModel && !vis_.overlays.empty();
     s.drawLayer[size_t(LineLayer::Retarget)] = rt_.previewOn && rt_.previewMode > 0;
@@ -395,11 +414,11 @@ void App::Frame()
     s.drawLayer[size_t(LineLayer::Weapon)] = weaponScene_.Active() && session_.hasModel;
     s.layerOnTop[size_t(LineLayer::Weapon)] = true;
     s.layerOnTop[size_t(LineLayer::Retarget)] = true;
-    s.layerOnTop[size_t(LineLayer::Skeleton)] = display_.skeletonOnTop;
-    renderer_.DrawScene(s);
-    if (points_.WantsDepth()) renderer_.CaptureDepth(); // read by the point overlay next frame
-    if (recorder_.Recording()) recorder_.FrameCapture(s, clear);
+    s.layerOnTop[size_t(LineLayer::Skeleton)] = display.skeletonOnTop;
+}
 
+void App::FrameEnd(std::chrono::steady_clock::time_point frameStart)
+{
     {
         Perf::Scope im("render: ImGui draw data");
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -1119,6 +1138,17 @@ void App::DrawUI()
         DrawOpticsPanel();
         DrawLogPanel();
         break;
+    case UiMode::Icons:
+        iconsPanel_.Draw(WinName("Icons"));
+        if (iconsPanel_.showParts)
+        {
+            // the outliner on the icon's own hiding (EnterHiding swapped it in)
+            ImGui::SetNextWindowSize(ImVec2(420 * dpi_, 560 * dpi_), ImGuiCond_FirstUseEver);
+            if (ui::Begin(WinName("Model parts (icon)").c_str(), &iconsPanel_.showParts)) outliner_.Draw();
+            ImGui::End();
+        }
+        DrawLogPanel();
+        break;
     default: break;
     }
     DrawInspector();
@@ -1223,7 +1253,7 @@ void App::RegisterHotkeys()
     input_.Bind(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_P, "Windows", "command palette", nullptr); // handled before the keyboard capture check
     input_.Bind(ImGuiMod_Ctrl | ImGuiKey_R, "Windows", "Vehicle & Crew mode and back (crew preview)", [this] { SetMode(shell_.mode == UiMode::Vehicle ? crewReturnMode_ : UiMode::Vehicle); });
     static const char* const kModeCmd[] = { "mode: Model", "mode: Skeleton & Anim", "mode: Vehicle & Crew", "mode: Materials", "mode: Validation",
-                                            "mode: Reload sync (weapon)", "mode: Optics (weapon)" };
+                                            "mode: Reload sync (weapon)", "mode: Optics (weapon)", "mode: Icons (UI pictures)" };
     for (int i = 0; i < int(UiMode::Count); ++i)
         input_.Bind(ImGuiMod_Ctrl | ImGuiKey(ImGuiKey_1 + i), "Windows", kModeCmd[i], [this, i] { SetMode(UiMode(i)); });
     input_.Bind(ImGuiKey_F, "Camera", "frame the model", [this] { camera_.Frame(scene_.boundsMin, scene_.boundsMax); }, true);

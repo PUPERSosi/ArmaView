@@ -4,6 +4,8 @@
 #include "ArmaConfig.h"
 #include "AssetSession.h"
 #include "Gltf.h"
+#include "IconImage.h"
+#include "IconStandards.h"
 #include "LayersJob.h"
 #include "Paths.h"
 #include "Settings.h"
@@ -372,6 +374,167 @@ std::string RunCoreTest(const fs::path& dir, int* failuresOut)
         assets.Poll(3.0); // stable: re-read
         check(opened && !doc.anim.layers.empty() && doc.anim.layers[0].anim != before && doc.anim.layers[0].anim->Frames() == 4 && view.covered >= 1,
               "hot reload: an opened RTM is re-read into its layer after a change on disk (IPaths data folder)");
+    }
+    // the Icons mode's rules (BI's standards) and picture operations, without a renderer
+    {
+        const fs::path idir = dir / "icons";
+        fs::create_directories(idir, ec);
+        std::ofstream(idir / "config.cpp", std::ios::binary | std::ios::trunc)
+            << "class CfgWeapons { class Rifle_Base_F; class Uniform_Base; class ItemCore; class InventoryOpticsItem_Base_F;\n"
+               "  class av_rifle_F: Rifle_Base_F { scope = 2; model = \"\\av\\rifle.p3d\"; };\n"
+               "  class av_uniform: Uniform_Base { scope = 2; };\n"
+               "  class av_optic: ItemCore { scope = 2; class ItemInfo: InventoryOpticsItem_Base_F { type = 201; }; };\n"
+               "  class av_helmet: ItemCore { scope = 2; class ItemInfo { type = 605; }; }; };\n"
+               "class CfgVehicles { class AllVehicles; class Car: AllVehicles {}; class CAManBase: AllVehicles {}; class Bag_Base; class Thing;\n"
+               "  class av_car: Car { scope = 2; }; class av_man: CAManBase { scope = 2; }; class av_pack: Bag_Base { scope = 2; }; class av_box: Thing { scope = 2; }; };\n";
+        ArmaConfig icfg;
+        icfg.Load(idir / "config.cpp", idir, false);
+        const bool kinds = SuggestIconPreset(icfg, "CfgWeapons", "av_rifle_F") == IconPreset::Weapon &&
+                           SuggestIconPreset(icfg, "CfgWeapons", "av_uniform") == IconPreset::Gear &&
+                           SuggestIconPreset(icfg, "CfgWeapons", "av_optic") == IconPreset::Attachment &&
+                           SuggestIconPreset(icfg, "CfgWeapons", "av_helmet") == IconPreset::Headgear &&
+                           SuggestIconPreset(icfg, "CfgVehicles", "av_car") == IconPreset::VehiclePicture &&
+                           SuggestIconPreset(icfg, "CfgVehicles", "av_man") == IconPreset::EditorPreview &&
+                           SuggestIconPreset(icfg, "CfgVehicles", "av_pack") == IconPreset::Gear &&
+                           SuggestIconPreset(icfg, "CfgVehicles", "av_box") == IconPreset::EditorPreview &&
+                           SuggestIconPreset(icfg, "CfgVehicles", "no_such") == IconPreset::Count;
+        const bool names = IconFileName(IconPreset::Weapon, "av_rifle_F") == "gear_av_rifle_F_X_ca.paa" &&
+                           IconFileName(IconPreset::VehicleMapIcon, "av_car") == "map_av_car_ca.paa" &&
+                           IconFileName(IconPreset::EditorPreview, "av_car") == "av_car.jpg" &&
+                           IconConfigLine(IconPreset::Weapon, "av/data/ui/gear_av_rifle_F_X_ca.paa") == "picture = \"\\av\\data\\ui\\gear_av_rifle_F_X_ca.paa\";" &&
+                           IconConfigLine(IconPreset::VehicleMapIcon, "\\av\\data\\ui\\map_av_car_ca.paa").starts_with("icon = ") &&
+                           EditorPreviewSqf({ "av_car", "av_man" }) == "[1, \"all\", [], [], [], [\"av_car\", \"av_man\"]] spawn BIS_fnc_exportEditorPreviews;" &&
+                           PaaSizeOk(1024, 512) && PaaSizeOk(128, 64) && !PaaSizeOk(455, 256) && IconPresetById("mapicon") == IconPreset::VehicleMapIcon;
+        // a 40 x 10 red bar in a 100 x 100 transparent picture -> into 200 x 100 with BI's weapon border
+        RgbaImage src;
+        src.w = src.h = 100;
+        src.px.assign(100 * 100 * 4, 0);
+        for (int y = 45; y < 55; ++y)
+            for (int x = 30; x < 70; ++x)
+            {
+                uint8_t* p = &src.px[(size_t(y) * 100 + x) * 4];
+                p[0] = 200; p[1] = 30; p[2] = 30; p[3] = 255;
+            }
+        RgbaImage fit = FitToFrame(src, 200, 100, 0.05f, 0.03f, 0.05f, 0.05f, false);
+        const ImageStats fs1 = MeasureImage(fit);
+        RgbaImage bottom = FitToFrame(src, 128, 64, 0.01f, 0.01f, 0.02f, 0.01f, true);
+        const ImageStats fs2 = MeasureImage(bottom);
+        Silhouette(bottom, 255, 255, 255);
+        const bool white = MeasureImage(bottom).whiteSilhouette;
+        RgbaImage outl = fit;
+        Outline(outl, 3, 0, 0, 0, 255);
+        const ImageStats fs3 = MeasureImage(outl);
+        RgbaImage adj = fit;
+        AdjustColor(adj, 1.0f, 0.0f, 1.0f); // brighter, grey
+        const ImageBounds ab = AlphaBounds(adj);
+        const uint8_t* mid = &adj.px[(size_t((ab.y0 + ab.y1) / 2) * adj.w + (ab.x0 + ab.x1) / 2) * 4];
+        const bool grey = mid[0] == mid[1] && mid[1] == mid[2] && mid[0] > 60;
+        const bool images = std::abs(fs1.marginL - 0.05f) < 0.016f && std::abs(fs1.marginR - 0.03f) < 0.016f && fs1.fillW > 0.9f && fs1.alpha &&
+                            std::abs(fs2.marginB - 0.01f) < 0.02f && fs2.marginT > 0.4f && white && fs3.fillW > fs1.fillW && grey;
+        std::string why;
+        const bool cats = SuggestIconCategory(icfg, "CfgWeapons", "av_rifle_F", &why) == IconCategory::Rifle && why == "Rifle_Base_F" &&
+                          SuggestIconCategory(icfg, "CfgWeapons", "av_uniform") == IconCategory::Uniform &&
+                          SuggestIconCategory(icfg, "CfgWeapons", "av_optic") == IconCategory::Optic &&
+                          SuggestIconCategory(icfg, "CfgWeapons", "av_helmet") == IconCategory::Headgear &&
+                          SuggestIconCategory(icfg, "CfgVehicles", "av_pack") == IconCategory::Backpack &&
+                          SuggestIconCategory(icfg, "CfgVehicles", "av_car", &why) == IconCategory::VehicleSilhouette && why == "Car" &&
+                          IconCategoryById("vest") == IconCategory::Vest && CategoryInfo(IconCategory::Vest).preset == IconPreset::Gear;
+        // the "BI examples" come from a game config at run time (nothing of BI's is shipped): a config written here
+        // with two rifles that have their own picture on disk (the one of the standard's size first) and one without
+        bool examples = false;
+        {
+            const fs::path gdir = dir / "icon_examples";
+            fs::create_directories(gdir / "g" / "ui", ec);
+            auto png = [](const fs::path& f, int w, int h) {
+                const uint8_t b[] = { 0x89, 'P', 'N', 'G', 13, 10, 26, 10, 0, 0, 0, 13, 'I', 'H', 'D', 'R',
+                                      uint8_t(w >> 24), uint8_t(w >> 16), uint8_t(w >> 8), uint8_t(w), uint8_t(h >> 24), uint8_t(h >> 16), uint8_t(h >> 8), uint8_t(h),
+                                      8, 6, 0, 0, 0 };
+                std::ofstream(f, std::ios::binary | std::ios::trunc).write(reinterpret_cast<const char*>(b), sizeof(b));
+            };
+            png(gdir / "g" / "ui" / "gear_a_x_ca.png", 512, 256);
+            png(gdir / "g" / "ui" / "gear_b_x_ca.png", 1024, 512);
+            std::ofstream(gdir / "config.cpp", std::ios::binary | std::ios::trunc)
+                << "class CfgWeapons { class Rifle_Base_F;\n"
+                   "  class g_rifle_a: Rifle_Base_F { scope = 2; picture = \"\\g\\ui\\gear_a_x_ca.png\"; };\n"
+                   "  class g_rifle_b: Rifle_Base_F { scope = 2; picture = \"\\g\\ui\\gear_b_x_ca.png\"; };\n"
+                   "  class g_rifle_c: Rifle_Base_F { scope = 2; picture = \"\\g\\ui\\missing_ca.paa\"; }; };\n";
+            ArmaConfig gcfg;
+            gcfg.Load(gdir / "config.cpp", gdir, false);
+            const auto ex = BiExamples(gcfg, IconCategory::Rifle, gdir);
+            examples = ex.size() == 2 && ex[0].cls == "g_rifle_b" && ex[0].width == 1024 && ex[1].cls == "g_rifle_a" && ex[0].line > 0 &&
+                       BiExamples(gcfg, IconCategory::Vest, gdir).empty();
+        }
+        check(cats && examples, std::format("icon categories by inheritance (with the base class) {}, BI examples read from a game config {}", cats ? "ok" : "WRONG",
+                                            examples ? "ok" : "WRONG"));
+        check(kinds && names && images, std::format("icons: kinds by inheritance {}, BI names / config line / SQF {}, fit {:.0f}x{:.0f}% L{:.0f} R{:.0f}, "
+                                                    "bottom-aligned B{:.0f}, silhouette {}, outline wider {}, colour {}",
+                                                    kinds ? "ok" : "WRONG", names ? "ok" : "WRONG", fs1.fillW * 100, fs1.fillH * 100, fs1.marginL * 100,
+                                                    fs1.marginR * 100, fs2.marginB * 100, white ? "white" : "NOT", fs3.fillW > fs1.fillW ? "yes" : "NO", grey ? "ok" : "WRONG"));
+    }
+    // what a class's picture shows (Icons mode): a uniform as its uniformClass soldier (model + camo), a vest / helmet
+    // as worn (ItemInfo uniformModel) with its own hiddenSelectionsTextures, else the class's model
+    {
+        const fs::path sdir = dir / "icon_subject";
+        fs::create_directories(sdir / "av", ec);
+        for (const char* m : { "soldier.p3d", "vest.p3d", "box.p3d" }) std::ofstream(sdir / "av" / m) << "x";
+        std::ofstream(sdir / "config.cpp", std::ios::binary | std::ios::trunc)
+            << "class CfgVehicles { class av_soldier { model = \"\\av\\soldier.p3d\"; hiddenSelections[] = { \"camo\" }; hiddenSelectionsTextures[] = { \"\\av\\u_co.paa\" }; };\n"
+               "  class av_box { scope = 2; model = \"\\av\\box\"; }; };\n"
+               "class CfgWeapons { class av_uniform { scope = 2; model = \"\\av\\suitpack.p3d\"; class ItemInfo { uniformModel = \"-\"; uniformClass = \"av_soldier\"; }; };\n"
+               "  class av_vest { scope = 2; model = \"\\av\\ground.p3d\"; hiddenSelections[] = { \"camo\" }; hiddenSelectionsTextures[] = { \"\\av\\v_co.paa\" };\n"
+               "    class ItemInfo { uniformModel = \"\\av\\vest.p3d\"; }; }; };\n";
+        ArmaConfig scfg;
+        scfg.Load(sdir / "config.cpp", sdir, false);
+        const IconSubject u = IconSubjectOf(scfg, "CfgWeapons", "av_uniform", sdir);
+        const IconSubject v = IconSubjectOf(scfg, "CfgWeapons", "av_vest", sdir);
+        const IconSubject b = IconSubjectOf(scfg, "CfgVehicles", "av_box", sdir);
+        const bool uniformOk = u.model.filename() == "soldier.p3d" && u.skin.className == "av_soldier" && u.skin.textures.size() == 1 && u.why.starts_with("uniformClass");
+        const bool vestOk = v.model.filename() == "vest.p3d" && v.skin.className == "av_vest" && v.skin.textures == std::vector<std::string>{ "\\av\\v_co.paa" };
+        const bool boxOk = b.model.filename() == "box.p3d" && b.why == "model" && b.skin.selections.empty();
+        check(uniformOk && vestOk && boxOk, std::format("icon subject: uniform -> {} ({}), vest -> {} skin {}, box -> {} ({})", PathToUtf8(u.model.filename()), u.why,
+                                                       PathToUtf8(v.model.filename()), v.skin.className, PathToUtf8(b.model.filename()), b.why));
+    }
+    // the pictures a mod's config already names, against BI's standard of the category (Icons mode, Validation): a
+    // vest picture of the wrong size with _co, a missing file, a rifle picture right; the name parts by BI's rule
+    {
+        const fs::path pdir = dir / "icon_pictures";
+        fs::create_directories(pdir / "av" / "data" / "ui", ec);
+        fs::create_directories(pdir / "av" / "data" / "tex", ec);
+        auto png = [](const fs::path& f, int w, int h, bool alpha) {
+            const uint8_t b[] = { 0x89, 'P', 'N', 'G', 13, 10, 26, 10, 0, 0, 0, 13, 'I', 'H', 'D', 'R',
+                                  uint8_t(w >> 24), uint8_t(w >> 16), uint8_t(w >> 8), uint8_t(w), uint8_t(h >> 24), uint8_t(h >> 16), uint8_t(h >> 8), uint8_t(h),
+                                  8, uint8_t(alpha ? 6 : 2), 0, 0, 0 };
+            std::ofstream(f, std::ios::binary | std::ios::trunc).write(reinterpret_cast<const char*>(b), sizeof(b));
+        };
+        png(pdir / "av" / "data" / "tex" / "icon_av_vest_co.png", 200, 100, true);  // wrong size, _co, not data\ui
+        png(pdir / "av" / "data" / "ui" / "gear_av_rifle_x_ca.png", 1024, 512, true); // all right
+        const uint8_t jpg[] = { 0xFF, 0xD8, 0xFF, 0xE0, 0, 4, 0, 0, 0xFF, 0xC0, 0, 17, 8, 1, 0, 1, 0xC7, 3, 0, 0, 0, 0 }; // 455 x 256
+        std::ofstream(pdir / "av" / "data" / "ui" / "av_box.jpg", std::ios::binary | std::ios::trunc).write(reinterpret_cast<const char*>(jpg), sizeof(jpg));
+        std::ofstream(pdir / "config.cpp", std::ios::binary | std::ios::trunc)
+            << "class CfgWeapons { class Rifle_Base_F; class Vest_Camo_Base;\n"
+               "  class av_rifle: Rifle_Base_F { scope = 2; picture = \"\\av\\data\\ui\\gear_av_rifle_x_ca.png\"; };\n"
+               "  class av_vest: Vest_Camo_Base { scope = 2; picture = \"\\av\\data\\tex\\icon_av_vest_co.png\"; };\n"
+               "  class av_gone: Vest_Camo_Base { scope = 2; picture = \"\\av\\data\\ui\\icon_av_gone_ca.paa\"; }; };\n"
+               "class CfgVehicles { class av_box { scope = 2; icon = \"iconObject\"; editorPreview = \"\\av\\data\\ui\\av_box.jpg\"; }; };\n";
+        ArmaConfig pcfg;
+        pcfg.Load(pdir / "config.cpp", pdir, false);
+        const auto issues = CheckConfigPictures(pcfg, pdir);
+        auto has = [&](const char* cls, const char* what, bool error) {
+            return std::any_of(issues.begin(), issues.end(), [&](const IconPictureIssue& i) {
+                return i.cls == cls && i.problem.find(what) != std::string::npos && i.error == error && i.line > 0;
+            });
+        };
+        const PictureFileInfo ji = ReadPictureInfo(pdir / "av" / "data" / "ui" / "av_box.jpg");
+        const bool found = has("av_vest", "size 200 x 100", false) && has("av_vest", "_co", false) && has("av_vest", "UI folder", false) &&
+                           has("av_gone", "not found", true) && !has("av_rifle", "", false) && !has("av_rifle", "", true) &&
+                           has("av_box", "EditorPreviews", false) && ji.ok && ji.width == 455 && ji.height == 256;
+        const IconNameParts n = IconNameOf(IconPreset::Weapon, "av_rifle");
+        const bool parts = n.prefix == "gear_" && n.suffix == "_X_ca" && n.ext == ".paa" && n.file == "gear_av_rifle_X_ca.paa" && !n.why.empty() &&
+                           IconNameOf(IconPreset::EditorPreview, "av_box").file == "av_box.jpg";
+        std::string list;
+        for (const auto& i : issues) list += std::format("[{} {}: {}] ", i.cls, i.key, i.problem);
+        check(found && parts, std::format("icon pictures in the config: {} issue(s) {}, jpg {}x{}, name parts {}{}", issues.size(), found ? "as expected" : "WRONG",
+                                          ji.width, ji.height, parts ? "ok" : "WRONG", found ? "" : ": " + list));
     }
     // glTF import: the generated sample (a bar on two joints, embedded PNGs, one clip) -> mesh, weights, joints as pivots,
     // the clip as deformation matrices in the viewer's axes (x mirrored); a binarized-looking file is refused with the message

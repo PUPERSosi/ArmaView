@@ -1,5 +1,24 @@
 # Changes
 
+## 1.1.0
+
+New:
+- **Icons mode** (Ctrl+8): UI pictures of the mod's classes by Bohemia's standards. A class of the mod shows its own
+  model and re-texture; its category comes from inheritance or is picked by hand; presets for editor previews,
+  weapons, gear, headgear, attachments, vehicle silhouettes and map icons with BI's sizes, borders, views and file
+  names; fitting (exposure, saturation, contrast, outline, white silhouette) and a camera kept per class; model parts
+  hidden for the picture only; PNG / JPG / PAA (ImageToPAA of the Arma 3 Tools); the config line; a batch over the
+  mod's classes; the SQF call of BIS_fnc_exportEditorPreviews for the mod's CfgVehicles classes.
+- BI's own pictures of the category beside the preview, read from the game data on P: while the viewer runs (nothing
+  of BI's is shipped); the "BI standards" window; docs/icons.md with the measured numbers and config references.
+- The pictures a mod's config already names are checked against their category's standard (missing file, size,
+  `_co` / `_ca`, alpha, folder, PAA power of two) in the Icons window and in Validation.
+- Only source models are pictured: a binarized model or unit part gets the standard message, and the Icons window lists
+  the unit parts it cannot show.
+- `--no-game`: the viewer does not read the game configs on P: (Arma 3 Samples and own files only).
+- ui-script: `icon`, `iconclass`, `iconcam`, `iconsave`, `iconstate`, `iconhide`, `iconpics`; selftest and coretest
+  steps for the mode (Arma 3 Samples and files written by the test).
+
 ## 1.0.4
 
 Fixes:

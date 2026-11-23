@@ -75,6 +75,12 @@ void UiScript::MouseButton(int button, bool down)
     io.AddMouseButtonEvent(button, down);
 }
 
+fs::path UiScript::OutPath(const std::string& file) const
+{
+    fs::path p = fs::path(Utf8ToWide(file));
+    return p.is_relative() ? baseDir_ / p : p;
+}
+
 void UiScript::Parse(const std::string& text)
 {
     auto& log = Log::Get();
@@ -190,7 +196,7 @@ void UiScript::Parse(const std::string& text)
         else if (cmd == "edit" || cmd == "moves_tests" || cmd == "moves_traps" || cmd == "control" || cmd == "layers" || cmd == "weapon" || cmd == "lang" ||
                  cmd == "tip" || cmd == "guide" || cmd == "modcheck" || cmd == "record" ||
                  cmd == "crashtest" || cmd == "unsaved" || cmd == "fuzz" || cmd == "coretest" || cmd == "bonecheck" || cmd == "blend" || cmd == "handanim" || cmd == "missing" || cmd == "statesgraph" || cmd == "idconflicts" ||
-                 cmd == "mode" || cmd == "show" || cmd == "frame" || cmd == "focusbone" || cmd == "layouts" || cmd == "unit" || cmd == "gltf_sample" || cmd == "optstate" || cmd == "skintest")
+                 cmd == "mode" || cmd == "show" || cmd == "frame" || cmd == "focusbone" || cmd == "layouts" || cmd == "unit" || cmd == "gltf_sample" || cmd == "optstate" || cmd == "skintest" || cmd == "icon" || cmd == "iconclass" || cmd == "iconcam" || cmd == "iconsave" || cmd == "iconstate" || cmd == "iconhide" || cmd == "iconpics")
         {
             // edit set <state> <entry> <value...> | edit link <from> <to> [connect] | edit new <name> [base] | edit setc <Cls/Sub> <entry> <value> | edit diff | edit save
             const std::string arg = cmd + ":" + rest;

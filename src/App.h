@@ -13,6 +13,7 @@
 #include "GettingStarted.h"
 #include "InfoWindows.h"
 #include "Input.h"
+#include "IconsPanel.h"
 #include "InspectorPanel.h"
 #include "LayersPanel.h"
 #include "LogPanel.h"
@@ -61,6 +62,9 @@ public:
     bool Init(HWND hwnd, float dpiScale);
     void Shutdown();
     void Frame();
+    void FrameEnd(std::chrono::steady_clock::time_point frameStart); // ImGui draw data, settings, perf, Present
+    // the SceneDraw of a view rectangle (display: other display settings than the view's, e.g. the Icons mode's)
+    void FillSceneDraw(SceneDraw& s, const LightingResult& lit, float x, float y, float w, float h, const DisplaySettings* display);
     void OnResize(UINT width, UINT height) { pendingW_ = width; pendingH_ = height; }
     void OpenFile(const std::filesystem::path& path) { assets_.OpenFile(path); } // .p3d model, .rtm layer
     void ApplyAutomation(const Automation& a) { automation_.Apply(a); }
@@ -354,6 +358,14 @@ private:
     UiSettings uiSettings_{ shell_, record_.settings, movesSim_, points_ };
     LayoutStore layouts_{ settings_, uiSettings_ };
     ClosePrompt closePrompt_{ session_, mats_, reload_, weaponScene_, layers_, movesEditor_, [this] { PostMessageW(hwnd_, WM_CLOSE, 0, 0); } };
+    IconRenderer iconRenderer_{ session_, scene_, renderer_,
+                                [this](SceneDraw& s, const LightingResult& lit, float x, float y, float w, float h, const DisplaySettings* d) {
+                                    FillSceneDraw(s, lit, x, y, w, h, d);
+                                } };
+    IconsPanel iconsPanel_{ session_, iconRenderer_, texCache_, *this,
+                            IconsPanel::Hooks{ [this](const std::filesystem::path& p) { return LoadModel(p, false); },
+                                               [this](const std::string& cls) { AssembleUnit(cls); },
+                                               [this] { return !ModelLoading() && !texCache_.Streaming() && !GameConfigsLoading(); }, &vis_ } };
     ViewerAutomation automation_{ *this };
 
     // ---- frame state

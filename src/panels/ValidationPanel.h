@@ -1,6 +1,7 @@
 #pragma once
 // Validation: the rig of the current LOD (weights, selections, points), model.cfg animations / skins, RTM bones of a
 // folder against the skeleton, the loop seam, crew problems; the CfgMoves section comes from the Moves panel.
+#include "IconStandards.h"
 #include "RTM.h"
 #include "Session.h"
 #include "ViewHost.h"
@@ -48,4 +49,6 @@ private:
     Session& session_;
     IViewHost& host_;
     IValidationView& view_;
+    std::vector<IconPictureIssue> pictures_; // the mod config's UI pictures against BI's standards
+    const void* picturesOf_ = nullptr;
 };

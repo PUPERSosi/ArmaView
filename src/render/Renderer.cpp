@@ -594,7 +594,7 @@ bool Renderer::BeginOffscreen(UINT w, UINT h, const float clearColor[4])
     return true;
 }
 
-bool Renderer::ReadOffscreen(std::vector<uint8_t>& rgba)
+bool Renderer::ReadOffscreen(std::vector<uint8_t>& rgba, bool keepAlpha)
 {
     if (!offTex_ || !offStaging_) return false;
     ctx_->CopyResource(offStaging_.Get(), offTex_.Get());
@@ -603,7 +603,8 @@ bool Renderer::ReadOffscreen(std::vector<uint8_t>& rgba)
     rgba.resize(size_t(offW_) * offH_ * 4);
     for (UINT y = 0; y < offH_; ++y) std::memcpy(rgba.data() + size_t(y) * offW_ * 4, static_cast<const uint8_t*>(m.pData) + size_t(y) * m.RowPitch, size_t(offW_) * 4);
     ctx_->Unmap(offStaging_.Get(), 0);
-    for (size_t i = 3; i < rgba.size(); i += 4) rgba[i] = 255;
+    if (!keepAlpha)
+        for (size_t i = 3; i < rgba.size(); i += 4) rgba[i] = 255; // video frames: opaque
     return true;
 }
 

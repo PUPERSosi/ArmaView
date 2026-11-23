@@ -31,6 +31,9 @@ void UiSettings::Load(const Settings& settings)
         else if (k == "MoveStart")
             if (const size_t tab = v.find('\t'); tab != std::string::npos) moves_.startPick[v.substr(0, tab)] = v.substr(tab + 1);
     }
+    for (const auto& [k, v] : settings.Pairs("icons"))
+        if (k == "ImageToPaa" && imageToPaa) *imageToPaa = v;
+        else if (k.starts_with("Class:") && iconClasses) (*iconClasses)[k.substr(6)] = v;
     PointOverlaySettings ps = points_.Settings();
     ps.FromPairs(settings.Pairs("points")); // missing keys keep the defaults
     points_.SetSettings(ps);
@@ -53,4 +56,9 @@ void UiSettings::Store(Settings& settings) const
         if (!state.empty()) p.emplace_back("MoveStart", model + "\t" + state);
     settings.SetPairs(p, "ui");
     settings.SetPairs(points_.Settings().ToPairs(), "points");
+    std::vector<std::pair<std::string, std::string>> icons;
+    if (imageToPaa) icons.emplace_back("ImageToPaa", *imageToPaa);
+    if (iconClasses)
+        for (const auto& [cls, v] : *iconClasses) icons.emplace_back("Class:" + cls, v);
+    settings.SetPairs(icons, "icons");
 }

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(ArmaView VERSION 1.0.4 LANGUAGES CXX RC)
+project(ArmaView VERSION 1.1.0 LANGUAGES CXX RC)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -62,6 +62,8 @@ add_library(ArmaViewCore STATIC
     src/core/Lighting.h
     src/core/WorldLight.h   src/core/WorldLight.cpp
     src/core/ModCheck.h     src/core/ModCheck.cpp
+    src/core/IconStandards.h src/core/IconStandards.cpp
+    src/core/IconImage.h    src/core/IconImage.cpp
 )
 target_include_directories(ArmaViewCore PUBLIC ${CMAKE_SOURCE_DIR}/src/core)
 target_include_directories(ArmaViewCore PRIVATE ${CGLTF_INCLUDE_DIRS})
@@ -111,6 +113,7 @@ add_library(ArmaViewPlatform STATIC
     src/platform/WinPaths.h    src/platform/WinPaths.cpp
     src/platform/Input.h       src/platform/Input.cpp
     src/platform/Dialogs.h     src/platform/Dialogs.cpp
+    src/platform/ImageFiles.h  src/platform/ImageFiles.cpp
 )
 target_include_directories(ArmaViewPlatform PUBLIC ${CMAKE_SOURCE_DIR}/src/platform)
 target_link_libraries(ArmaViewPlatform PUBLIC ArmaViewCore psapi windowscodecs ole32)
@@ -131,6 +134,7 @@ add_executable(ArmaView WIN32
     src/StatesGraph.h src/StatesGraph.cpp
     src/view/WeaponScene.h src/view/WeaponScene.cpp
     src/view/SceneView.h src/view/SceneView.cpp
+    src/view/IconRenderer.h src/view/IconRenderer.cpp
     src/view/SceneInput.h src/view/SceneInput.cpp
     src/view/SceneOverlay.h src/view/SceneOverlay.cpp
     src/view/UiSettings.h src/view/UiSettings.cpp
@@ -173,6 +177,7 @@ add_executable(ArmaView WIN32
     src/panels/ClosePrompt.h src/panels/ClosePrompt.cpp
     src/panels/ViewHost.h
     src/panels/ModCheckPanel.h src/panels/ModCheckPanel.cpp
+    src/panels/IconsPanel.h src/panels/IconsPanel.cpp
     src/ArmaView.rc src/Version.h.in
 )
 

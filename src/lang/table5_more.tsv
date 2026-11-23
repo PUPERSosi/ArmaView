@@ -76,3 +76,117 @@ checking {} / {}	проверка {} / {}
 Cancel##rtmcheck	Отмена
 Stops the check of the RTM folder; the files checked so far stay listed	Останавливает проверку папки RTM; уже проверенные файлы остаются в списке
 hidden by config ("")	скрыто конфигом ("")
+Icons	Иконки
+mode: Icons (UI pictures)	режим: иконки (картинки UI)
+Open a model (MLOD or glTF): its pictures are made here by BI's standards.	Откройте модель (MLOD или glTF): её картинки делаются здесь по стандартам BI.
+(no class of this model in the config)	(в конфиге нет класса этой модели)
+Name in the file	Имя в файле
+Dress as this unit	Одеть как этот юнит
+Preset	Пресет
+editorPreview (Eden)	editorPreview (Eden)
+Weapon picture	Картинка оружия
+Gear picture (uniform, vest, backpack, glasses)	Картинка снаряжения (форма, жилет, рюкзак, очки)
+Headgear picture (helmet, hat, NVG)	Картинка головного убора (шлем, шапка, ПНВ)
+Attachment / magazine / item picture	Картинка обвеса / магазина / предмета
+Vehicle picture (white silhouette)	Картинка техники (белый силуэт)
+Vehicle map icon (white, from above)	Иконка техники на карте (белая, сверху)
+Custom	Своя
+Fitting	Подгонка
+Exposure (EV)	Экспозиция (EV)
+Saturation	Насыщенность
+Contrast	Контраст
+Outline (px)	Обводка (px)
+Border L R T B (%)	Отступы Л П В Н (%)
+White silhouette	Белый силуэт
+Camera yaw	Поворот камеры
+Camera pitch	Наклон камеры
+Field of view	Поле зрения
+BI numbers	Числа BI
+Refresh preview	Обновить превью
+Output	Результат
+PAA (ImageToPAA), else PNG	PAA (ImageToPAA), иначе PNG
+Find	Найти
+ImageToPAA.exe of the Arma 3 Tools (Steam libraries of this computer)	ImageToPAA.exe из Arma 3 Tools (библиотеки Steam этого компьютера)
+Copy config line	Копировать строку конфига
+Save picture	Сохранить картинку
+Batch (the mod's classes)	Пакет (классы мода)
+List again	Обновить список
+Editor previews (CfgVehicles)	Превью редактора (CfgVehicles)
+Map icons (vehicles)	Иконки карты (техника)
+Stop##iconbatch	Стоп
+Make all	Сделать все
+SQF for the game	SQF для игры
+BIS_fnc_exportEditorPreviews for the selected CfgVehicles classes only (copied): run it in the game; the shots go to Screenshots\EditorPreviews	BIS_fnc_exportEditorPreviews только для выбранных классов CfgVehicles (скопировано): запустите в игре; снимки попадут в Screenshots\EditorPreviews
+%zu class(es) with a model on disk in the mod's config	%zu класс(ов) мода с моделью на диске
+3/4 from the front-left, a little above	3/4 спереди-слева, чуть сверху
+3/4 from the front-right, a little above (BIS_fnc_exportEditorPreviews)	3/4 спереди-справа, чуть сверху (BIS_fnc_exportEditorPreviews)
+= prefix "{}" + class "{}" + ending "{}" + "{}"	= приставка "{}" + класс "{}" + окончание "{}" + "{}"
+BI standards	Стандарты BI
+Backpack	Рюкзак
+Camera roll	Крен камеры
+Category	Категория
+File name: {}{}{}{}	Имя файла: {}{}{}{}
+Fit by BI	Подогнать по BI
+Fit into the BI border	Вписать в отступы BI
+Glasses	Очки
+Headgear (helmet, hat, NVG)	Головной убор (шлем, шапка, ПНВ)
+In the mod: {}	В моде: {}
+In the preview: left drag turns, right / middle drag moves, wheel zooms (Ctrl+click a slider: type)	В превью: ЛКМ — вращение, ПКМ / СКМ — сдвиг, колесо — приближение (Ctrl+клик по ползунку: ввод числа)
+Launcher	Гранатомёт
+Magazine	Магазин
+Map icon (vehicle from above)	Иконка карты (техника сверху)
+Medians of BI's own pictures of the category (docs/icons.md); the example is read from the game data on P: while the viewer runs	Медианы картинок BI этой категории (docs/icons.md); пример читается из данных игры на P: во время работы
+Model parts...	Части модели...
+Model parts (icon)	Части модели (иконка)
+Hide selections, proxies or LODs for this picture only (the outliner of the Model mode; H, Shift+H, Alt+H)	Скрыть selections, прокси или LOD только для этой картинки (outliner режима Model; H, Shift+H, Alt+H)
+Muzzle / pointer / bipod / item	Глушитель / ЛЦУ / сошки / предмет
+Open its config line	Открыть строку конфига
+Optic	Прицел
+Pistol	Пистолет
+Reset camera	Сброс камеры
+Reset hiding	Сбросить скрытие
+Rifle / MG / DMR	Винтовка / пулемёт / DMR
+Target X Y Z (m)	Цель X Y Z (м)
+UI pictures (config): {} error(s), {} warning(s)	Картинки UI (конфиг): ошибок {}, предупреждений {}
+Check again	Проверить снова
+Uniform	Униформа
+VR ground with shadow, no alpha	VR-земля с тенью, без альфы
+Vehicle (white silhouette)	Техника (белый силуэт)
+Vest	Жилет
+Zoom	Приближение
+auto (by inheritance: {})	авто (по наследованию: {})
+auto (by inheritance: {}): {}	авто (по наследованию: {}): {}
+fill %.0f x %.0f %%, border L %.0f R %.0f T %.0f B %.0f %%	заполнение %.0f x %.0f %%, отступы Л %.0f П %.0f В %.0f Н %.0f %%
+fill {:.0f} x {:.0f} %, border L {:.0f} R {:.0f} T {:.0f} B {:.0f} %	заполнение {:.0f} x {:.0f} %, отступы Л {:.0f} П {:.0f} В {:.0f} Н {:.0f} %
+free	свободный
+from above, nose up	сверху, носом вверх
+front view	вид спереди
+preset: {}	пресет: {}
+side view	вид сбоку
+side view, muzzle left	вид сбоку, дулом влево
+side view, nose left, on the bottom edge	вид сбоку, носом влево, на нижнем краю
+transparent (alpha)	прозрачный (альфа)
+white silhouette, transparent (alpha)	белый силуэт, прозрачный (альфа)
+Config entry	Поле конфига
+Size	Размер
+Background / alpha	Фон / альфа
+Border (L R T B)	Отступы (Л П В Н)
+Format	Формат
+File name	Имя файла
+Folder	Папка
+BI example	Пример BI
+{}: {} x {}, {}, {}, border L{:.0f} R{:.0f} T{:.0f} B{:.0f} %, {} in {}	{}: {} x {}, {}, {}, отступы Л{:.0f} П{:.0f} В{:.0f} Н{:.0f} %, {} в {}
+the file is not found	файл не найден
+not in a UI folder (BI: data\ui)	не в папке UI (BI: data\ui)
+ending _co on a picture with a transparent background: BI names them _ca (TexConvert keeps the alpha)	окончание _co у картинки с прозрачным фоном: у BI такие _ca (TexConvert сохраняет альфу)
+not in an EditorPreviews folder (BI: \a3\editorpreviews_f\data\cfgvehicles\, a mod: data\editorpreviews)	не в папке EditorPreviews (BI: \a3\editorpreviews_f\data\cfgvehicles\, в моде: data\editorpreviews)
+cannot read the file	файл не читается
+unknown picture format	неизвестный формат картинки
+gear_ ... _X_ca: BI's weapon pictures (gear_mx_rifle_x_ca.paa); _ca = colour + alpha: TexConvert keeps the transparent background (DXT5), _co would drop it (DXT1)	gear_ ... _X_ca: как картинки оружия BI (gear_mx_rifle_x_ca.paa); _ca = цвет + альфа: TexConvert сохраняет прозрачный фон (DXT5), с _co он пропал бы (DXT1)
+icon_ ... _ca: BI's gear / item pictures (icon_u_b_combatuniform_mcam_ca.paa); _ca = colour + alpha: TexConvert keeps the transparent background (DXT5), _co would drop it (DXT1)	icon_ ... _ca: как картинки снаряжения / предметов BI (icon_u_b_combatuniform_mcam_ca.paa); _ca = цвет + альфа: TexConvert сохраняет прозрачный фон (DXT5), с _co он пропал бы (DXT1)
+<class>_ca: BI's vehicle pictures (apc_tracked_01_base_ca.paa); _ca = colour + alpha: TexConvert keeps the transparent background (DXT5), _co would drop it (DXT1)	<класс>_ca: как картинки техники BI (apc_tracked_01_base_ca.paa); _ca = цвет + альфа: TexConvert сохраняет прозрачный фон (DXT5), с _co он пропал бы (DXT1)
+map_ ... _ca: BI's map icons (map_apc_tracked_01_ca.paa); _ca = colour + alpha: TexConvert keeps the transparent background (DXT5), _co would drop it (DXT1)	map_ ... _ca: как иконки карты BI (map_apc_tracked_01_ca.paa); _ca = цвет + альфа: TexConvert сохраняет прозрачный фон (DXT5), с _co он пропал бы (DXT1)
+_ca: a picture with transparency; _ca = colour + alpha: TexConvert keeps the transparent background (DXT5), _co would drop it (DXT1)	_ca: картинка с прозрачностью; _ca = цвет + альфа: TexConvert сохраняет прозрачный фон (DXT5), с _co он пропал бы (DXT1)
+<Class>.jpg: the file name is the CfgVehicles class (BIS_fnc_exportEditorPreviews); JPG: no alpha, the editor shows it as is	<Класс>.jpg: имя файла — класс CfgVehicles (BIS_fnc_exportEditorPreviews); JPG: без альфы, редактор показывает как есть
+BI's pictures of this category are read from the game data on P: (unpacked by Arma 3 Tools); none found.	Картинки BI этой категории читаются из данных игры на P: (распакованных Arma 3 Tools); не найдены.
+not in the picture: {} {}: {}	нет на картинке: {} {}: {}

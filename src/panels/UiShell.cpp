@@ -275,7 +275,7 @@ void UiShell::BuildModeLayout(UiMode m, ImGuiID dock)
     ImGui::DockBuilderAddNode(dock, int(ImGuiDockNodeFlags_DockSpace) | ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::DockBuilderSetNodeSize(dock, vp->WorkSize);
     ImGuiID left = 0, right = 0, bottom = 0, center = dock;
-    const float leftFrac = m == UiMode::Validation ? 0.38f : 0.24f;
+    const float leftFrac = m == UiMode::Validation || m == UiMode::Icons ? 0.38f : 0.24f;
     const float bottomFrac = m == UiMode::Animation || m == UiMode::Vehicle ? 0.36f : m == UiMode::Reload || m == UiMode::Optics ? 0.42f : 0.22f;
     if (m != UiMode::Vehicle) ImGui::DockBuilderSplitNode(center, ImGuiDir_Left, leftFrac, &left, &center);
     ImGui::DockBuilderSplitNode(center, ImGuiDir_Right, 0.28f, &right, &center);
@@ -321,6 +321,10 @@ void UiShell::BuildModeLayout(UiMode m, ImGuiID dock)
     case UiMode::Optics:
         dockWin("Outliner", left);
         dockWin("Optics", bottom);
+        dockWin("Log", bottom);
+        break;
+    case UiMode::Icons:
+        dockWin("Icons", left);
         dockWin("Log", bottom);
         break;
     default: break;
