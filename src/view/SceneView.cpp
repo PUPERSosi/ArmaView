@@ -125,6 +125,20 @@ void SceneView::RebuildLodGeometry()
                     for (size_t f = 0; f < s.faceBytes.size() && f < faceSkin.size(); ++f)
                         if (s.faceBytes[f]) faceSkin[f] = i;
 
+    skinHidden.assign(l.faces.size(), 0);
+    skinHiddenFaces = 0;
+    // points only on skin-hidden faces: out of the bounds (framing, shadow fit) once the faces are known (below)
+    auto markSkinOnly = [&] {
+        pointSkinOnly.assign(l.points.size(), 0);
+        if (!skinHiddenFaces) return;
+        std::vector<uint8_t> drawn(l.points.size(), 0);
+        for (size_t fi = 0; fi < l.faces.size(); ++fi)
+            for (uint32_t c = 0; c < l.faces[fi].count; ++c)
+                if (const uint32_t pt = l.faces[fi].v[c].point; pt < l.points.size())
+                    (skinHidden[fi] ? pointSkinOnly[pt] : drawn[pt]) = 1;
+        for (size_t pt = 0; pt < l.points.size(); ++pt)
+            if (drawn[pt]) pointSkinOnly[pt] = 0;
+    };
     // Group faces by (texture, material) -> one draw section each.
     std::map<std::pair<std::string, std::string>, int> sectionOf;
     std::vector<std::vector<MeshVertex>> secVerts;
@@ -143,10 +157,12 @@ void SceneView::RebuildLodGeometry()
         if (!valid || (proxyFace[fi] && !display_.showProxies) || faceHidden[fi]) continue;
 
         std::string tex = f.texture, mat = f.material;
-        if (int hs = faceSkin[fi]; hs >= 0)
+        if (int hs = faceSkin[fi]; hs >= 0 && !SkinFace(*cfgSkin, hs, tex, mat))
         {
-            if (hs < int(cfgSkin->textures.size()) && !cfgSkin->textures[hs].empty()) tex = cfgSkin->textures[hs];
-            if (hs < int(cfgSkin->materials.size()) && !cfgSkin->materials[hs].empty()) mat = cfgSkin->materials[hs];
+            // texture "" in hiddenSelectionsTextures: the game does not draw these faces (as setObjectTexture [i, ""])
+            skinHidden[fi] = 1;
+            ++skinHiddenFaces;
+            continue;
         }
         if (h_.DamageState() > 0)
         {
@@ -219,6 +235,7 @@ void SceneView::RebuildLodGeometry()
         for (const auto& e : extra) meshSections.push_back({ e.texture, e.material, 0, e.first, e.count });
         vertPoint.resize(baseVerts.size(), uint32_t(l.points.size())); // attachments: the identity matrix after the points
     }
+    markSkinOnly();
     if (restMin.x > restMax.x) // no drawable faces (e.g. Memory, Land Contact): use all points
     {
         for (const auto& p : l.points)
@@ -437,7 +454,7 @@ void SceneView::UpdatePose()
         // bounds (framing, shadow fit): every 4th mesh point is plenty
         for (size_t p = 0; p < l.points.size() && p < pointMats.size(); p += 4)
         {
-            if (p < pointInMesh.size() && !pointInMesh[p]) continue;
+            if ((p < pointInMesh.size() && !pointInMesh[p]) || (p < pointSkinOnly.size() && pointSkinOnly[p])) continue;
             glm::vec3 x = glm::vec3(pointMats[p] * glm::vec4(l.points[p].pos, 1.0f));
             boundsMin = glm::min(boundsMin, x);
             boundsMax = glm::max(boundsMax, x);
@@ -812,7 +829,7 @@ bool SceneView::PickFace(const glm::mat4& viewProj, float nx, float ny, uint32_t
     bool hit = false;
     for (uint32_t fi = 0; fi < uint32_t(l.faces.size()); ++fi)
     {
-        if (fi < faceHidden.size() && faceHidden[fi]) continue;
+        if ((fi < faceHidden.size() && faceHidden[fi]) || (fi < skinHidden.size() && skinHidden[fi])) continue;
         const P3DFace& f = l.faces[fi];
         if (f.count < 3) continue;
         bool ok = true;

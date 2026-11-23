@@ -131,7 +131,7 @@ void ViewerAutomation::Apply(const Automation& a)
             script += "record turn mp4 320 240 10 5 dir=" + PathToUtf8(recDir) + "\nwait 8\nrecord cancel\nwait 3\n";
         }
         windowWalk();
-        model("Test_Car_01\\Test_Car_01.p3d", "Test_Car_01", "");
+        model("Test_Car_01\\Test_Car_01.p3d", "Test_Car_01", "skintest body\nwait 3\n");
         model("Test_Heli_01\\Test_Heli_01.p3d", "Test_Heli_01", "");
         model("Test_Character_01\\A3_character_example.p3d", "A3_character_example", "");
         // the Samples' RTMs as layers on the sample character
@@ -1113,6 +1113,53 @@ void ViewerAutomation::RegisterCommands()
                            s.hasModel ? PathToUtf8(s.model.path.filename()) : "-", s.lod, sel, int(app_.scene_.highlight),
                            app_.scene_.selectedBone >= 0 && app_.scene_.selectedBone < int(s.skeleton.bones.size()) ? s.skeleton.bones[size_t(app_.scene_.selectedBone)].name : "-",
                            isolate.empty() ? "-" : isolate, hidden, bound, compareBones, s.activeSkin, app_.inspector_.section);
+    });
+    // a config skin hiding one selection ("" texture), on the open model: its faces leave the drawn sections (and
+    // the picking), the rest stays; a shorter array / material "" change nothing. Errors when not so.
+    reg.Add("skintest", "<selection>", "hiddenSelectionsTextures \"\" hides that selection's faces (an Error otherwise)", [this](std::istringstream& is) -> std::string {
+        std::string sel;
+        is >> sel;
+        Session& s = app_.session_;
+        SceneView& v = app_.scene_;
+        if (!s.hasModel) return "no model";
+        const P3DLod& l = s.model.lods[size_t(s.lod)];
+        size_t selFaces = 0;
+        for (const auto& x : l.selections)
+            if (IEquals(x.name, sel)) selFaces = x.faceCount;
+        if (!selFaces) return "no selection " + sel;
+        auto drawn = [&] {
+            size_t n = 0;
+            for (size_t i = 0; i < v.vehicleSections && i < v.meshSections.size(); ++i) n += v.meshSections[i].faces;
+            return n;
+        };
+        const auto keepSkins = s.configSkins;
+        const int keepActive = s.activeSkin;
+        auto withSkin = [&](std::vector<std::string> texs, std::vector<std::string> mats) {
+            ConfigSkin k;
+            k.cfgRoot = "CfgTest";
+            k.className = "AV_SkinTest";
+            k.selections = { sel };
+            k.textures = std::move(texs);
+            k.materials = std::move(mats);
+            s.configSkins = { k };
+            s.activeSkin = 0;
+            v.RebuildLodGeometry();
+            return std::make_pair(drawn(), v.skinHiddenFaces);
+        };
+        s.configSkins.clear();
+        s.activeSkin = -1;
+        v.RebuildLodGeometry();
+        const size_t before = drawn();
+        const auto [hiddenDrawn, hidden] = withSkin({ "" }, {});
+        const auto [shortDrawn, shortHidden] = withSkin({}, { "" });
+        s.configSkins = keepSkins;
+        s.activeSkin = keepActive;
+        v.RebuildLodGeometry();
+        const bool ok = hidden > 0 && hidden <= selFaces && hiddenDrawn + hidden == before && shortDrawn == before && shortHidden == 0;
+        const std::string msg = std::format("skintest {}: {} face(s) drawn, texture \"\" -> {} drawn, {} hidden (selection {} faces); no texture + material \"\" -> {} drawn",
+                                            sel, before, hiddenDrawn, hidden, selFaces, shortDrawn);
+        if (!ok) Log::Get().Error("{}", msg);
+        return msg;
     });
     reg.Add("frame", "", "frame the model in its current pose", [this](std::istringstream&) -> std::string {
         app_.camera_.Frame(app_.scene_.boundsMin, app_.scene_.boundsMax);

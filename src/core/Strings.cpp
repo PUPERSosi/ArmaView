@@ -1204,6 +1204,7 @@ const Row kRows[] = {
     { "checking {} / {}", "проверка {} / {}", nullptr, nullptr, nullptr },
     { "Cancel##rtmcheck", "Отмена", nullptr, nullptr, nullptr },
     { "Stops the check of the RTM folder; the files checked so far stay listed", "Останавливает проверку папки RTM; уже проверенные файлы остаются в списке", nullptr, nullptr, nullptr },
+    { "hidden by config (\"\")", "скрыто конфигом (\"\")", nullptr, nullptr, nullptr },
     { "Mod check", "Проверка мода", nullptr, nullptr, nullptr },
     { "Mod check...", "Проверка мода...", "Checks every P3D, model.cfg, config.cpp, RVMAT and RTM of a mod folder in the background (read only) and lists the problems per file.", "Проверяет все P3D, model.cfg, config.cpp, RVMAT и RTM папки мода в фоне (только чтение) и показывает проблемы по файлам.", "Mod check (validate every file of a mod folder)" },
     { "Mod check (validate every file of a mod folder)", "Проверка мода (все файлы папки мода)", nullptr, nullptr, nullptr },

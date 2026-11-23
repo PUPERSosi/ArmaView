@@ -29,6 +29,9 @@
 
 #include "CoreGuard.h"
 #include "Unit.h"
+#include "Attachments.h"
+#include "RvMaterial.h"
+#include "Texture.h"
 
 namespace fs = std::filesystem;
 
@@ -580,6 +583,95 @@ std::string RunCoreTest(const fs::path& dir, int* failuresOut)
         check(veh && veh->name == "AV_Test_Car" && !veh->GetString("crew").empty() && doc.configSkins.size() == 1 && tex,
               std::format("mod prefix from the config's paths (no $PBOPREFIX$): model {} -> class {}, {} skin(s), texture {}", rel, veh ? veh->name : "-",
                           doc.configSkins.size(), tex ? "found" : "NOT FOUND"));
+    }
+    // hiddenSelectionsTextures "": the selection is not drawn (as in the game / setObjectTexture [i, ""]); past the array:
+    // the model's texture; material "" changes nothing; a class whose textures are all "" is still a re-texture
+    {
+        const fs::path cdir = dir / "skin_hide";
+        fs::create_directories(cdir, ec);
+        std::ofstream(cdir / "config.cpp", std::ios::binary | std::ios::trunc)
+            << "class CfgVehicles {\n"
+               "  class AV_Hide1 { model = \"\\av\\m.p3d\"; hiddenSelections[] = { \"s1\", \"s2\" }; hiddenSelectionsTextures[] = { \"\", \"x_co.paa\" }; };\n"
+               "  class AV_HideAll { model = \"\\av\\m.p3d\"; hiddenSelections[] = { \"s1\", \"s2\" }; hiddenSelectionsTextures[] = { \"\", \"\" }; };\n"
+               "  class AV_Short { model = \"\\av\\m.p3d\"; hiddenSelections[] = { \"s1\", \"s2\" }; hiddenSelectionsTextures[] = { \"y_co.paa\" }; };\n"
+               "  class AV_MatEmpty { model = \"\\av\\m.p3d\"; hiddenSelections[] = { \"s1\" }; hiddenSelectionsMaterials[] = { \"\" }; };\n"
+               "  class AV_NoArrays { model = \"\\av\\m.p3d\"; hiddenSelections[] = { \"s1\" }; };\n};\n";
+        ArmaConfig skinCfg;
+        skinCfg.Load(cdir / "config.cpp", cdir, false);
+        const std::vector<ConfigSkin> skins = FindConfigSkins(skinCfg, "\\av\\m.p3d");
+        auto skinOf = [&](const char* cls) -> const ConfigSkin* {
+            for (const auto& k : skins)
+                if (k.className == cls) return &k;
+            return nullptr;
+        };
+        const ConfigSkin *hide1 = skinOf("AV_Hide1"), *hideAll = skinOf("AV_HideAll"), *shortTex = skinOf("AV_Short"), *matEmpty = skinOf("AV_MatEmpty");
+        // a two-face model: s1 = face 0, s2 = face 1, both "orig_co.paa"
+        AttachedModel am;
+        am.status = AttachedModel::Status::Ok;
+        P3DLod lod;
+        lod.points.resize(4);
+        lod.points[1].pos = glm::vec3(1, 0, 0);
+        lod.points[2].pos = glm::vec3(0, 1, 0);
+        lod.points[3].pos = glm::vec3(1, 1, 0);
+        lod.normals = { glm::vec3(0, 0, 1) };
+        for (uint32_t f = 0; f < 2; ++f)
+        {
+            P3DFace face;
+            face.count = 3;
+            face.v[0] = { f, 0, 0, 0 };
+            face.v[1] = { f + 1, 0, 1, 0 };
+            face.v[2] = { f + 2, 0, 0, 1 };
+            face.texture = "orig_co.paa";
+            lod.faces.push_back(face);
+        }
+        for (int i = 0; i < 2; ++i)
+        {
+            P3DSelection sel;
+            sel.name = i == 0 ? "s1" : "s2";
+            sel.faceBytes = { uint8_t(i == 0), uint8_t(i == 1) };
+            sel.faceCount = 1;
+            lod.selections.push_back(sel);
+        }
+        am.model.lods.push_back(lod);
+        auto texturesOf = [&](const ConfigSkin* k, int& hidden) {
+            std::string list;
+            hidden = k ? RebuildWithHiddenSelections(am, k->selections, k->textures, k->materials) : -1;
+            for (const auto& s : am.sections) list += (list.empty() ? "" : ",") + s.texture + "/" + std::to_string(s.count / 3);
+            return list;
+        };
+        int h1 = 0, hAll = 0, hShort = 0, hMat = 0;
+        const std::string t1 = texturesOf(hide1, h1), tAll = texturesOf(hideAll, hAll), tShort = texturesOf(shortTex, hShort), tMat = texturesOf(matEmpty, hMat);
+        std::string mt, tx = "orig_co.paa";
+        const bool matKeeps = matEmpty && SkinFace(*matEmpty, 0, tx, mt) && tx == "orig_co.paa" && mt.empty();
+        // the default skin of a model: the first class that sets something, not a hide-only one listed before it
+        int defaultSkin = -2;
+        size_t listed = 0;
+        {
+            const fs::path root = dir / "skin_root";
+            fs::create_directories(root / "av", ec);
+            std::ofstream(root / "av" / "config.cpp", std::ios::binary | std::ios::trunc)
+                << "class CfgVehicles {\n"
+                   "  class AV_HideOnly { model = \"\\av\\m.p3d\"; hiddenSelections[] = { \"s1\" }; hiddenSelectionsTextures[] = { \"\" }; };\n"
+                   "  class AV_Paint { model = \"\\av\\m.p3d\"; hiddenSelections[] = { \"s1\" }; hiddenSelectionsTextures[] = { \"x_co.paa\" }; };\n};\n";
+            DiskFileSystem sdisk;
+            EventBus sbus;
+            Session sdoc(sdisk, sbus);
+            sdoc.projectRoot = root;
+            sdoc.model.path = root / "av" / "m.p3d"; // the path only
+            LogCapture quiet;
+            sdoc.LoadAddonConfig();
+            defaultSkin = sdoc.activeSkin;
+            listed = sdoc.configSkins.size();
+        }
+        Image proc;
+        std::string perr;
+        const bool alpha0 = MakeProceduralTexture("#(argb,8,8,3)color(1,0,0,0)", proc, perr) && !proc.mips.empty() && proc.mips[0][3] == 0;
+        check(skins.size() == 4 && hide1 && hideAll && shortTex && matEmpty && t1 == "x_co.paa/1" && h1 == 1 && tAll.empty() && hAll == 2 &&
+                  tShort == "y_co.paa/1,orig_co.paa/1" && hShort == 0 && tMat == "orig_co.paa/2" && hMat == 0 && matKeeps && alpha0 &&
+                  listed == 2 && defaultSkin == 1,
+              std::format("hiddenSelectionsTextures \"\": {} class(es) found (all-\"\" one {}), {{\"\", x}} -> {} ({} hidden), {{\"\", \"\"}} -> '{}' ({} hidden), "
+                          "shorter -> {}, material \"\" -> {}, procedural alpha 0 {}, default skin {} of {} (not the hide-only one)",
+                          skins.size(), hideAll ? "included" : "MISSING", t1, h1, tAll, hAll, tShort, tMat, alpha0 ? "ok" : "NOT 0", defaultSkin, listed));
     }
     // a model still being written (qt-req 1.7): while a hot reload retries (requireComplete) its read / parse problems are
     // no Errors (Debug); the last attempt (requireComplete off) reports them as Errors

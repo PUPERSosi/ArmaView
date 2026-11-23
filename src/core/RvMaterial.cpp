@@ -387,13 +387,24 @@ std::vector<ConfigSkin> FindConfigSkins(const ArmaConfig& cfg, const std::string
             s.where = cfg.Where(k->file, k->line);
             s.file = cfg.FileOf(k->file);
             s.line = k->line;
-            bool any = false;
-            for (auto& t : s.textures) any |= !t.empty();
-            for (auto& m : s.materials) any |= !m.empty();
-            if (any && !s.selections.empty()) out.push_back(std::move(s));
+            // "" entries count: all textures "" is a re-texture that hides those selections
+            const bool arrays = k->Find("hiddenSelectionsTextures") || k->Find("hiddenSelectionsMaterials");
+            if (arrays && !s.selections.empty()) out.push_back(std::move(s));
         }
     }
     return out;
+}
+
+bool SkinFace(const std::vector<std::string>& textures, const std::vector<std::string>& materials, int i, std::string& texture, std::string& material)
+{
+    if (i < 0) return true;
+    if (i < int(textures.size()))
+    {
+        if (textures[size_t(i)].empty()) return false; // "" hides the selection
+        texture = textures[size_t(i)];
+    }
+    if (i < int(materials.size()) && !materials[size_t(i)].empty()) material = materials[size_t(i)];
+    return true;
 }
 
 const CfgClass* FindVehicleClass(const ArmaConfig& cfg, const std::string& modelPath)

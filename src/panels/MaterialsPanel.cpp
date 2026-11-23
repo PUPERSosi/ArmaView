@@ -52,9 +52,12 @@ void MaterialsPanel::Draw(const std::string& windowName, const std::function<voi
                     if (IEquals(sel.name, s.selections[i])) faces = sel.faceCount;
                 bool inSections = false;
                 for (const auto& sec : session_.modelInfo.sections) inSections |= IEquals(sec, s.selections[i]);
+                // "" hides the selection (as in the game); past the array: the model's own texture
+                const bool hidden = i < s.textures.size() && s.textures[i].empty();
+                const std::string tex = i >= s.textures.size() ? std::string("-") : hidden ? std::string(T("hidden by config (\"\")")) : s.textures[i];
                 ui::BulletText("%s (%zu faces)%s -> %s%s%s", s.selections[i].c_str(), faces, inSections ? "" : " [not in sections]",
-                                  i < s.textures.size() ? s.textures[i].c_str() : "-", i < s.materials.size() && !s.materials[i].empty() ? " + " : "",
-                                  i < s.materials.size() ? s.materials[i].c_str() : "");
+                                  tex.c_str(), !hidden && i < s.materials.size() && !s.materials[i].empty() ? " + " : "",
+                                  !hidden && i < s.materials.size() ? s.materials[i].c_str() : "");
             }
         }
     }

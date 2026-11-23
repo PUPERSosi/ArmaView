@@ -108,8 +108,14 @@ struct ProxySlot
 // Proxy triangle -> proxy model space to parent space (engine rule, see the file comment). valid: non-degenerate.
 glm::mat4 ProxyMatrix(const glm::vec3 p[3], bool* valid = nullptr);
 // Rebuilds a model's drawable geometry (verts / sections) from its first LOD; faceOverride may change a face's texture /
-// material (hiddenSelectionsTextures of the class wearing it). Nested proxies baked into the model are dropped.
-void RebuildModelGeometry(AttachedModel& m, const std::function<void(size_t face, std::string& texture, std::string& material)>& faceOverride = {});
+// material (hiddenSelectionsTextures of the class wearing it) and returns false for a face that is not drawn (texture
+// ""). Nested proxies baked into the model are dropped.
+using FaceOverride = std::function<bool(size_t face, std::string& texture, std::string& material)>;
+void RebuildModelGeometry(AttachedModel& m, const FaceOverride& faceOverride = {});
+// The hidden selections of the class wearing a model (sels / texs / mats of its config) on its first LOD: re-textured,
+// "" faces left out. Returns the faces left out; found: hidden selections present in the model.
+int RebuildWithHiddenSelections(AttachedModel& m, const std::vector<std::string>& sels, const std::vector<std::string>& texs,
+                                const std::vector<std::string>& mats, int* found = nullptr);
 // Skinned copy of a model's first-LOD vertices (point matrices of that LOD, e.g. from SkinMatrices).
 void SkinModelVerts(const AttachedModel& m, const std::vector<glm::mat4>& pointMats, std::vector<MeshVertex>& out);
 

@@ -259,7 +259,15 @@ bool Session::LoadAddonConfig()
         if (s.textures.size() > s.selections.size())
             log.Warn("  {}::{}: {} textures for {} hidden selections", s.cfgRoot, s.className, s.textures.size(), s.selections.size());
     }
-    if (activeSkin < 0 && !configSkins.empty()) activeSkin = 0;
+    // the default: the first class that sets a texture or material (one whose entries are all "" only hides selections:
+    // listed and selectable, not the model's default look - e.g. a base class inheriting an empty array)
+    for (int i = 0; activeSkin < 0 && i < int(configSkins.size()); ++i)
+    {
+        bool sets = false;
+        for (const auto& t : configSkins[size_t(i)].textures) sets |= !t.empty();
+        for (const auto& m : configSkins[size_t(i)].materials) sets |= !m.empty();
+        if (sets) activeSkin = i;
+    }
     return true;
 }
 

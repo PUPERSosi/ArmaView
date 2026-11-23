@@ -47,7 +47,7 @@ fs::path FindModelCfgFor(const fs::path& p3d, const fs::path& projectRoot)
 }
 
 // First LOD as sections grouped by (texture, material); proxy triangles skipped.
-void BuildGeometry(AttachedModel& m, const std::function<void(size_t, std::string&, std::string&)>& faceOverride = {})
+void BuildGeometry(AttachedModel& m, const FaceOverride& faceOverride = {})
 {
     const P3DLod& l = m.model.lods.front();
     std::vector<uint8_t> proxyFace(l.faces.size(), 0);
@@ -71,7 +71,7 @@ void BuildGeometry(AttachedModel& m, const std::function<void(size_t, std::strin
             valid &= f.v[c].point < l.points.size() && (!normalsOk || f.v[c].normal < l.normals.size());
         if (!valid) continue;
         std::string tex = f.texture, mat = f.material;
-        if (faceOverride) faceOverride(fi, tex, mat);
+        if (faceOverride && !faceOverride(fi, tex, mat)) continue; // hidden by the class wearing it ("" texture)
         auto [it, added] = index.emplace(std::make_pair(ToLower(tex), ToLower(mat)), int(m.sections.size()));
         if (added)
         {
@@ -181,12 +181,37 @@ bool IsPlaceholderProxy(const std::string& lp, const std::string& stem)
            stem.starts_with("muzzle_flash") || lp.find("\\characters_f\\proxies\\") != std::string::npos || lp.find("\\weapon_slots\\") != std::string::npos;
 }
 
-void RebuildModelGeometry(AttachedModel& m, const std::function<void(size_t, std::string&, std::string&)>& faceOverride)
+void RebuildModelGeometry(AttachedModel& m, const FaceOverride& faceOverride)
 {
     m.verts.clear();
     m.vertPoint.clear();
     m.sections.clear();
     if (!m.model.lods.empty()) BuildGeometry(m, faceOverride);
+}
+
+int RebuildWithHiddenSelections(AttachedModel& m, const std::vector<std::string>& sels, const std::vector<std::string>& texs,
+                                const std::vector<std::string>& mats, int* found)
+{
+    if (found) *found = 0;
+    if (m.model.lods.empty()) return 0;
+    const P3DLod& lod = m.model.lods.front();
+    std::vector<int> faceSel(lod.faces.size(), -1);
+    for (int i = 0; i < int(sels.size()); ++i)
+        for (const auto& s : lod.selections)
+            if (IEquals(s.name, sels[size_t(i)]))
+            {
+                if (found) ++*found;
+                for (size_t f = 0; f < s.faceBytes.size() && f < faceSel.size(); ++f)
+                    if (s.faceBytes[f]) faceSel[f] = i;
+            }
+    int hidden = 0;
+    RebuildModelGeometry(m, [&](size_t f, std::string& t, std::string& mt) {
+        const int i = f < faceSel.size() ? faceSel[f] : -1;
+        if (SkinFace(texs, mats, i, t, mt)) return true;
+        ++hidden;
+        return false;
+    });
+    return hidden;
 }
 
 std::shared_ptr<AttachedModel> ModelCache::Get(const fs::path& file, bool rig, const fs::path& projectRoot) { return Load(file, rig, projectRoot, 0); }

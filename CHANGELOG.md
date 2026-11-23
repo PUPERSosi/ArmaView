@@ -1,5 +1,16 @@
 # Changes
 
+## 1.0.4
+
+Fixes:
+- An empty string in `hiddenSelectionsTextures` hides the faces of that hidden selection, as in the game (and as
+  `setObjectTexture [i, ""]`); before, they were drawn with the model's own texture. An index past the array keeps the
+  model's texture; an empty `hiddenSelectionsMaterials` entry changes nothing. Hidden faces are left out of drawing,
+  shadows, framing, picking and the section counts; the Materials window marks such a selection "hidden by config".
+- A class whose re-texture entries are all empty is listed as a config skin (it hides selections); the default skin
+  is still the first class that sets a texture or material.
+- Unit / outfit parts: the same rule for the hidden selections of the class wearing a part.
+
 ## 1.0.3
 
 Fixes:

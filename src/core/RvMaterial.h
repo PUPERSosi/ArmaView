@@ -68,7 +68,14 @@ struct ConfigSkin
 };
 
 // Scans every class one level below the root Cfg* classes for model == modelPath (Arma path, any case/extension form).
+// A class counts when it has hiddenSelections and a hiddenSelectionsTextures or hiddenSelectionsMaterials array, even if
+// every entry is "" (a re-texture that hides the selections).
 std::vector<ConfigSkin> FindConfigSkins(const ArmaConfig& cfg, const std::string& modelPath);
+// Hidden selection i of a class on a face (as the game, and setObjectTexture [i, ""]): texture "" hides the face; a set
+// texture / material replaces the face's; an index past an array (or no array) keeps the model's own; material ""
+// changes nothing. false: the face is not drawn.
+bool SkinFace(const std::vector<std::string>& textures, const std::vector<std::string>& materials, int i, std::string& texture, std::string& material);
+inline bool SkinFace(const ConfigSkin& s, int i, std::string& texture, std::string& material) { return SkinFace(s.textures, s.materials, i, texture, material); }
 std::string NormalizeArmaPath(std::string_view p);
 // CfgVehicles class whose model= is modelPath (own entry preferred over an inherited one); null if none.
 const CfgClass* FindVehicleClass(const ArmaConfig& cfg, const std::string& modelPath); // lower case, '\', no leading '\', ".p3d" added if no extension

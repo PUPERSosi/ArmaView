@@ -92,6 +92,9 @@ public:
     std::vector<float> customHeat;
     std::vector<uint32_t> pickFaces; // Ctrl+click on the scene: picked faces of the current LOD
     std::vector<uint8_t> faceHidden; // current LOD
+    std::vector<uint8_t> skinHidden; // current LOD: faces the config skin hides (hiddenSelectionsTextures "")
+    std::vector<uint8_t> pointSkinOnly; // current LOD: points only on skin-hidden faces (left out of the bounds)
+    size_t skinHiddenFaces = 0;      // count of skinHidden
     ValidationReport validation;     // of the current LOD
     FaceDiagInfo faceInfo;           // of the current LOD
 

@@ -465,10 +465,11 @@ void Unit::LoadPart(UnitPart& p, const ArmaConfig& cfg, const Skeleton& skel, co
         const std::string tex = face ? face->GetString("texture") : "", mat = face ? face->GetString("material") : "";
         int changed = 0;
         RebuildModelGeometry(*m, [&](size_t, std::string& t, std::string& mt) {
-            if (ToLower(t) != main) return;
+            if (ToLower(t) != main) return true;
             if (!tex.empty()) t = tex;
             if (!mat.empty()) mt = mat;
             ++changed;
+            return true;
         });
         if (!tex.empty() || !mat.empty())
             p.note += std::format("{}face texture / material on {} face(s)", p.note.empty() ? "" : "; ", changed);
@@ -485,23 +486,10 @@ void Unit::LoadPart(UnitPart& p, const ArmaConfig& cfg, const Skeleton& skel, co
         }
         if (!sels.empty() && (!texs.empty() || !mats.empty()))
         {
-            std::vector<int> faceSel(lod.faces.size(), -1);
             int found = 0;
-            for (int i = 0; i < int(sels.size()); ++i)
-                for (const auto& s : lod.selections)
-                    if (IEquals(s.name, sels[i]))
-                    {
-                        ++found;
-                        for (size_t f = 0; f < s.faceBytes.size() && f < faceSel.size(); ++f)
-                            if (s.faceBytes[f]) faceSel[f] = i;
-                    }
-            RebuildModelGeometry(*m, [&](size_t f, std::string& t, std::string& mt) {
-                const int i = f < faceSel.size() ? faceSel[f] : -1;
-                if (i < 0) return;
-                if (i < int(texs.size()) && !texs[i].empty()) t = texs[i];
-                if (i < int(mats.size()) && !mats[i].empty()) mt = mats[i];
-            });
+            const int hidden = RebuildWithHiddenSelections(*m, sels, texs, mats, &found);
             p.note += std::format("{}{} of {} hidden selection(s) in the model", p.note.empty() ? "" : "; ", found, sels.size());
+            if (hidden) p.note += std::format("; {} face(s) hidden by config (\"\")", hidden);
         }
     }
     // skinning with the unit's skeleton

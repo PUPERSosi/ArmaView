@@ -190,7 +190,7 @@ void UiScript::Parse(const std::string& text)
         else if (cmd == "edit" || cmd == "moves_tests" || cmd == "moves_traps" || cmd == "control" || cmd == "layers" || cmd == "weapon" || cmd == "lang" ||
                  cmd == "tip" || cmd == "guide" || cmd == "modcheck" || cmd == "record" ||
                  cmd == "crashtest" || cmd == "unsaved" || cmd == "fuzz" || cmd == "coretest" || cmd == "bonecheck" || cmd == "blend" || cmd == "handanim" || cmd == "missing" || cmd == "statesgraph" || cmd == "idconflicts" ||
-                 cmd == "mode" || cmd == "show" || cmd == "frame" || cmd == "focusbone" || cmd == "layouts" || cmd == "unit" || cmd == "gltf_sample" || cmd == "optstate")
+                 cmd == "mode" || cmd == "show" || cmd == "frame" || cmd == "focusbone" || cmd == "layouts" || cmd == "unit" || cmd == "gltf_sample" || cmd == "optstate" || cmd == "skintest")
         {
             // edit set <state> <entry> <value...> | edit link <from> <to> [connect] | edit new <name> [base] | edit setc <Cls/Sub> <entry> <value> | edit diff | edit save
             const std::string arg = cmd + ":" + rest;
